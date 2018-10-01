@@ -1,0 +1,25 @@
+{
+  "name": "steem-wise-hub-frontend",
+  "version": "1.0.0",
+  "description": "Cool & handy web interface for Wise: the frontend",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wise-team/wise-hub.git"
+  },
+  "keywords": [
+    "steem", "blockchain", "wise"
+  ],
+  "author": "The Wise Team (https://wise-team.io/)",
+  "contributors": [
+    "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wise-team/wise-hub/issues"
+  },
+  "homepage": "https://wise.vote/"
+}
