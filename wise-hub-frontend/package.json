@@ -1,6 +1,6 @@
 {
   "name": "steem-wise-hub-frontend",
-  "version": "1.0.0",
+  "version": "1.2.2",
   "description": "Cool & handy web interface for Wise: the frontend",
   "engines": {
     "node": ">=9.11"
