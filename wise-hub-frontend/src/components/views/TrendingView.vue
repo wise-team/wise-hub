@@ -7,7 +7,6 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Actions } from "../../store/actions";
 
 export default Vue.extend({
     props: [],

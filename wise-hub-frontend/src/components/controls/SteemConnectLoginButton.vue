@@ -1,15 +1,16 @@
-<!-- src/components/SteemConnectLoginButton.vue -->
+<!-- src/components/controls/SteemConnectLoginButton.vue -->
 <template>
         <span class="steemconnect-container">
             <span v-if="isLoggedIn">
+                <strong>{{ username }}</strong>
                 <b-button class="steemconnect-logout-button" size="sm" variant="link"
                      @click="logout" title="Log out from SteemConnect">
-                    log out from SteemConnect
+                    Log out from SteemConnect
                 </b-button>
             </span>
             <span v-else>
                 <a :href="loginUrl">
-                    login with SteemConnect
+                    Login with SteemConnect
                 </a>
             </span>
             <span class="steemconnect-error-msg">{{ errorMessage }}</span>
@@ -18,8 +19,10 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { SteemConnectApiHelper } from "../api/SteemConnectApiHelper";
-import { Actions } from "../store/actions";
+import { SteemConnectApiHelper } from "../../store/modules/steemconnect/SteemConnectApiHelper";
+import { SteemConnectModule } from "../../store/modules/steemconnect/SteemConnectModule";
+import { s } from "../../store/store";
+import { d } from "../../util/util";
 
 export default Vue.extend({
     props: [],
@@ -29,22 +32,22 @@ export default Vue.extend({
     },
     methods: {
         logout() {
-            this.$store.dispatch(Actions.logoutFromSteemConnect);
+            s(this.$store).dispatch(SteemConnectModule.Actions.logout);
         },
     },
     computed: {
         isLoggedIn(): boolean {
-            return this.$store.state.steemConnectData.loggedIn;
+            return s(this.$store).getters[SteemConnectModule.Getters.isLoggedIn];
         },
         loginUrl(): string {
-            return SteemConnectApiHelper.getLoginUrl();
+            return s(this.$store).getters[SteemConnectModule.Getters.getLoginUrl];
         },
         errorMessage(): string {
-            return this.$store.state.steemConnectData.error;
+            return s(this.$store).state.steemConnect.error ? d(s(this.$store).state.steemConnect.error) : "";
         },
         username(): string {
-            return this.$store.state.steemConnectData.account ?
-                this.$store.state.steemConnectData.account.name : "(loading account...)";
+            return d(s(this.$store).state.steemConnect).account ?
+                d(s(this.$store).state.steemConnect.account).name : "(loading account...)";
         },
     },
 });

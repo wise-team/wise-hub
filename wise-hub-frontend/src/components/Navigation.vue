@@ -19,7 +19,9 @@
 
             <!-- Right aligned nav items -->
             <b-navbar-nav class="ml-auto">
-                <span class="nav-item">SteemConnect</span>
+                <span class="nav-item">
+                    <steem-connect-login-button />
+                </span>
             </b-navbar-nav>
         </b-collapse>
     </b-navbar>
@@ -30,6 +32,9 @@ import Vue from "vue";
 import faCrown from "@fortawesome/fontawesome-free-solid/faCrown";
 import faAlignCenter from "@fortawesome/fontawesome-free-solid/faAlignCenter";
 import faChessKnight from "@fortawesome/fontawesome-free-solid/faChessKnight";
+import { s } from "../store/store";
+
+import SteemConnectLoginButton from "./controls/SteemConnectLoginButton";
 
 export default Vue.extend({
     props: [],
@@ -45,6 +50,7 @@ export default Vue.extend({
         trendingIcon() { return faAlignCenter; },
     },
     components: {
+        SteemConnectLoginButton,
     },
 });
 </script>

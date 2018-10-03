@@ -20,7 +20,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
  * Import components
  */
 import App from "./components/App.vue";
-import store from "./store/store";
+import { store, Actions } from "./store/store";
 import TrendingView from "./components/views/TrendingView.vue";
 import VoteView from "./components/views/VoteView.vue";
 import DelegateView from "./components/views/DelegateView.vue";
@@ -32,7 +32,6 @@ import DelegateView from "./components/views/DelegateView.vue";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 import "./style.css";
-import { Actions } from "./store/actions";
 
 
 /**
@@ -61,4 +60,4 @@ const v = new Vue({
 });
 
 // initialize steemconnect & eventually login automatically
-// v.$store.dispatch(Actions.initialize);
+v.$store.dispatch(Actions.initialize);
