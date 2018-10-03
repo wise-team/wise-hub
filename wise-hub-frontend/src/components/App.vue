@@ -8,7 +8,12 @@
         </b-row>
         <b-row>
             <b-col>
-                
+                <navigation-component />
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col>
+                <router-view></router-view>
             </b-col>
         </b-row>
         <b-row>
@@ -24,6 +29,8 @@ import Vue from "vue";
 
 import HeaderComponent from "./Header.vue";
 import FooterComponent from "./Footer.vue";
+import NavigationComponent from "./Navigation.vue";
+
 
 export default Vue.extend({
     props: [],
@@ -38,6 +45,7 @@ export default Vue.extend({
     components: {
         HeaderComponent,
         FooterComponent,
+        NavigationComponent
     },
 });
 </script>

@@ -16,7 +16,6 @@
             false
         ],
         "arrow-parens": false,
-        // Pending fix for shorthand property names.
         "object-literal-sort-keys": false,
 
         "ordered-imports": false,
@@ -24,7 +23,7 @@
         "no-consecutive-blank-lines": false,
         "curly": false,
         "prefer-for-of": false,
-        "max-line-length": 200,
+        "max-line-length": 200
     },
     "rulesDirectory": []
 }
