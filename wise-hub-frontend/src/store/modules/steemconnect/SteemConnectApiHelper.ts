@@ -18,14 +18,20 @@ export class SteemConnectApiHelper {
         + "&scope=" + SteemConnectApiHelper.SC2_SCOPE.join(",");
     }
 
-    public static async initialize(): Promise<{ accessToken: string, account: { id: string; name: string; json_metadata: string; }} | undefined> {
+    public static async initialize(): Promise<string | false> {
         const accessToken = SteemConnectApiHelper.getAccessToken();
         if (queryParams.access_token && accessToken) {
             localStorage.setItem(SteemConnectApiHelper.LS_ACCESS_TOKEN_KEY, accessToken);
             window.location.search = "";
         }
 
-        if (!accessToken) return undefined;
+        if (accessToken) return accessToken;
+        else return false;
+    }
+
+    public static async loadAccount(): Promise<{ id: string; name: string; json_metadata: string; } | false> {
+        const accessToken = SteemConnectApiHelper.getAccessToken();
+        if (!accessToken) return false;
 
         const steemConnectV2 = SteemConnectApiHelper.getSteemConnectObject();
         steemConnectV2.setAccessToken(accessToken);
@@ -36,8 +42,8 @@ export class SteemConnectApiHelper {
                 else resolve(result);
             });
         })) as any;
-        const ret = { accessToken: accessToken, account:  result.account as { id: string, name: string, json_metadata: string }};
-        return ret;
+        if (result && result.account) return result.account as { id: string, name: string, json_metadata: string };
+        else return false;
     }
 
     public static async logout() {
@@ -46,12 +52,12 @@ export class SteemConnectApiHelper {
 
         const steemConnectV2 = SteemConnectApiHelper.getSteemConnectObject();
         steemConnectV2.setAccessToken(accessToken);
-        await (await new BluebirdPromise((resolve, reject) => {
+        await new BluebirdPromise((resolve, reject) => {
             steemConnectV2.revokeToken((error: Error, result: any) => {
                 if (error) reject(error);
                 else resolve(result);
             });
-        })) as any;
+        });
         
         localStorage.removeItem(SteemConnectApiHelper.LS_ACCESS_TOKEN_KEY);
         window.location.href = SteemConnectApiHelper.SC2_CALLBACK_URL;

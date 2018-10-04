@@ -87,12 +87,21 @@ export namespace SteemConnectModule {
         [Actions.initialize]: (
             { commit, dispatch, state }, payload?: {} | undefined,
         ): void => {
-            SteemConnectApiHelper.initialize()
+            const accessTokenOrFalse = SteemConnectApiHelper.initialize();
+            if (!accessTokenOrFalse) {
+                commit(Mutations.setAccessToken, undefined);
+                commit(Mutations.setLoggedIn, false);
+                return;
+            }
+            const accessToken = accessTokenOrFalse;
+            commit(Mutations.setAccessToken, accessToken);
+            commit(Mutations.setLoggedIn, true);
+
+            SteemConnectApiHelper.loadAccount()
             .then(
-                result => {
-                    if (result && result.account) {
-                        commit(Mutations.setAccount, result.account);
-                        commit(Mutations.setAccessToken, result.accessToken);
+                resultAccount => {
+                    if (resultAccount) {
+                        commit(Mutations.setAccount, resultAccount);
                         commit(Mutations.setLoggedIn, true);
                         commit(Mutations.setError, undefined);
                     }
@@ -107,6 +116,7 @@ export namespace SteemConnectModule {
                 }
             )
         },
+
         [Actions.logout]: (
             { commit, dispatch, state }, payload: boolean,
         ): void => {
