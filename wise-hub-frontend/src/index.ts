@@ -1,8 +1,10 @@
 /* tslint:disable no-console */
+import { data as wise } from "./wise-config.gen";
+import { d } from "./util/util";
 
 declare const __VERSION__: string;
 console.log("steem-wise-hub version: " + __VERSION__);
-const repoUrl = /*§ "\"" + d(data.config.githubOrgName) + "/" + d(data.repository.name) + "\"" §*/"wise-team/wise-hub"/*§§.*/;
+const repoUrl = d(wise.config.repository.github.organization) + "/" + d(wise.repository.name) + "\"";
 console.log("This is open source software: https://github.com/" + repoUrl);
 
 
@@ -21,9 +23,9 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
  */
 import App from "./components/App.vue";
 import { store, Actions } from "./store/store";
-import TrendingView from "./components/views/TrendingView.vue";
-import VoteView from "./components/views/VoteView.vue";
-import DelegateView from "./components/views/DelegateView.vue";
+import ReadView from "./components/views/read/ReadView.vue";
+import VoteView from "./components/views/vote/VoteView.vue";
+import DelegateView from "./components/views/delegate/DelegateView.vue";
 
 
 /**
@@ -46,7 +48,7 @@ Vue.component("font-awesome-icon", FontAwesomeIcon);
  */
 const router = new VueRouter({
     routes: [
-        { path: '/', component: TrendingView },
+        { path: '/', component: ReadView },
         { path: '/vote', component: VoteView },
         { path: '/delegate', component: DelegateView },
     ]
