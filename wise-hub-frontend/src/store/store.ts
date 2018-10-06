@@ -12,15 +12,17 @@ import { StatusModuleImpl } from "./modules/status/StatusModuleImpl";
 Vue.use(Vuex);
 
 declare const __VERSION__: string;
-export const PERSISTENCE_LOCALSTORAGE_KEY = "steemwisehub_" + (__VERSION__ ? __VERSION__ : "");
+export const PERSISTENCE_LOCALSTORAGE_KEY = "steem_wise_hub_" + (__VERSION__ ? __VERSION__ : "");
 
 /**
  * Root state types
  */
 export interface State {
-  
+  unusedPathToBeSavedByTheVuexPersistedStateBecauseIfPathsArrayIsEmptyItSavesEverything: string;
 }
-const state: State = {};
+const state: State = {
+  unusedPathToBeSavedByTheVuexPersistedStateBecauseIfPathsArrayIsEmptyItSavesEverything: "",
+};
 
 export class Actions {
   public static initialize: string = "initialize";
@@ -47,6 +49,7 @@ const modules: Modules & ModuleTree<State> = {
 };
 
 const persistentPaths: string [] = [];
+persistentPaths.push("unusedPathToBeSavedByTheVuexPersistedStateBecauseIfPathsArrayIsEmptyItSavesEverything");
 SteemConnectModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(SteemConnectModule.modulePathName+ "." + persistentPath));
 StatusModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(StatusModule.modulePathName+ "." + persistentPath));
 
@@ -78,14 +81,15 @@ export function s(incognitoStore: any): Store {
 /**
  * Store
  */
+console.log(persistentPaths);
 export const store = new Vuex.Store<State>({
   state: state,
   actions: actions,
   modules: modules,
   plugins: [
-    /*createPersistedState({
+    createPersistedState({
       key: PERSISTENCE_LOCALSTORAGE_KEY,
       paths: persistentPaths,
-    }),*/
+    }),
   ],
 });
