@@ -1,4 +1,4 @@
-<!-- src/components/controls/PrpfileButton.vue -->
+<!-- src/components/controls/ProfileButton.vue -->
 <template>
     <b-navbar-nav class="ml-auto profile-button">
         <b-nav-item v-if="isLoggedIn">

@@ -13,6 +13,9 @@ export const data = {
       "version": "1.2.2",
       "homepage": "https://wise.vote/",
     },
+    "witness": {
+      "account": "wise-team",
+    },
     "team": {
       "name": "Wise Team",
       "website": {
@@ -20,7 +23,6 @@ export const data = {
       },
       "steem": {
         "account": "wise-team",
-        "witness": "wise-team",
       },
     },
     "npm": {

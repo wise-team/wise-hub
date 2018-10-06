@@ -2,6 +2,7 @@ import { MutationTree, ActionTree, GetterTree, Module } from "vuex";
 import { SteemConnectApiHelper } from "./SteemConnectApiHelper";
 
 import { SteemConnectModule as Me } from "./SteemConnectModule";
+import { StatusModule } from "../status/StatusModule";
 
 export namespace SteemConnectModuleImpl {
     /**
@@ -86,6 +87,7 @@ export namespace SteemConnectModuleImpl {
                         commit(Mutations.setAccount, resultAccount);
                         commit(Mutations.setLoggedIn, true);
                         commit(Mutations.setError, undefined);
+                        dispatch(StatusModule.Actions.setAccountName, { accountName: resultAccount.name });
                     }
                     else {
                         dispatch(Me.Actions.reset);
@@ -121,14 +123,9 @@ export namespace SteemConnectModuleImpl {
     /**
      * Getters
      */
-    export class Getters {
-        public static getLoginUrl: string = Me.localName("getLoginUrl");
-        public static isLoggedIn: string = Me.localName("isLoggedIn");
-    };
-
     const getters: GetterTree<Me.State, Me.State> = {
-        [Getters.getLoginUrl]: (state: Me.State): string => SteemConnectApiHelper.getLoginUrl(),
-        [Getters.isLoggedIn]: (state: Me.State): boolean => state.loggedIn,
+        [Me.Getters.getLoginUrl]: (state: Me.State): string => SteemConnectApiHelper.getLoginUrl(),
+        [Me.Getters.isLoggedIn]: (state: Me.State): boolean => state.loggedIn,
     };
 
 

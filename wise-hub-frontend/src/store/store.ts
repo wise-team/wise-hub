@@ -5,6 +5,8 @@ import createPersistedState from "vuex-persistedstate";
 
 import { SteemConnectModule } from "./modules/steemconnect/SteemConnectModule";
 import { SteemConnectModuleImpl } from "./modules/steemconnect/SteemConnectModuleImpl";
+import { StatusModule } from "./modules/status/StatusModule";
+import { StatusModuleImpl } from "./modules/status/StatusModuleImpl";
 
 
 Vue.use(Vuex);
@@ -37,13 +39,16 @@ const actions: ActionTree<State, State> = {
  */
 export interface Modules {
   [SteemConnectModule.modulePathName]: Module<SteemConnectModule.State, State>;
+  [StatusModule.modulePathName]: Module<StatusModule.State, State>;
 }
 const modules: Modules & ModuleTree<State> = {
-  [SteemConnectModule.modulePathName]: SteemConnectModuleImpl.steemConnectModule
+  [SteemConnectModule.modulePathName]: SteemConnectModuleImpl.steemConnectModule,
+  [StatusModule.modulePathName]: StatusModuleImpl.module
 };
 
 const persistentPaths: string [] = [];
 SteemConnectModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(SteemConnectModule.modulePathName+ "." + persistentPath));
+StatusModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(StatusModule.modulePathName+ "." + persistentPath));
 
 
 
@@ -53,6 +58,7 @@ SteemConnectModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths
 export interface Store {
   state: {
     [SteemConnectModule.modulePathName]: SteemConnectModule.State;
+    [StatusModule.modulePathName]: StatusModule.State;
   },
   dispatch: Dispatch,
   commit: Commit,
@@ -77,9 +83,9 @@ export const store = new Vuex.Store<State>({
   actions: actions,
   modules: modules,
   plugins: [
-    createPersistedState({
+    /*createPersistedState({
       key: PERSISTENCE_LOCALSTORAGE_KEY,
       paths: persistentPaths,
-    }),
+    }),*/
   ],
 });

@@ -7,7 +7,7 @@
 
             <b-navbar-nav>
                 <li class="nav-item">
-                    <router-link class="nav-link" to="/"><font-awesome-icon :icon="trendingIcon" /> Trending</router-link>
+                    <router-link class="nav-link" to="/"><font-awesome-icon :icon="trendingIcon" /> Read</router-link>
                 </li>
                 <li class="nav-item">
                     <router-link class="nav-link" to="/vote"><font-awesome-icon :icon="voteIcon" /> Vote</router-link>
@@ -29,7 +29,7 @@ import faAlignCenter from "@fortawesome/fontawesome-free-solid/faAlignCenter";
 import faChessKnight from "@fortawesome/fontawesome-free-solid/faChessKnight";
 import { s } from "../store/store";
 
-import ProfileButton from "./controls/ProfileButton"
+import ProfileButton from "./controls/ProfileButton.vue";
 
 export default Vue.extend({
     props: [],

@@ -5,12 +5,6 @@ export namespace SteemConnectModule {
         return modulePathName + "_" + name;
     }
 
-    export class Actions {
-        static reset = modulePathName + "_reset";
-        public static initialize = modulePathName + "_initialize";
-        public static logout = modulePathName + "_logout";
-    }
-
     export interface State {
         account: {
             id: string;
@@ -21,4 +15,15 @@ export namespace SteemConnectModule {
         loggedIn: boolean;
         error: string | undefined;
     }
+
+    export class Actions {
+        static reset = localName("reset");
+        public static initialize = localName("initialize");
+        public static logout = localName("logout");
+    }
+
+    export class Getters {
+        public static getLoginUrl: string = localName("getLoginUrl");
+        public static isLoggedIn: string = localName("isLoggedIn");
+    };
 }

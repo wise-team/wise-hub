@@ -1,7 +1,7 @@
-<!-- src/components/views/DelegateView.vue -->
+<!-- src/components/views/vote/VoteView.vue -->
 <template>
-        <div id="delegate-view">
-            <p>Delegate view</p>
+        <div id="vote-view">
+            <p>Vote view</p>
         </div>
 </template>
 
