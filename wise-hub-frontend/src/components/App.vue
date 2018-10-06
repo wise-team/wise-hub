@@ -12,7 +12,7 @@
             </b-col>
         </b-row>
         <b-row>
-            <b-col>
+            <b-col class="router-view-container">
                 <router-view></router-view>
             </b-col>
         </b-row>
@@ -51,4 +51,7 @@ export default Vue.extend({
 </script>
 
 <style>
+.router-view-container {
+    margin-top: 2rem;
+}
 </style>
