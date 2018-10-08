@@ -92,7 +92,7 @@ export namespace StatusModuleImpl {
                     commit(Mutations.setAccountStatsVoting, { loading: false, value: result, error: "" });
                 },
                 error => {
-                    commit(Mutations.setAccountStatsVoting, { loading: false, value: false, error: error });
+                    commit(Mutations.setAccountStatsVoting, { loading: false, value: false, error: error + "" });
                 }
             );
 
@@ -102,7 +102,7 @@ export namespace StatusModuleImpl {
                     commit(Mutations.setAccountStatsDelegating, { loading: false, value: result, error: "" });
                 },
                 error => {
-                    commit(Mutations.setAccountStatsDelegating, { loading: false, value: false, error: error });
+                    commit(Mutations.setAccountStatsDelegating, { loading: false, value: false, error: error + "" });
                 }
             );
 
