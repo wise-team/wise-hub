@@ -23,6 +23,13 @@ export namespace StatusModuleImpl {
                 value: false,
                 error: ""
             }
+        },
+        generalStats: {
+            loading: true,
+            error: "",
+            voters: -1,
+            delegators: -1,
+            operations: -1,
         }
     };
     export const persistentPaths: string [] = [
@@ -41,6 +48,7 @@ export namespace StatusModuleImpl {
         public static setAccountStatsVoting = Me.localName("setAccountStatsVoting");
         public static setAccountStatsDelegating = Me.localName("setAccountStatsDelegating");
         public static setAccountStatsSupporting = Me.localName("setAccountStatsSupporting");
+        public static setGeneralStats = Me.localName("setGeneralStats");
     }
 
     const mutations: MutationTree<Me.State> = {
@@ -49,20 +57,29 @@ export namespace StatusModuleImpl {
         ) {
             state.accountStats.loadedFor = payload;
         },
+
         [Mutations.setAccountStatsVoting](
             state: Me.State, payload: { loading: boolean; value: boolean; error: string; },
         ) {
             state.accountStats.voting = payload;
         },
+
         [Mutations.setAccountStatsDelegating](
             state: Me.State, payload: { loading: boolean; value: boolean; error: string; },
         ) {
             state.accountStats.delegating = payload;
         },
+
         [Mutations.setAccountStatsSupporting](
             state: Me.State, payload: { loading: boolean; value: boolean; error: string; },
         ) {
             state.accountStats.supporting = payload;
+        },
+
+        [Mutations.setGeneralStats](
+            state: Me.State, payload: { loading: boolean; error: string; voters: number; delegators: number; operations: number; },
+        ) {
+            state.generalStats = payload;
         },
     };
 
@@ -74,6 +91,20 @@ export namespace StatusModuleImpl {
     }
 
     const actions: ActionTree<Me.State, Me.State> = {
+        [Me.Actions.initialize]: (
+            { commit, dispatch, state }, payload: {},
+        ): void => {
+            StatusApiHelper.loadGeneralStats()
+            .then(
+                result => commit(Mutations.setGeneralStats, 
+                    { loading: false, error: "", delegators: result.delegators, voters: result.voters, operations: result.operations }
+                ),
+                error => commit(Mutations.setGeneralStats, 
+                    { loading: false, error: error.message, delegators: -1, voters: -1, operations: -1 }
+                )
+            );
+        },
+
         [Me.Actions.setAccountName]: (
             { commit, dispatch, state }, payload: { accountName: string },
         ): void => {

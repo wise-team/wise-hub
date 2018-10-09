@@ -4,6 +4,12 @@ import { data as wise } from "../../../wise-config.gen";
 import { d } from "../../../util/util";
 
 export class StatusApiHelper {
+    public static async loadGeneralStats(): Promise<{ operations: number; delegators: number; voters: number; }> {
+        const query = "/stats";
+        const result = await Axios.get(wise.config.sql.endpoint.schema + "://" + wise.config.sql.endpoint.host + query);
+        return { operations: d(result.data[0].operations), delegators: d(result.data[0].delegators), voters: d(result.data[0].voters) }
+    }
+
     public static async isVoting(accountName: string): Promise<boolean> {
         const query = "/operations?delegator=eq." + d(accountName) + "&operation_type=eq.set_rules&select=count";
         const result = await Axios.get(wise.config.sql.endpoint.schema + "://" + wise.config.sql.endpoint.host + query);

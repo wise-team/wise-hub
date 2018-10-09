@@ -32,6 +32,7 @@ const actions: ActionTree<State, State> = {
       { commit, dispatch, state }, payload?: {} | undefined,
   ): void => {
       dispatch(SteemConnectModule.Actions.initialize);
+      dispatch(StatusModule.Actions.initialize);
   },
 };
 

@@ -22,10 +22,18 @@ export namespace StatusModule {
                 value: boolean;
                 error: string;
             }
+        },
+        generalStats: {
+            loading: boolean;
+            error: string;
+            voters: number;
+            delegators: number;
+            operations: number;
         }
     }
 
     export class Actions {
+        public static initialize = localName("initialize");
         public static setAccountName = localName("setAccountName");
     }
 }
