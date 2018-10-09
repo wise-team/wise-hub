@@ -2,6 +2,7 @@ import Axios from "axios";
 import * as steem from "steem";
 import { data as wise } from "../../../wise-config.gen";
 import { d } from "../../../util/util";
+import { StatusModule } from "./StatusModule";
 
 export class StatusApiHelper {
     public static async loadGeneralStats(): Promise<{ operations: number; delegators: number; voters: number; }> {
@@ -28,5 +29,30 @@ export class StatusApiHelper {
         else {
             return d(result[0].witness_votes).filter((witness: string) => witness === wise.config.witness.account).length > 0;
         }
+    }
+
+    public static async loadLatestOperations(): Promise<StatusModule.WiseOperation []> {
+        const query = "/operations?order=moment.desc&limit=" + wise.config.hub.visual.read.lastActivity.numOfOpsToShow;
+        const result = await Axios.get(wise.config.sql.endpoint.schema + "://" + wise.config.sql.endpoint.host + query);
+
+        const operations: StatusModule.WiseOperation [] = [];
+
+        result.data.forEach((op: any) => {
+            const wiseOp: StatusModule.WiseOperation = {
+                id: op.id,
+                block_num: op.block_num,
+                transaction_num: op.transaction_num,
+                transaction_id: op.transaction_id,
+                timestamp: op.timestamp,
+                moment: op.moment,
+                voter: op.voter,
+                delegator: op.delegator,
+                operation_type: op.operation_type,
+                data: JSON.parse(op.json_str)
+            };
+            operations.push(wiseOp);
+        });
+
+        return operations;
     }
 }

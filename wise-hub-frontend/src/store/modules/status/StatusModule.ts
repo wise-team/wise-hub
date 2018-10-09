@@ -29,7 +29,25 @@ export namespace StatusModule {
             voters: number;
             delegators: number;
             operations: number;
+        },
+        latestOperations: {
+            loading: boolean;
+            error: string;
+            operations: WiseOperation[];
         }
+    }
+
+    export interface WiseOperation {
+        id: number;
+        block_num: number;
+        transaction_num: number;
+        transaction_id: string;
+        timestamp: string;
+        moment: string;
+        voter: string;
+        delegator: string;
+        operation_type: "confirm_vote" | "send_voteorder" | "set_rules";
+        data: any;
     }
 
     export class Actions {

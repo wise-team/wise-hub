@@ -141,6 +141,15 @@ export const data = {
       "development": {
         "url": "http://portal.wise.vote/",
       },
+      "visual": {
+        "read": {
+          "lastActivity": {
+            "numOfOpsToShow": 50,
+            "trxLinkBase": "https://steemd.com/tx/{trx}",
+            "articleLinkBase": "https://steemit.com/@{author}/{permlink}",
+          },
+        },
+      },
     },
     "test": {
       "live": {

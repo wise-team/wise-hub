@@ -30,6 +30,11 @@ export namespace StatusModuleImpl {
             voters: -1,
             delegators: -1,
             operations: -1,
+        },
+        latestOperations: {
+            loading: true,
+            error: "",
+            operations: []
         }
     };
     export const persistentPaths: string [] = [
@@ -49,6 +54,7 @@ export namespace StatusModuleImpl {
         public static setAccountStatsDelegating = Me.localName("setAccountStatsDelegating");
         public static setAccountStatsSupporting = Me.localName("setAccountStatsSupporting");
         public static setGeneralStats = Me.localName("setGeneralStats");
+        public static setLatestOperations = Me.localName("setLatestOperations");
     }
 
     const mutations: MutationTree<Me.State> = {
@@ -81,6 +87,12 @@ export namespace StatusModuleImpl {
         ) {
             state.generalStats = payload;
         },
+
+        [Mutations.setLatestOperations](
+            state: Me.State, payload: { loading: boolean; error: string; operations: Me.WiseOperation []; },
+        ) {
+            state.latestOperations = payload;
+        },
     };
 
     /**
@@ -101,6 +113,16 @@ export namespace StatusModuleImpl {
                 ),
                 error => commit(Mutations.setGeneralStats, 
                     { loading: false, error: error.message, delegators: -1, voters: -1, operations: -1 }
+                )
+            );
+
+            StatusApiHelper.loadLatestOperations()
+            .then(
+                result => commit(Mutations.setLatestOperations, 
+                    { loading: false, error: "", operations: result }
+                ),
+                error => commit(Mutations.setLatestOperations, 
+                    { loading: false, error: error.message, operations: [] }
                 )
             );
         },

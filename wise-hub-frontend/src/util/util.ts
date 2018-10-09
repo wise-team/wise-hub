@@ -18,3 +18,28 @@ export function formatBigInt (value: number) {
     }
     return shortValue+suffixes[suffixNum];
 }
+
+// based on: https://stackoverflow.com/a/6109105/761265
+export function timeDifferenceStr(current: number, previous: number) {
+    var msPerMinute = 60 * 1000;
+    var msPerHour = msPerMinute * 60;
+    var msPerDays = msPerHour * 24 * 2;
+
+    var elapsed = current - previous;
+
+    if (elapsed < msPerMinute) {
+         return Math.round(elapsed/1000) + " seconds ago";   
+    }
+
+    else if (elapsed < msPerHour) {
+         return Math.round(elapsed/msPerMinute) + " minutes ago";   
+    }
+
+    else if (elapsed < msPerDays ) {
+         return Math.round(elapsed/msPerHour ) + " hours ago";   
+    }
+
+    else {
+        return new Date(previous).toISOString();   
+    }
+}

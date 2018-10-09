@@ -9,3 +9,9 @@
 .wise-background {
     background-color: #6b11ff;
 }
+
+.avatar-in-text {
+    height: 1.4rem;
+    vertical-align: -0.25rem;
+    border-radius: 50%;
+}
