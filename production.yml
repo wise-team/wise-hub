@@ -6,13 +6,20 @@ networks:
       name: caddy-proxy
 
 services:
-  voting-page:
+  hub:
     container_name: wise-hub
     build: $PWD/wise-hub-frontend
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     networks:
       - proxy-tier
     environment:
       NODE_ENV: production
+      #§ 'VIRTUAL_HOST: "' + data.config.hub.production.host + '"'
+      VIRTUAL_HOST: "hub.wise.vote"
+      VIRTUAL_NETWORK: "caddy-proxy"
+      VIRTUAL_PORT: 8080
+      #§ 'CADDY_TLS: ' + ( data.config.hub.production.schema === "https" ? '"yes"' : '"no"')
+      CADDY_TLS: "yes"
+      CADDY_TIMEOUTS: "read 5m, write 2m"
 
