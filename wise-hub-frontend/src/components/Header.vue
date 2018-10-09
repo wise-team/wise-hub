@@ -2,7 +2,7 @@
 <template>
         <div id="header-component">
             <div class="text-center header">
-                <a href="/"><h1><img src="assets/wise-full-color.svg" alt="Wise"></h1></a>
+                <a href="/"><h1><img src="/assets/wise-full-color.svg" alt="Wise"></h1></a>
                 <p class="text-muted">
                     Vote delegation system for Steem blockchain
                 </p>
