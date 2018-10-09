@@ -8,7 +8,7 @@ networks:
 services:
   hub:
     container_name: wise-hub
-    build: $PWD/wise-hub-frontend
+    build: ./wise-hub-frontend
     expose:
       - "8080"
     networks:
