@@ -1,7 +1,12 @@
 version: "3"
 
 services:
-  frontend:
+  frontend: #§< data.config.hub.docker.services.frontend.name + ':'
+    container_name: wise-hub-frontend #§< 'container_name: ' + data.config.hub.docker.services.frontend.container
     build: ./wise-hub-frontend
+    image: wise/wise-hub-frontend #§< 'image: ' + data.config.hub.docker.services.frontend.image
     ports:
       - "8080:8080"
+    environment:
+      NODE_ENV: production
+
