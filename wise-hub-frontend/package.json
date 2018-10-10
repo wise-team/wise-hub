@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rm -rf dist && webpack",
     "serve": "http-server ./",
-    "build-and-serve": "npm run build & npm run serve",
+    "build-and-serve": "npm run build && npm run serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

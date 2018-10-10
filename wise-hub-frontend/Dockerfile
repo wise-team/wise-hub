@@ -4,10 +4,11 @@ FROM node:9.11-alpine
 ADD . /src/
 WORKDIR /src/
 
-RUN sh -c "npm install 2>&1"
-RUN sh -c "NODE_ENV=production npm run build 2>&1"
+RUN npm install
+RUN NODE_ENV=production npm run build | tr -d '{}[]'
 
-CMD [ "sh", "-c", "npm run serve 2>&1" ]
+CMD [ "npm", "run", "serve" ]
+
 
 
 ##§ '\n' + data.config.docker.generateDockerfileFrontMatter(data) + '\n' §##
