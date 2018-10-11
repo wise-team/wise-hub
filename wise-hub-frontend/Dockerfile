@@ -9,13 +9,13 @@ RUN NODE_ENV=production npm run build 2>&1 | tr -d '{}[]'
 
 
 # Stage 2
-FROM nginx:stable-alpine
+FROM nginx:1
 WORKDIR /usr/share/nginx/html
 COPY --from=0 /src/index.html ./
 COPY --from=0 /src/favicon.ico ./
 COPY --from=0 /src/assets/ ./assets/
 COPY --from=0 /src/dist/ ./dist/
-COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+# COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 RUN ls
 EXPOSE 8080
 
