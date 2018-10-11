@@ -26,7 +26,11 @@ import { store, Actions } from "./store/store";
 import ReadView from "./components/views/read/ReadView.vue";
 import VoteView from "./components/views/vote/VoteView.vue";
 import DelegateView from "./components/views/delegate/DelegateView.vue";
-
+import NotFoundView from "./components/views/NotFoundView.vue";
+import RulesetsView from "./components/views/rulesets/RulesetsView.vue";
+import RulesetsEditorView from "./components/views/rulesets-editor/RulesetsEditorView.vue";
+import AccountView from "./components/views/account/AccountView.vue";
+import TransactionDetailsView from "./components/views/transaction-details/TransactionDetailsView.vue";
 
 /**
  * Import global css
@@ -49,8 +53,18 @@ Vue.component("font-awesome-icon", FontAwesomeIcon);
 const router = new VueRouter({
     routes: [
         { path: '/', component: ReadView },
+        { path: '/read/:moment?', component: ReadView },
         { path: '/vote', component: VoteView },
         { path: '/delegate', component: DelegateView },
+        { path: '/@:delegator/rulesets', component: RulesetsView },
+        { path: '/@:delegator/rulesets/for/@:voter', component: RulesetsView },
+        { path: '/rulesets/for/@:voter', component: RulesetsView },
+        { path: '/rulesets/for/@:voter/edit', component: RulesetsEditorView },
+        { path: '/@:account', component: AccountView },
+        { path: '/@:account/read/:moment?', component: AccountView },
+        { path: '/tx/:transaction_id', component: TransactionDetailsView },
+        
+        { path: '*', component: NotFoundView }
     ]
 });
 

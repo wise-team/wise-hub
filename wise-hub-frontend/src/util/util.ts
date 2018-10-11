@@ -43,3 +43,9 @@ export function timeDifferenceStr(current: number, previous: number) {
         return new Date(previous).toISOString();   
     }
 }
+
+export function ucfirst(text: string): string {
+    if (text.length === 0) return "";
+    else if(text.length === 1) return text.toUpperCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}

@@ -10,7 +10,7 @@
             <p> </p>
             <p style="font-size: 0.75rem;">
                 Copyright &copy; 2018-{{ new Date().getFullYear() }}
-                by <a :href="'https://steemit.com/@' + wise.config.team.steem.account">@ {{ wise.config.team.steem.account }} </a>
+                by <a :href="'https://steemit.com/@' + wise.config.team.steem.account">@{{ wise.config.team.steem.account }} </a>
                 Under {{ wise.config.license.code }} license.
             </p>
         </footer>

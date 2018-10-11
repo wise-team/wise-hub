@@ -120,9 +120,6 @@ export default Vue.extend({
     position: relative;
 }
 
-.you-and-wise .plus {
-}
-
 .you-and-wise .wise {
     position: relative;
     left: -1.5rem;
