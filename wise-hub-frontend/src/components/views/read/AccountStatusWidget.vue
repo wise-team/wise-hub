@@ -7,7 +7,7 @@
         >
             <p class="card-text you-and-wise">
                 <img :src="'https://steemitimages.com/u/' + account + '/avatar'" alt="Your avatar" class="avatar" />
-                <img src="/assets/wise-full-color-emblem.svg" alt="Wise logo" class="wise" />
+                <img src="/assets/images/wise/full-color-emblem.svg" alt="Wise logo" class="wise" />
             </p>
             <p class="card-text">
                 <i>Who are you for the Wise?</i>
