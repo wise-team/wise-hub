@@ -51,6 +51,7 @@ Vue.component("font-awesome-icon", FontAwesomeIcon);
  * Start app
  */
 const router = new VueRouter({
+    mode: "history",
     routes: [
         { path: '/', component: ReadView },
         { path: '/read/:moment?', component: ReadView },

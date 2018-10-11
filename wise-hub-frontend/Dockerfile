@@ -4,10 +4,20 @@ FROM node:9.11-alpine
 ADD . /src/
 WORKDIR /src/
 
-RUN npm install
-RUN NODE_ENV=production npm run build | tr -d '{}[]'
+RUN npm install 2>&1 | tr -d '{}[]'
+RUN NODE_ENV=production npm run build 2>&1 | tr -d '{}[]'
 
-CMD [ "npm", "run", "serve" ]
+
+# Stage 2
+FROM nginx:stable-alpine
+WORKDIR /usr/share/nginx/html
+COPY --from=0 /src/index.html ./
+COPY --from=0 /src/favicon.ico ./
+COPY --from=0 /src/assets/ ./assets/
+COPY --from=0 /src/dist/ ./dist/
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+RUN ls
+EXPOSE 8080
 
 
 

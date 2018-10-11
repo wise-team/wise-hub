@@ -11,9 +11,9 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 module.exports = {
   entry: './src/index.ts',
   output: {
-    path: path.resolve(__dirname, './dist'),
-    publicPath: 'dist/',
-    filename: 'build.js'
+    path: path.resolve(__dirname, 'dist'),
+    publicPath: '/dist/',
+    filename: 'wise-hub.js'
   },
   mode: (process.env.NODE_ENV === 'production' ? 'production' : 'development'),
   module: {
