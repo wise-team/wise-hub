@@ -15,9 +15,7 @@ COPY --from=0 /src/index.html ./
 COPY --from=0 /src/favicon.ico ./
 COPY --from=0 /src/assets/ ./assets/
 COPY --from=0 /src/dist/ ./dist/
-# COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
-RUN ls
-EXPOSE 8080
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
 
 

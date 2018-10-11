@@ -6,7 +6,7 @@ services:
     build: ./wise-hub-frontend
     image: wise/wise-hub-frontend #§< 'image: ' + data.config.hub.docker.services.frontend.image
     ports:
-      - "8080:8080"
+      - "8080:8090"
     environment:
       NODE_ENV: production
 
