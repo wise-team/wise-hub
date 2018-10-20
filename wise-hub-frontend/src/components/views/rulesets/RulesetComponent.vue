@@ -7,23 +7,27 @@
             <pre>{{ ruleset | json }}</pre>
         </b-alert>
     </div>
-    <div v-else class="card shadow-sm mb-3">
-        <div class="card-header">
-            {{ ruleset.name }}
+    <div v-else class="ruleset-component">
+        <div class="mb-2">
+            <span class="text-muted h5">{{ ruleset.name }}&nbsp;</span>
+            <span class="ruleset-options">
+                <b-dropdown size="sm" variant="link" text="Options" right>
+                    <b-dropdown-item>Rename</b-dropdown-item>
+                    <b-dropdown-item>Edit</b-dropdown-item>
+                    <b-dropdown-item>Change voter</b-dropdown-item>
+                    <b-dropdown-item>Delete</b-dropdown-item>
+                    <b-dropdown-divider></b-dropdown-divider>
+                    <b-dropdown-item>Copy</b-dropdown-item>
+                    <b-dropdown-item>Ask a delegator</b-dropdown-item>
+                </b-dropdown>
+            </span>
         </div>
-        <div class="card-body rules-scroller">
-            <div class="rules-scroller-viewport">
-                <rule-component
-                    v-for="(rule, index) in ruleset.rules" :key="index"
-                    :rule="rule"
-                    class="mr-3 rule rounded shadow-sm border"
-                />
-            </div>
-        </div>
-        <div class="card-footer">
-            <small class="text-muted">block no {{ effectuatedSetRules.moment.blockNum }}, trx no {{ effectuatedSetRules.moment.transactionNum }}</small>
-            <span class="float-right text-muted scroll-indicator">&#8596;</span>
-        </div>
+
+        <horizontal-rule-component
+            v-for="(rule, index) in ruleset.rules" :key="index"
+            :rule="rule"
+            class="mb-2 ml-2"
+        />
     </div>
 </template>
 
@@ -31,10 +35,11 @@
 import Vue from "vue";
 import { icons } from "../../../icons";
 import { s } from "../../../store/store";
-import { d, ucfirst } from "../../../util/util";
+import { d, ucfirst, uniqueId } from "../../../util/util";
 import { Ruleset } from "steem-wise-core";
 
-import RuleComponent from "./RuleComponent";
+import RuleComponent from "./RuleComponent.vue";
+import HorizontalRuleComponent from "./HorizontalRuleComponent.vue";
 
 export default Vue.extend({
     props: [ "ruleset", "effectuatedSetRules" ],
@@ -51,7 +56,8 @@ export default Vue.extend({
         },
     },
     components: {
-        RuleComponent
+        RuleComponent,
+        HorizontalRuleComponent
     },
     filters: {
         ucfirst: ucfirst,
@@ -61,18 +67,7 @@ export default Vue.extend({
 </script>
 
 <style>
-.rules-scroller {
-    overflow-x: scroll;
-}
-
-.rules-scroller-viewport {
-    white-space: nowrap;
-}
-
-.scroll-indicator {
-}
-
-.rule {
-    display: inline-block;
+.ruleset-component .ruleset-options {
+    float: right;
 }
 </style>

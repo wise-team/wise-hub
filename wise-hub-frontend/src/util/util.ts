@@ -53,3 +53,8 @@ export function ucfirst(text: string): string {
     else if(text.length === 1) return text.toUpperCase();
     return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+const counterHolder = { counter: 0 };
+export function uniqueId() {
+    return counterHolder.counter++;
+}

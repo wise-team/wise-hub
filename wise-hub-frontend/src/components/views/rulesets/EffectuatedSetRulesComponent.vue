@@ -8,7 +8,7 @@
         </b-alert>
     </div>
     <div v-else class="mb-5">
-        <h4 class="p-2 mb-3 rounded effectuatedsetrulescomponent-title">
+        <h4 class="p-2 mb-3 mt-1 rounded effectuatedsetrulescomponent-title">
             <font-awesome-icon :icon="delegatorIcon" /> {{ setRules.delegator }}
              &nbsp;&nbsp;&#8594;&nbsp;&nbsp;
              <font-awesome-icon :icon="voterIcon" /> {{ setRules.voter }}
@@ -17,7 +17,7 @@
         <ruleset-component
             v-for="ruleset in setRules.rulesets" :key="ruleset.name + ''"
             :ruleset="ruleset" :effectuatedSetRules="setRules"
-            class="ml-2"
+            class="ml-2 mb-4"
         />
     </div>
 </template>

@@ -16,7 +16,6 @@ if (window.location.hostname === "localhost") {
     Log.log().init();
 }
 
-
 /**
  * Import Vue & dependencies
  */
