@@ -24,9 +24,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import faCrown from "@fortawesome/fontawesome-free-solid/faCrown";
-import faAlignCenter from "@fortawesome/fontawesome-free-solid/faAlignCenter";
-import faChessKnight from "@fortawesome/fontawesome-free-solid/faChessKnight";
+import { icons } from "../icons";
 import { s } from "../store/store";
 
 import ProfileButton from "./controls/ProfileButton.vue";
@@ -40,9 +38,9 @@ export default Vue.extend({
     methods: {
     },
     computed: {
-        delegateIcon() { return faCrown; },
-        voteIcon() { return faChessKnight; },
-        trendingIcon() { return faAlignCenter; },
+        delegateIcon() { return icons.delegator; },
+        voteIcon() { return icons.voter; },
+        trendingIcon() { return icons.read; },
     },
     components: {
         ProfileButton,

@@ -34,8 +34,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import faSpinner from "@fortawesome/fontawesome-free-solid/faSpinner";
-import faExclamation from "@fortawesome/fontawesome-free-solid/faExclamation";
+import { icons } from "../../../icons";
 import { SteemConnectModule } from "../../../store/modules/steemconnect/SteemConnectModule";
 import { s } from "../../../store/store";
 import { d, assertString, formatBigInt } from "../../../util/util";
@@ -67,12 +66,8 @@ export default Vue.extend({
         loginUrl(): string {
             return s(this.$store).getters[SteemConnectModule.Getters.getLoginUrl];
         },
-        loadingIcon() {
-            return faSpinner;
-        },
-        errorIcon() {
-            return faExclamation;
-        },
+        loadingIcon() { return icons.loading; },
+        errorIcon() { return icons.error; },
     },
     components: {
     },

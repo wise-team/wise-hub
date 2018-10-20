@@ -1,12 +1,20 @@
 /* tslint:disable no-console */
+import Wise from "steem-wise-core";
 import { data as wise } from "./wise-config.gen";
 import { d } from "./util/util";
+import { Log } from "./Log";
 
 declare const __VERSION__: string;
 console.log("steem-wise-hub version: " + __VERSION__);
+console.log("steem-wise-core version: " + Wise.getVersion());
 const repoUrl = d(wise.config.repository.github.organization) + "/" + d(wise.repository.name) + "\"";
 console.log("This is open source software: https://github.com/" + repoUrl);
 
+if (window.location.hostname === "localhost") {
+    (window as any).WISE_LOG_LEVEL = "debug";
+    console.log("Localhost detected. Setting window.WISE_LOG_LEVEL=" + (window as any).WISE_LOG_LEVEL);
+    Log.log().init();
+}
 
 
 /**
@@ -16,7 +24,6 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import BootstrapVue from "bootstrap-vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-
 
 /**
  * Import components
@@ -38,7 +45,6 @@ import TransactionDetailsView from "./components/views/transaction-details/Trans
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 import "./style.css";
-
 
 /**
  * Initialize dependencies
@@ -75,6 +81,8 @@ const v = new Vue({
     router: router,
     render: h => h(App),
 });
+
+Log.log().init();
 
 // initialize steemconnect & eventually login automatically
 v.$store.dispatch(Actions.initialize);

@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import faGithub from "@fortawesome/fontawesome-free-brands/faGithub";
+import { icons } from "../icons";
 import { data as wise } from "../wise-config.gen";
 import { d } from "../util/util";
 
@@ -33,9 +33,7 @@ export default Vue.extend({
     methods: {
     },
     computed: {
-        githubIcon() {
-            return faGithub;
-        },
+        githubIcon() { return icons.github; },
     },
     components: {
     },

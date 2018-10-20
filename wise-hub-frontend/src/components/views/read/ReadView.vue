@@ -31,8 +31,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import faSpinner from "@fortawesome/fontawesome-free-solid/faSpinner";
-import faExclamationCircle from "@fortawesome/fontawesome-free-solid/faExclamationCircle";
+import { icons } from "../../../icons";
 import { StatusModule } from "../../../store/modules/status/StatusModule";
 import { data as wise } from "../../../wise-config.gen";
 import { s } from "../../../store/store";
@@ -106,12 +105,8 @@ export default Vue.extend({
 
             return table;
         },
-        loadingIcon() {
-            return faSpinner;
-        },
-        errorIcon() {
-            return faExclamationCircle;
-        },
+        loadingIcon() { return icons.loading; },
+        errorIcon() { return icons.error; },
     },
     components: {
         AccountStatusWidget,

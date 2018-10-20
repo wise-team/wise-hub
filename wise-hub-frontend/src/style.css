@@ -15,3 +15,10 @@
     vertical-align: -0.25rem;
     border-radius: 50%;
 }
+
+h1 {
+    text-align: center;
+    color: #6c757d !important; /* .text-muted */
+    margin-top: 3rem !important; /* mt-5 */
+    margin-bottom: 3rem !important; /* mb-5 */
+}

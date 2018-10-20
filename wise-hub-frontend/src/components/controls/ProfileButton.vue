@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import faSpinner from "@fortawesome/fontawesome-free-solid/faSpinner";
+import { icons } from "../../icons";
 import { SteemConnectModule } from "../../store/modules/steemconnect/SteemConnectModule";
 import { s } from "../../store/store";
 import { d } from "../../util/util";
@@ -60,7 +60,7 @@ export default Vue.extend({
             return d(s(this.$store).state.steemConnect).account ?
                 d(s(this.$store).state.steemConnect.account).name : "(loading account...)";
         },
-        loadingIcon() { return faSpinner; },
+        loadingIcon() { return icons.loading; },
     },
 });
 </script>

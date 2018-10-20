@@ -38,8 +38,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import faSpinner from "@fortawesome/fontawesome-free-solid/faSpinner";
-import faExclamation from "@fortawesome/fontawesome-free-solid/faExclamation";
+import { icons } from "../../icons";
 import { s } from "../../store/store";
 import { d } from "../../util/util";
 
@@ -52,8 +51,8 @@ export default Vue.extend({
     methods: {
     },
     computed: {
-        loadingIcon() { return faSpinner; },
-        errorIcon() { return faExclamation; },
+        loadingIcon() { return icons.loading; },
+        errorIcon() { return icons.error; },
     },
 });
 </script>

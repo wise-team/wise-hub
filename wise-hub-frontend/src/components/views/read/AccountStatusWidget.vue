@@ -42,9 +42,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import faSpinner from "@fortawesome/fontawesome-free-solid/faSpinner";
-import faCheck from "@fortawesome/fontawesome-free-solid/faCheck";
-import faCircle from "@fortawesome/fontawesome-free-solid/faCircle";
+import { icons } from "../../../icons";
 import { s } from "../../../store/store";
 import { d } from "../../../util/util";
 
@@ -59,15 +57,9 @@ export default Vue.extend({
     methods: {
     },
     computed: {
-        yesIcon() {
-            return faCheck;
-        },
-        noIcon() {
-            return faCircle;
-        },
-        loadingIcon() {
-            return faSpinner;
-        },
+        yesIcon() { return icons.ok; },
+        noIcon() { return icons.notice; },
+        loadingIcon() { return icons.loading; },
         isLoadingVoting(): boolean {
             return s(this.$store).state.status.accountStats.voting.loading;
         },
