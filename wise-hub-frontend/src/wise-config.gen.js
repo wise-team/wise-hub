@@ -10,12 +10,13 @@ export const data = {
       "code": "MIT",
     },
     "wise": {
-      "version": "1.2.2",
+      "version": "2.2.1",
       "homepage": "https://wise.vote/",
     },
     "steem": {
       "minimalApiBlockchainVersion": "0.20.5",
       "minimalApiHardforkVersion": "0.20.0",
+      "defaultApiUrl": "https://api.steemit.com",
       "apis": [ {
   "url": "https://api.steemit.com",
   "get_block": true,
@@ -48,29 +49,29 @@ export const data = {
     },
     "npm": {
       "node": {
-        "version": "9.11",
+        "version": "10.12",
       },
       "keywords": [ "steem", "blockchain", "wise" ],
       "author": "The Wise Team (https://wise-team.io/)",
     },
     "docker": {
       "imageHostname": "wise",
+      "maintainer": "The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>",
       "labels": {
         "domain": "vote.wise",
-        "defaultLabels": [ () => ".wise-version=\"1.2.2\"", () => ".license=\"MIT\"", () => ".repository=\"wise-hub\"" ],
+        "defaultLabels": [ () => "maintainer=\"The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>\"", () => "vote.wise.wise-version=\"2.2.1\"", () => "vote.wise.license=\"MIT\"", () => "vote.wise.repository=\"wise-hub\"" ],
       },
-      "maintainer": "The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>",
-      "generateDockerfileFrontMatter": () => "LABEL maintainer=\"The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>\"\nLABEL vote.wise.wise-version=\"1.2.2\"\nLABEL vote.wise.license=\"MIT\"\nLABEL vote.wise.repository=\"wise-hub\"",
+      "generateDockerfileFrontMatter": () => "LABEL maintainer=\"The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>\"\nLABEL vote.wise.wise-version=\"2.2.1\"\nLABEL vote.wise.license=\"MIT\"\nLABEL vote.wise.repository=\"wise-hub\"",
     },
     "repository": {
       "github": {
         "organization": "wise-team",
       },
       "readme": {
-        "badges": [ () => "[![License](https://img.shields.io/github/license/wise-team/wise-hub.svg?style=flat-square)](https://github.com/wise-team/wise-hub/blob/master/LICENSE)", () => "[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)", () => "[![Chat](https://img.shields.io/badge/chat%20on%20discord-6b11ff.svg?style=flat-square)](https://discordapp.com/invite/CwxQDbG)", () => "[![Wise operations count](https://img.shields.io/badge/dynamic/json.svg?label=wise%20operations%20count&url=https%3A%2F%2Fsql.wise.vote%3A%2Foperations%3Fselect%3Dcount&query=%24%5B0%5D.count&colorB=blue&style=flat-square)](https://sql.wise.vote/operations?select=moment,delegator,voter,operation_type&order=moment.desc)" ],
+        "badges": [ () => "[object Object]", () => "[object Object]", () => "[object Object]", () => "[object Object]" ],
+        "generateDefaultBadges": () => "\n[![License](https://img.shields.io/github/license/wise-team/wise-hub.svg?style=flat-square)](https://github.com/wise-team/wise-hub/blob/master/LICENSE) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) [![Chat](https://img.shields.io/badge/chat%20on%20discord-6b11ff.svg?style=flat-square)](https://discordapp.com/invite/CwxQDbG) [![Wise operations count](https://img.shields.io/badge/dynamic/json.svg?label=wise%20operations%20count&url=https%3A%2F%2Fsql.wise.vote%3A%2Foperations%3Fselect%3Dcount&query=%24%5B0%5D.count&colorB=blue&style=flat-square)](https://sql.wise.vote/operations?select=moment,delegator,voter,operation_type&order=moment.desc)\n",
         "generateHelpUsMd": () => "\n## Contribute to steem Wise\n\nWe welcome warmly:\n\n- Bug reports via [issues](https://github.com/wise-team/wise-hub).\n- Enhancement requests via via [issues](https://github.com/wise-team/wise-hub/issues).\n- [Pull requests](https://github.com/wise-team/wise-hub/pulls)\n- Security reports to _jedrzejblew@gmail.com_.\n\n**Before** contributing please **read [Wise CONTRIBUTING guide](https://github.com/wise-team/steem-wise-core/blob/master/CONTRIBUTING.md)**.\n\nThank you for developing WISE together!\n\n\n\n## Like the project? Let @wise-team become your favourite witness!\n\nIf you use & appreciate our software — you can easily support us. Just vote for \"wise-team\" to become you one of your witnesses. You can do it here: [https://steemit.com/~witnesses](https://steemit.com/~witnesses).\n\n",
         "generateHelpMd": () => "\n## Where to get help?\n\n- Feel free to talk with us on our chat: [https://discordapp.com/invite/CwxQDbG](https://discordapp.com/invite/CwxQDbG) .\n- You can read [The Wise Manual](https://wise.vote/introduction)\n- You can also contact Jędrzej at jedrzejblew@gmail.com (if you think that you found a security issue, please contact me quickly).\n\nYou can also ask questions as issues in appropriate repository: See [issues for this repository](https://github.com/wise-team/wise-hub/issues).\n\n",
-        "generateDefaultBadges": () => "\n[![License](https://img.shields.io/github/license/wise-team/wise-hub.svg?style=flat-square)](https://github.com/wise-team/wise-hub/blob/master/LICENSE) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) [![Chat](https://img.shields.io/badge/chat%20on%20discord-6b11ff.svg?style=flat-square)](https://discordapp.com/invite/CwxQDbG) [![Wise operations count](https://img.shields.io/badge/dynamic/json.svg?label=wise%20operations%20count&url=https%3A%2F%2Fsql.wise.vote%3A%2Foperations%3Fselect%3Dcount&query=%24%5B0%5D.count&colorB=blue&style=flat-square)](https://sql.wise.vote/operations?select=moment,delegator,voter,operation_type&order=moment.desc)\n",
       },
       "repositories": {
         "core": {
@@ -132,6 +133,10 @@ export const data = {
       },
     },
     "sql": {
+      "protocol": {
+        "version": "1.0",
+        "maxRowsPerPage": 1000,
+      },
       "pusher": {
         "requestConcurrencyPerNode": 3,
         "blockProcessingTimeoutMs": 9000,
@@ -154,6 +159,10 @@ export const data = {
           "postgrest": {
             "name": "postgrest",
             "container": "wise-sql-postgrest",
+          },
+          "api_proxy": {
+            "name": "wise_sql_api_proxy",
+            "container": "wise_sql_api_proxy",
           },
         },
         "volumes": {
@@ -194,16 +203,23 @@ export const data = {
       },
     },
     "test": {
-      "live": {
+      "healthcheck": {
         "metrics": {
           "periodMs": 259200000,
         },
         "inBrowserTests": {
-          "enabled": true,
+          "enabled": false,
           "browsers": [ "firefox" ],
         },
         "api": {
           "testThroughProxy": false,
+        },
+        "log": {
+          "dockerVolume": "wise.test.logs",
+        },
+        "slack": {
+          "mentionUsers": [ "UAEGKTY3T" ],
+          "webhookUrlFilePath": "/opt/wise/slackWebhook.url",
         },
       },
       "websites": {
@@ -262,10 +278,10 @@ export const data = {
         "icon": "https://wise.vote/assets/wise-full-color-icon-128.png",
         "website": "https://wise.vote/",
         "beneficiaries": null,
-        "is_public": false,
+        "is_public": true,
         "is_disabled": false,
         "created_at": "2018-07-06T09:53:05.827Z",
-        "updated_at": "2018-09-21T13:20:47.021Z",
+        "updated_at": "2018-10-16T15:00:15.365Z",
       },
     },
   },
