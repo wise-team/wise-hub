@@ -1,3 +1,5 @@
+import * as uuid from "uuid";
+
 export function d <T> (input: T | undefined): T {
     if (typeof input !== "undefined") return input;
     else throw new Error("Input value is undefined (d() fn)");
@@ -54,7 +56,6 @@ export function ucfirst(text: string): string {
     return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-const counterHolder = { counter: 0 };
-export function uniqueId() {
-    return counterHolder.counter++;
+export function uniqueId(): string {
+    return uuid.v4();
 }
