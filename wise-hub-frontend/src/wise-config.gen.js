@@ -204,6 +204,18 @@ export const data = {
         "metrics": {
           "periodMs": 259200000,
         },
+        "hostedLogs": {
+          "host": "test.wise.vote",
+          "tls": "yes",
+        },
+        "docker": {
+          "services": {
+            "hostedLogs": {
+              "name": "wise_healthcheck_hosted_logs",
+              "container": "wise_healthcheck_hosted_logs",
+            },
+          },
+        },
         "inBrowserTests": {
           "enabled": false,
           "browsers": [ "firefox" ],
@@ -215,7 +227,7 @@ export const data = {
           "dockerVolume": "wise.test.logs",
         },
         "slack": {
-          "mentionUsers": [ "UAEGKTY3T" ],
+          "mentionUsers": [ "UAEGKTY3T", "UASN9CGJ0" ],
           "webhookUrlFilePath": "/opt/wise/slackWebhook.url",
         },
       },
@@ -243,12 +255,12 @@ export const data = {
           "name": "Wise",
           "website": "https://wise.vote/",
         },
-        "last_account_update": "2018-07-06T09:47:06",
-        "last_owner_update": "1970-01-01T00:00:00",
+        "last_account_update": "2018-10-22T13:31:54",
+        "last_owner_update": "2018-10-22T13:31:54",
         "keys": {
           "owner": "STM5qMTthdfQMQREDNxjz3zsKBRY15SfLToNnzPM7RwWddiHwD3Xq",
-          "active": "STM8jjcuFn1F96eq8ssbtT7UDJpu8AmkR4sgXBhPT7TCUVaozb57q",
-          "posting": "STM7NuCMemrJ6FJza1Ky733AAbwL5dnzAE7jnLEi4waroH8ZoQCof",
+          "active": [ "STM8jjcuFn1F96eq8ssbtT7UDJpu8AmkR4sgXBhPT7TCUVaozb57q", "STM8YvYn5ykLo1eKkPvVu7jx6Ko3MYjVQ4zP4GRx3JKcBauAk5nHf" ],
+          "posting": [ "STM6Xs8WxmVHpf4EBKE3eA2v1J3H9PappSpnGDV8JatuLpJbz436Z", "STM7NuCMemrJ6FJza1Ky733AAbwL5dnzAE7jnLEi4waroH8ZoQCof" ],
           "memo": "STM7F9UXfVpwCbyqonyJawET2WC3jwnV2UT16ubkA7fgqmBDfYK4w",
         },
         "recovery_account": "noisy",
