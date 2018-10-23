@@ -52,5 +52,6 @@ export default Vue.extend({
 
 <style>
 .router-view-container {
+    margin-top: 1rem;
 }
 </style>

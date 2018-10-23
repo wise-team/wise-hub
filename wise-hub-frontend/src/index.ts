@@ -1,5 +1,5 @@
 /* tslint:disable no-console */
-import Wise from "steem-wise-core";
+import Wise, { EffectuatedSetRules } from "steem-wise-core";
 import { data as wise } from "./wise-config.gen";
 import { d } from "./util/util";
 import { Log } from "./Log";
@@ -33,7 +33,7 @@ import ReadView from "./components/views/read/ReadView.vue";
 import VoteView from "./components/views/vote/VoteView.vue";
 import DelegateView from "./components/views/delegate/DelegateView.vue";
 import NotFoundView from "./components/views/NotFoundView.vue";
-import RulesetsView from "./components/views/rulesets/RulesetsView.vue";
+import RulesetsView from "./components/views/RulesetsView.vue";
 import RulesetsEditorView from "./components/views/rulesets-editor/RulesetsEditorView.vue";
 import AccountView from "./components/views/account/AccountView.vue";
 import TransactionDetailsView from "./components/views/transaction-details/TransactionDetailsView.vue";

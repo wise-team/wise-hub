@@ -1,18 +1,19 @@
-<!-- src/components/views/rulesets/RuleComponent.vue -->
+<!-- src/components/views/rulesets/HorizontalRuleComponent.vue -->
 <template>
-    <div class="rule bg-light">
-        <div class="rule-icon" :style="'color: ' + ruleColor + ';'">
+    <div class="horizontal-rule-component">
+        <span :style="'color: ' + ruleColor + ';'">
             <font-awesome-icon :icon="ruleIcon" />
-        </div>
-        <div class="rule-title" :style="'background-color: ' + ruleColor + ';'">{{ rule.rule }}</div>
+            {{ rule.rule }}
+        </span>
+        <unknown-rule-component :ruleId="ruleId" :enabled="edit"  />
     </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { icons } from "../../../icons";
-import { s } from "../../../store/store";
-import { d, ucfirst } from "../../../util/util";
+import { icons } from "../../icons";
+import { s } from "../../store/store";
+import { d, ucfirst } from "../../util/util";
 import { Rule } from "steem-wise-core";
 
 const colors = {
@@ -30,20 +31,29 @@ const colors = {
     [Rule.Type.WeightForPeriod]: "#ffc107"
 } as { [x: string]: any; };
 
+const editors = {
+
+};
+
+import UnknownRuleComponent from "./rules/UnknownRuleComponent.vue";
+import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
+
 export default Vue.extend({
-    props: [ "rule" ],
+    props: [ "ruleId", "edit" ],
     data() {
         return {
             
         };
     },
-    methods: {
+    methods: { 
     },
     computed: {
+        rule(): NormalizedRulesets.NormalizedRule {
+            return s(this.$store).state.rulesets.normalizedRulesets.entities.rules[this.ruleId];
+        },
         ruleIcon(): any {
             const ruleType: string = this.rule.rule;
-            const sIcon: any = icons.rule[ruleType];
-            return sIcon || icons.unknownRule;
+            return icons.rule[ruleType] || icons.unknownRule;
         },
         ruleColor(): string {
             const ruleType: string = this.rule.rule;
@@ -51,6 +61,7 @@ export default Vue.extend({
         },
     },
     components: {
+        UnknownRuleComponent
     },
     filters: {
         ucfirst: ucfirst,
@@ -60,21 +71,4 @@ export default Vue.extend({
 </script>
 
 <style>
-.rule {
-    width: 12rem;
-    height: 12rem;
-    text-align: center;
-}
-
-.rule .rule-icon {
-    font-size: 4rem;
-    margin: 0;
-    padding: 0;
-    line-height: 1.3;
-}
-
-.rule .rule-title {
-    font-weight: bold;
-    color: white;
-}
 </style>

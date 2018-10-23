@@ -1,25 +1,19 @@
-<!-- src/components/views/rulesets/HorizontalRuleComponent.vue -->
+<!-- src/components/views/rulesets/RuleComponent.vue -->
 <template>
-    <div class="horizontal-rule-component">
-        <div class="input-group">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1" :style="'color: ' + ruleColor + ';'">
-                    <font-awesome-icon :icon="ruleIcon" />
-                </span>
-                <span class="input-group-text" id="basic-addon1" :style="'color: ' + ruleColor + ';'">
-                    {{ rule.rule }}
-                </span>
-            </div>
-            <input type="text" class="form-control" :placeholder="JSON.stringify(rule)" aria-label="Username" aria-describedby="basic-addon1" disabled>
+    <div class="rule bg-light">
+        <div class="rule-icon" :style="'color: ' + ruleColor + ';'">
+            <font-awesome-icon :icon="ruleIcon" />
         </div>
+        <div class="rule-title" :style="'background-color: ' + ruleColor + ';'">{{ rule.rule }}</div>
+        
     </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { icons } from "../../../icons";
-import { s } from "../../../store/store";
-import { d, ucfirst } from "../../../util/util";
+import { icons } from "../../icons";
+import { s } from "../../store/store";
+import { d, ucfirst } from "../../util/util";
 import { Rule } from "steem-wise-core";
 
 const colors = {
@@ -36,10 +30,6 @@ const colors = {
     [Rule.Type.Weight]: "#007bff",
     [Rule.Type.WeightForPeriod]: "#ffc107"
 } as { [x: string]: any; };
-
-const editors = {
-
-};
 
 export default Vue.extend({
     props: [ "rule" ],
@@ -71,4 +61,21 @@ export default Vue.extend({
 </script>
 
 <style>
+.rule {
+    width: 12rem;
+    height: 12rem;
+    text-align: center;
+}
+
+.rule .rule-icon {
+    font-size: 4rem;
+    margin: 0;
+    padding: 0;
+    line-height: 1.3;
+}
+
+.rule .rule-title {
+    font-weight: bold;
+    color: white;
+}
 </style>

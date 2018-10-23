@@ -7,6 +7,8 @@ import { SteemConnectModule } from "./modules/steemconnect/SteemConnectModule";
 import { SteemConnectModuleImpl } from "./modules/steemconnect/SteemConnectModuleImpl";
 import { StatusModule } from "./modules/status/StatusModule";
 import { StatusModuleImpl } from "./modules/status/StatusModuleImpl";
+import { RulesetsModule } from "./modules/rulesets/RulesetsModule";
+import { RulesetsModuleImpl } from "./modules/rulesets/RulesetsModuleImpl";
 
 
 Vue.use(Vuex);
@@ -43,17 +45,19 @@ const actions: ActionTree<State, State> = {
 export interface Modules {
   [SteemConnectModule.modulePathName]: Module<SteemConnectModule.State, State>;
   [StatusModule.modulePathName]: Module<StatusModule.State, State>;
+  [RulesetsModule.modulePathName]: Module<RulesetsModule.State, State>
 }
 const modules: Modules & ModuleTree<State> = {
   [SteemConnectModule.modulePathName]: SteemConnectModuleImpl.steemConnectModule,
-  [StatusModule.modulePathName]: StatusModuleImpl.module
+  [StatusModule.modulePathName]: StatusModuleImpl.module,
+  [RulesetsModule.modulePathName]: RulesetsModuleImpl.module
 };
 
 const persistentPaths: string [] = [];
 persistentPaths.push("unusedPathToBeSavedByTheVuexPersistedStateBecauseIfPathsArrayIsEmptyItSavesEverything");
 SteemConnectModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(SteemConnectModule.modulePathName+ "." + persistentPath));
 StatusModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(StatusModule.modulePathName+ "." + persistentPath));
-
+RulesetsModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(RulesetsModule.modulePathName+ "." + persistentPath));
 
 
 /**
@@ -63,6 +67,7 @@ export interface Store {
   state: {
     [SteemConnectModule.modulePathName]: SteemConnectModule.State;
     [StatusModule.modulePathName]: StatusModule.State;
+    [RulesetsModule.modulePathName]: RulesetsModule.State;
   },
   dispatch: Dispatch,
   commit: Commit,

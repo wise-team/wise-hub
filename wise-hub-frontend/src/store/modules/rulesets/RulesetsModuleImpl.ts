@@ -39,7 +39,9 @@ export namespace RulesetsModuleImpl {
             state: Me.State, payload: { loading?: boolean; loadedFor?: string; error?: string; },
         ) {
             if (payload.loadedFor) state.loadedFor = payload.loadedFor;
-            if (payload.loading) state.loading = payload.loading;
+            if (typeof payload.loading !== "undefined") {
+                state.loading = payload.loading;
+            }
             if (payload.error) state.error = payload.error;
         },
 
@@ -81,17 +83,6 @@ export namespace RulesetsModuleImpl {
         },
     };
 
-    
-    function asyncAction(commit: (mutation: string, payload: any) => void, fn: () => Promise<void>) {
-        (async () => {
-            try {
-                await fn();
-            }
-            catch (error) {
-                commit(Mutations.setStatus, { error: error + ": " + error.message });
-            }
-        });
-    }
 
     /**
      * Actions
@@ -101,22 +92,31 @@ export namespace RulesetsModuleImpl {
 
     const normalizer = new NormalizedRulesets();
     const actions: ActionTree<Me.State, Me.State> = {
-        [Me.Actions.loadIfNeeded]: (
+        [Me.Actions.setVoterAndOrDelegator]: (
             { commit, dispatch, state }, payload: { delegator?: string; voter?: string; },
-        ): void => asyncAction(commit, async () => {
-            if (! payload.delegator && ! payload.voter)
-                throw new Error("You have to specify the voter, the delegator, or both");
-            
-            const loadedFor = payload.delegator + "_" + payload.voter;
-            if (state.loadedFor !== loadedFor) {
+        ): void => {
+            (async () => {
+                try {
+                    if (! payload.delegator && ! payload.voter)
+                        throw new Error("You have to specify the voter, the delegator, or both");
+                    
+                    const loadFor = payload.delegator + "_" + payload.voter;
+                    if (state.loadedFor !== loadFor) {
+                        commit(Mutations.setStatus, { loading: true, loadedFor: loadFor });
 
-                const result: EffectuatedSetRules [] = await RulesetsModuleApiHelper
-                    .loadRulesets({ delegator: payload.delegator, voter: payload.voter });
+                        const result: EffectuatedSetRules [] = await RulesetsModuleApiHelper
+                            .loadRulesets({ delegator: payload.delegator, voter: payload.voter });
 
-                const normalized: NormalizedRulesets.Result = normalizer.normalize(result);
-                commit(Mutations.setNormalizedRulesets, normalized);
-            }
-        }),
+                        const normalized: NormalizedRulesets.Result = normalizer.normalize(result);
+                        commit(Mutations.setNormalizedRulesets, normalized);
+                        commit(Mutations.setStatus, { loading: false, error: "" });
+                    }
+                }
+                catch (error) {
+                    commit(Mutations.setStatus, { loading: false, error: error + ": " + error.message });
+                }
+            })();
+        },
 
         [Me.Actions.updateRule]: (
             { commit, dispatch, state }, payload: NormalizedRulesets.NormalizedRule,

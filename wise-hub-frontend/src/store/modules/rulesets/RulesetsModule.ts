@@ -17,7 +17,7 @@ export namespace RulesetsModule {
     }
 
     export class Actions {
-        public static loadIfNeeded = localName("loadIfNeeded");
+        public static setVoterAndOrDelegator = localName("setVoterAndOrDelegator");
 
         public static createNewRule = localName("addNewRuleToRuleset");
         public static updateRule = localName("updateRule");

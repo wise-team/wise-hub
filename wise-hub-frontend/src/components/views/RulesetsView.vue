@@ -16,22 +16,23 @@
 
         <loading-control :error="error" :loading="loading" loadingText="Loading rulesets..." />
         
-        <span v-for="effSetRules in rulesets" :key="effSetRules.moment + ''">
-            <effectuated-set-rules-component v-if="effSetRules.rulesets.length > 0" :set-rules="effSetRules" />
+        <span v-for="setRulesId in setRulesItems" :key="setRulesId">
+            <effectuated-set-rules-component :set-rules-id="setRulesId" />
         </span>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { s } from "../../../store/store";
-import { d, ucfirst } from "../../../util/util";
+import { s } from "../../store/store";
+import { d, ucfirst } from "../../util/util";
 import { EffectuatedSetRules } from "steem-wise-core";
-import { WiseApiHelper } from "../../../api/WiseApiHelper";
+import { WiseApiHelper } from "../../api/WiseApiHelper";
 
-import EffectuatedSetRulesComponent from "./EffectuatedSetRulesComponent.vue";
-import LoadingControl from "../../controls/LoadingControl.vue";
-import { Log } from "../../../Log";
+import EffectuatedSetRulesComponent from "../rulesets/EffectuatedSetRulesComponent.vue";
+import LoadingControl from "../controls/LoadingControl.vue";
+import { Log } from "../../Log";
+import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 
 export default Vue.extend({
     props: [],
@@ -39,10 +40,6 @@ export default Vue.extend({
         return {
             delegator: this.$route.params.delegator ? this.$route.params.delegator : undefined,
             voter: this.$route.params.voter ? this.$route.params.voter : undefined,
-            rulesetsLoadedFor: "",
-            loading: false,
-            error: "",
-            rulesets: [] as EffectuatedSetRules []
         };
     },
     watch: {
@@ -57,28 +54,22 @@ export default Vue.extend({
     },
     methods: {
         loadRulesetsIfRequired() {
-            if (this.rulesetsLoadedFor != this.voter + "$" + this.delegator) {
-                this.rulesetsLoadedFor = this.voter + "$" + this.delegator;
-                this.loading = true;
-                (async () => {
-                    try {
-                        const result: EffectuatedSetRules []
-                            = await WiseApiHelper.loadRulesets({ voter: this.voter, delegator: this.delegator });
-                        this.rulesets = result;
-                        this.loading = false;
-                        this.loadRulesetsIfRequired();
-                    }
-                    catch (error) {
-                        this.error = error + ": " + error.message;
-                        this.loading = false;
-                        Log.log().exception(Log.level.error, error);
-                    }
-                })();
-                
-            }
+            s(this.$store).dispatch(RulesetsModule.Actions.setVoterAndOrDelegator, { delegator: this.delegator, voter: this.voter });
         }
     },
     computed: {
+        loading(): boolean {
+            console.log("Loading=" + s(this.$store).state.rulesets.loading);
+            return s(this.$store).state.rulesets.loading;
+        },
+        error(): string {
+            return s(this.$store).state.rulesets.error;
+        },
+        setRulesItems(): string [] {
+            const listOfIds = s(this.$store).state.rulesets.normalizedRulesets.result;
+            return listOfIds.filter(setRulesId => 
+                s(this.$store).state.rulesets.normalizedRulesets.entities.setRules[setRulesId].rulesets.length > 0);
+        },
     },
     components: {
         EffectuatedSetRulesComponent,

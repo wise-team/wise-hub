@@ -48,6 +48,7 @@ export class StatusApiHelper {
                 voter: op.voter,
                 delegator: op.delegator,
                 operation_type: op.operation_type,
+                json_str: op.json_str,
                 data: JSON.parse(op.json_str)
             };
             operations.push(wiseOp);
