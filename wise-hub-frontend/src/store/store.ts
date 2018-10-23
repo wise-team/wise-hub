@@ -84,6 +84,7 @@ export function s(incognitoStore: any): Store {
  */
 console.log(persistentPaths);
 export const store = new Vuex.Store<State>({
+  strict: ( window.location.hostname === "localhost" ? true : false ),
   state: state,
   actions: actions,
   modules: modules,
