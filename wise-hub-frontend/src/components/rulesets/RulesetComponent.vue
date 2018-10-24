@@ -34,13 +34,14 @@
                  <horizontal-rule-component
                     v-for="ruleId in ruleset.rules" :key="ruleId"
                     :ruleId="ruleId"
+                    :rulesetId="rulesetId"
                     :edit="edit"
                     class="mb-2 ml-2"
                 />
                 <p class="text-center">
                      <b-btn v-b-toggle="unique + '-collapse'" variant="outline-secondary"
                       size="sm" class="mt-1">
-                        Add rule
+                        <font-awesome-icon :icon="addIcon" /> Add rule
                      </b-btn>
                 </p>
 
@@ -124,6 +125,7 @@ export default Vue.extend({
             return typeof this.ruleset.name !== "undefined"
                 && Array.isArray(this.ruleset.rules)
         },
+        addIcon() { return icons.add },
     },
     components: {
         RuleComponent,

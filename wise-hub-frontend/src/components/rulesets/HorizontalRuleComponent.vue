@@ -1,9 +1,14 @@
 <!-- src/components/views/rulesets/HorizontalRuleComponent.vue -->
 <template>
     <div class="horizontal-rule-component">
-        <span :style="'color: ' + ruleColor + ';'">
-            <font-awesome-icon :icon="ruleIcon" />
-            {{ rule.rule }}
+        <span :style="'color: ' + ruleColor + ';'" class="d-flex w-100 justify-content-between">
+            <span>
+                <font-awesome-icon :icon="ruleIcon" />
+                {{ rule.rule }}
+            </span>
+            <small class="delete-btn" @click="deleteRule()">
+                <font-awesome-icon :icon="deleteIcon" /> delete
+            </small>
         </span>
         <unknown-rule-component :ruleId="ruleId" :enabled="edit"  />
     </div>
@@ -37,15 +42,19 @@ const editors = {
 
 import UnknownRuleComponent from "./rules/UnknownRuleComponent.vue";
 import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
+import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 
 export default Vue.extend({
-    props: [ "ruleId", "edit" ],
+    props: [ "rulesetId", "ruleId", "edit" ],
     data() {
         return {
             
         };
     },
-    methods: { 
+    methods: {
+        deleteRule() {
+            s(this.$store).dispatch(RulesetsModule.Actions.deleteRule, { rulesetId: this.rulesetId, ruleId: this.ruleId });
+        }
     },
     computed: {
         rule(): NormalizedRulesets.NormalizedRule {
@@ -59,6 +68,7 @@ export default Vue.extend({
             const ruleType: string = this.rule.rule;
             return colors[ruleType] || "black";
         },
+        deleteIcon() { return icons.delete },
     },
     components: {
         UnknownRuleComponent
@@ -71,4 +81,10 @@ export default Vue.extend({
 </script>
 
 <style>
+.horizontal-rule-component .delete-btn {
+    color: #bb5555;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 </style>

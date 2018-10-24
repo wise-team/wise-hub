@@ -19,6 +19,8 @@ import faPeopleCarry from "@fortawesome/fontawesome-free-solid/faPeopleCarry";
 import faThumbsUp from "@fortawesome/fontawesome-free-solid/faThumbsUp";
 import faPlug from "@fortawesome/fontawesome-free-solid/faPlug";
 import faChartLine from "@fortawesome/fontawesome-free-solid/faChartLine";
+import faPlus from "@fortawesome/fontawesome-free-solid/faPlus";
+import faTrashAlt from "@fortawesome/fontawesome-free-solid/faTrashAlt";
 
 import { Rule } from "steem-wise-core";
 
@@ -28,6 +30,9 @@ export const icons = {
     error: faExclamationCircle,
     ok: faCheck,
     notice: faCircle,
+    add: faPlus,
+    delete: faTrashAlt,
+
 
     // brands
     github: faGithub,
