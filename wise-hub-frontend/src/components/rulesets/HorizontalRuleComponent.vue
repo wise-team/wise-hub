@@ -18,7 +18,7 @@
 import Vue from "vue";
 import { icons } from "../../icons";
 import { s } from "../../store/store";
-import { d, ucfirst } from "../../util/util";
+import { d, ucfirst, uniqueId } from "../../util/util";
 import { Rule } from "steem-wise-core";
 
 const colors = {

@@ -36,10 +36,10 @@
                     :ruleId="ruleId"
                     :rulesetId="rulesetId"
                     :edit="edit"
-                    class="mb-2 ml-2"
+                    class="mb-4 mb-md-2 ml-2"
                 />
                 <p class="text-center">
-                     <b-btn v-b-toggle="unique + '-collapse'" variant="outline-secondary"
+                     <b-btn @click="addRule()" variant="outline-secondary"
                       size="sm" class="mt-1">
                         <font-awesome-icon :icon="addIcon" /> Add rule
                      </b-btn>
@@ -100,12 +100,13 @@ import Vue from "vue";
 import { icons } from "../../icons";
 import { s } from "../../store/store";
 import { d, ucfirst, uniqueId } from "../../util/util";
-import { Ruleset } from "steem-wise-core";
+import { Ruleset, Rule } from "steem-wise-core";
 import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
 
 import BehindPanel from "../controls/BehindPanel.vue";
 import RuleComponent from "./RuleComponent.vue";
 import HorizontalRuleComponent from "./HorizontalRuleComponent.vue";
+import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 
 export default Vue.extend({
     props: [ "rulesetId" ],
@@ -116,6 +117,18 @@ export default Vue.extend({
         };
     },
     methods: {
+        addRule() {
+            s(this.$store).dispatch(
+                RulesetsModule.Actions.createNewRule,
+                {
+                    rulesetId: this.rulesetId, 
+                    rule: {
+                        id: "rule-" + uniqueId(),
+                        rule: Rule.Type.AgeOfPost
+                    }
+                }
+            );
+        }
     },
     computed: {
         ruleset(): NormalizedRulesets.NormalizedRuleset {
