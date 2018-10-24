@@ -1,23 +1,44 @@
 <!-- src/components/rulesets/actions/DeleteRulesetActionComponent.vue -->
 <template>
     <div>
-        <h5>Delete this ruleset</h5>
-        <p>TODO</p>
+        <h5>Delete ruleset <em>{{ ruleset.name }}</em></h5>
+        <b-button @click="deleteRuleset()" size="sm" variant="danger">
+            <font-awesome-icon :icon="deleteIcon" /> Confirm delete
+        </b-button>
+        <hr />
+        <small>
+            This change is only temporary. It will disappear when you refresh the page. 
+            To make it persistent upload rulesets for this voter (violet box).
+        </small>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+import { icons } from "../../../icons";
+import { s } from "../../../store/store";
+import { d, ucfirst, uniqueId } from "../../../util/util";
+import { RulesetsModule } from "../../../store/modules/rulesets/RulesetsModule";
 
 export default Vue.extend({
-    props: [],
+    props: [ "setRulesId", "ruleset" ],
     data() {
         return {
         };
     },
     methods: {
+        deleteRuleset() {
+            s(this.$store).dispatch(
+                RulesetsModule.Actions.deleteRuleset,
+                {
+                    setRulesId: this.setRulesId, 
+                    rulesetId: this.ruleset.id
+                }
+            );
+        }
     },
     computed: {
+        deleteIcon() { return icons.delete; }
     },
     components: {
     },

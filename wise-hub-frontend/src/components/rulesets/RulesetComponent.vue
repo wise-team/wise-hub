@@ -57,7 +57,7 @@
                     </b-collapse>
 
                     <b-collapse :id="unique + '-collapse-delete'" :accordion="unique + '-options-accordion'" class="p-2">
-                        <delete-ruleset-action-component class="p-2" />
+                        <delete-ruleset-action-component :set-rules-id="setRules.id" :ruleset="ruleset" class="p-2" />
                     </b-collapse>
 
                     <b-collapse :id="unique + '-collapse-ch-voter'" :accordion="unique + '-options-accordion'" class="p-2">
@@ -88,7 +88,7 @@ import DeleteRulesetActionComponent from "./actions/DeleteRulesetActionComponent
 import RenameRulesetActionComponent from "./actions/RenameRulesetActionComponent.vue";
 
 export default Vue.extend({
-    props: [ "rulesetId" ],
+    props: [ "setRules", "rulesetId" ],
     data() {
         return {
             edit: false,
@@ -143,9 +143,5 @@ export default Vue.extend({
 
 .ruleset-component .card-footer {
     border: 2px solid white;
-}
-
-.ruleset-component .collapse-panels hr {
-    margin-top: 0 !important;
 }
 </style>

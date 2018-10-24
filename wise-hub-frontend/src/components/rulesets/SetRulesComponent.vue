@@ -20,6 +20,7 @@
             
         <ruleset-component
             v-for="rulesetId in setRules.rulesets" :key="rulesetId"
+            :set-rules="setRules"
             :rulesetId="rulesetId"
             class="mb-4"
         />

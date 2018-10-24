@@ -17,7 +17,7 @@
         <loading-control :error="error" :loading="loading" loadingText="Loading rulesets..." />
         
         <span v-for="setRulesId in setRulesItems" :key="setRulesId">
-            <effectuated-set-rules-component :set-rules-id="setRulesId" />
+            <set-rules-component :set-rules-id="setRulesId" />
         </span>
     </div>
 </template>
@@ -29,7 +29,7 @@ import { d, ucfirst } from "../../util/util";
 import { EffectuatedSetRules } from "steem-wise-core";
 import { WiseApiHelper } from "../../api/WiseApiHelper";
 
-import EffectuatedSetRulesComponent from "../rulesets/EffectuatedSetRulesComponent.vue";
+import SetRulesComponent from "../rulesets/SetRulesComponent.vue";
 import LoadingControl from "../controls/LoadingControl.vue";
 import { Log } from "../../Log";
 import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
@@ -72,7 +72,7 @@ export default Vue.extend({
         },
     },
     components: {
-        EffectuatedSetRulesComponent,
+        SetRulesComponent,
         LoadingControl
     },
     filters: {
