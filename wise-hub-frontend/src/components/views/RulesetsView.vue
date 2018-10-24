@@ -24,6 +24,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import * as _ from "lodash";
 import { s } from "../../store/store";
 import { d, ucfirst } from "../../util/util";
 import { EffectuatedSetRules } from "steem-wise-core";
@@ -59,17 +60,19 @@ export default Vue.extend({
     },
     computed: {
         loading(): boolean {
-            console.log("Loading=" + s(this.$store).state.rulesets.loading);
             return s(this.$store).state.rulesets.loading;
         },
         error(): string {
             return s(this.$store).state.rulesets.error;
         },
         setRulesItems(): string [] {
-            const listOfIds = s(this.$store).state.rulesets.normalizedRulesets.result;
+            const listOfIds = _.keys(s(this.$store).state.rulesets.normalizedRulesets.entities.setRules);
             return listOfIds.filter(setRulesId => 
                 s(this.$store).state.rulesets.normalizedRulesets.entities.setRules[setRulesId].rulesets.length > 0
-             || s(this.$store).state.rulesets.backupNormalizedRulesets.entities.setRules[setRulesId].rulesets.length > 0
+             || (
+                     s(this.$store).state.rulesets.backupNormalizedRulesets.entities.setRules[setRulesId]
+                  && s(this.$store).state.rulesets.backupNormalizedRulesets.entities.setRules[setRulesId].rulesets.length > 0
+                )
             );
         },
     },

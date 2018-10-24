@@ -47,7 +47,7 @@ export class NormalizedRulesets {
 
     public genIdForRule(): string { return "rule" + (this.idIncrementer.n++) };
     public genIdForRuleset(): string { return "ruleset" + (this.idIncrementer.n++) };
-    public getIdForSetRules(): string { return "rule" + (this.idIncrementer.n++) };
+    public getIdForSetRules(): string { return "setRules" + (this.idIncrementer.n++) };
 }
 
 export namespace NormalizedRulesets {
@@ -66,6 +66,7 @@ export namespace NormalizedRulesets {
     export interface NormalizedSetRulesForVoter {
         id: ID;
         voter: string;
+        delegator: string;
         rulesets: ID [];
     }
 

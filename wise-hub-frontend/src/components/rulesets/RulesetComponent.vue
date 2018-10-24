@@ -63,7 +63,7 @@
                     </b-collapse>
 
                     <b-collapse :id="unique + '-collapse-rename'" :accordion="unique + '-options-accordion'" class="p-2">
-                        <rename-ruleset-action-component class="p-2" />
+                        <rename-ruleset-action-component :set-rules-id="setRules.id" :ruleset="ruleset" class="p-2" />
                     </b-collapse>
 
                     <b-collapse :id="unique + '-collapse-delete'" :accordion="unique + '-options-accordion'" class="p-2">
@@ -71,7 +71,7 @@
                     </b-collapse>
 
                     <b-collapse :id="unique + '-collapse-ch-voter'" :accordion="unique + '-options-accordion'" class="p-2">
-                        <change-ruleset-voter-action-component class="p-2" />
+                        <change-ruleset-voter-action-component :set-rules-id="setRules.id" :ruleset="ruleset" class="p-2" />
                     </b-collapse>
                 </div>
             </div>
@@ -133,10 +133,11 @@ export default Vue.extend({
         ruleset(): NormalizedRulesets.NormalizedRuleset {
             return s(this.$store).state.rulesets.normalizedRulesets.entities.rulesets[this.rulesetId];
         },
-        rulesetBackup(): NormalizedRulesets.NormalizedRuleset {
+        rulesetBackup(): NormalizedRulesets.NormalizedRuleset | undefined {
             return s(this.$store).state.rulesets.backupNormalizedRulesets.entities.rulesets[this.rulesetId];
         },
         rulesToBeDeleted(): NormalizedRulesets.NormalizedRule [] {
+            if (!this.rulesetBackup) return [];
             return this.rulesetBackup.rules.filter(ruleId => this.ruleset.rules.indexOf(ruleId) < 0)
             .map(ruleId => s(this.$store).state.rulesets.backupNormalizedRulesets.entities.rules[ruleId]);
         },

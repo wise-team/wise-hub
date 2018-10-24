@@ -5,6 +5,7 @@ import { RulesetsModule as Me } from "./RulesetsModule";
 import { d, assertString } from "../../../util/util";
 import { EffectuatedSetRules, Rule, Ruleset } from "steem-wise-core";
 import { NormalizedRulesets } from "./NormalizedRulesets";
+import Vue from "vue";
 
 export namespace RulesetsModuleImpl {
 
@@ -36,9 +37,11 @@ export namespace RulesetsModuleImpl {
 
     const mutations: MutationTree<Me.State> = {
         [Mutations.setStatus](
-            state: Me.State, payload: { loading?: boolean; loadedFor?: string; error?: string; },
+            state: Me.State, payload: { loading?: boolean; loadedFor?: string; delegator?: string; voter?: string; error?: string; },
         ) {
             if (payload.loadedFor) state.loadedFor = payload.loadedFor;
+            if (payload.delegator) state.delegator = payload.delegator;
+            if (payload.voter) state.voter = payload.voter;
             if (typeof payload.loading !== "undefined") {
                 state.loading = payload.loading;
             }
@@ -55,7 +58,13 @@ export namespace RulesetsModuleImpl {
         [Mutations.updateRule](
             state: Me.State, payload: NormalizedRulesets.NormalizedRule,
         ) {
-            state.normalizedRulesets.entities.rules[payload.id] = payload;
+            if (state.normalizedRulesets.entities.rules[payload.id]) {
+                state.normalizedRulesets.entities.rules[payload.id] = payload;
+            }
+            else {
+                Vue.set(state.normalizedRulesets.entities.rules, payload.id, payload);
+            }
+
             if (!state.backupNormalizedRulesets.entities.rules[payload.id]
                 || !_.isEqual(state.backupNormalizedRulesets.entities.rules[payload.id], payload)) {
                 state.changed = true;
@@ -65,7 +74,13 @@ export namespace RulesetsModuleImpl {
         [Mutations.updateRuleset](
             state: Me.State, payload: NormalizedRulesets.NormalizedRuleset,
         ) {
-            state.normalizedRulesets.entities.rulesets[payload.id] = payload;
+            if (state.normalizedRulesets.entities.rulesets[payload.id]) {
+                state.normalizedRulesets.entities.rulesets[payload.id] = payload;
+            }
+            else {
+                Vue.set(state.normalizedRulesets.entities.rulesets, payload.id, payload);
+            }
+
             if (!state.backupNormalizedRulesets.entities.rulesets[payload.id]
                 || !_.isEqual(state.backupNormalizedRulesets.entities.rulesets[payload.id], payload)) {
                 state.changed = true;
@@ -75,7 +90,15 @@ export namespace RulesetsModuleImpl {
         [Mutations.updateSetRules](
             state: Me.State, payload: NormalizedRulesets.NormalizedSetRulesForVoter,
         ) {
-            state.normalizedRulesets.entities.setRules[payload.id] = payload;
+            if (state.normalizedRulesets.entities.setRules[payload.id]) {
+                state.normalizedRulesets.entities.setRules[payload.id] = payload;
+            }
+            else {
+                Vue.set(state.normalizedRulesets.entities.setRules, payload.id, payload);
+            }
+
+            console.log("Updated setRules to:");
+            console.log(state.normalizedRulesets.entities.setRules);
             if (!state.backupNormalizedRulesets.entities.setRules[payload.id]
                 || !_.isEqual(state.backupNormalizedRulesets.entities.setRules[payload.id], payload)) {
                 state.changed = true;
@@ -102,7 +125,9 @@ export namespace RulesetsModuleImpl {
                     
                     const loadFor = payload.delegator + "_" + payload.voter;
                     if (state.loadedFor !== loadFor) {
-                        commit(Mutations.setStatus, { loading: true, loadedFor: loadFor });
+                        commit(Mutations.setStatus, 
+                            { loading: true, delegator: payload.delegator, voter: payload.voter, loadedFor: loadFor }
+                        );
 
                         const result: EffectuatedSetRules [] = await RulesetsModuleApiHelper
                             .loadRulesets({ delegator: payload.delegator, voter: payload.voter });
@@ -174,9 +199,11 @@ export namespace RulesetsModuleImpl {
                 commit(Mutations.updateSetRules, targetSetRules);
             }
             else {
+                if (!state.delegator) throw new Error("State.delegator is not specified");
                 targetSetRules = {
                     id: normalizer.getIdForSetRules(),
                     voter: d(payload.voter),
+                    delegator: state.delegator,
                     rulesets: [ payload.ruleset.id ]
                 };
                 commit(Mutations.updateSetRules, targetSetRules);
@@ -204,7 +231,7 @@ export namespace RulesetsModuleImpl {
         ): void => {
             const newRuleset: NormalizedRulesets.NormalizedRuleset
                 = _.cloneDeep(state.normalizedRulesets.entities.rulesets[payload.rulesetId]);
-            newRuleset.name = name;
+            newRuleset.name = payload.name;
             commit(Mutations.updateRuleset, newRuleset);
         },
 
@@ -213,9 +240,11 @@ export namespace RulesetsModuleImpl {
         ): void => {
             if (state.normalizedRulesets.entities.setRules[payload.setRulesId].voter === payload.voter) return;
 
-            const oldSetRules = state.normalizedRulesets.entities.setRules[payload.setRulesId];
+
+            const oldSetRules = _.cloneDeep(state.normalizedRulesets.entities.setRules[payload.setRulesId]);
             const rulesetIndex = oldSetRules.rulesets.indexOf(payload.rulesetId);
-            if (rulesetIndex > 0) oldSetRules.rulesets.splice(rulesetIndex, 1);
+            if (rulesetIndex >= 0) oldSetRules.rulesets.splice(rulesetIndex, 1);
+            else throw new Error("Cannot find ruleset with id " + payload.rulesetId + " in setRules with id " + payload.setRulesId);
             commit(Mutations.updateSetRules, oldSetRules);
 
             let targetSetRules: NormalizedRulesets.NormalizedSetRulesForVoter | undefined = undefined;
@@ -231,6 +260,7 @@ export namespace RulesetsModuleImpl {
                 targetSetRules = {
                     id: normalizer.getIdForSetRules(),
                     voter: payload.voter,
+                    delegator: oldSetRules.delegator,
                     rulesets: [ payload.rulesetId ]
                 };
                 commit(Mutations.updateSetRules, targetSetRules);

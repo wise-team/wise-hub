@@ -11,6 +11,8 @@ export namespace RulesetsModule {
         loading: boolean;
         error: string | "";
         loadedFor: string;
+        delegator?: string;
+        voter?: string;
         changed: boolean;
         backupNormalizedRulesets: NormalizedRulesets.Result;
         normalizedRulesets: NormalizedRulesets.Result;

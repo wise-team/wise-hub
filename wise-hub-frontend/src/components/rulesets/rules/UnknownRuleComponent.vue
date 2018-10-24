@@ -44,7 +44,7 @@ export default Vue.extend({
                 try {
                     const newObj = JSON.parse(value);
                     newObj.id = this.rule.id;
-                    this.$store.dispatch(RulesetsModule.Actions.updateRule, newObj);
+                    s(this.$store).dispatch(RulesetsModule.Actions.updateRule, newObj);
                     this.error = "";
                 }
                 catch (error) {

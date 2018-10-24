@@ -1,10 +1,12 @@
 import Axios from "axios";
-import * as steem from "steem";
+import * as steemJs from "steem";
 import { data as wise } from "../../../wise-config.gen";
 import { d } from "../../../util/util";
 import { StatusModule } from "./StatusModule";
 
 export class StatusApiHelper {
+    private static STEEM: steemJs.api.Steem = new steemJs.api.Steem({ url: wise.config.steem.defaultApiUrl });
+
     public static async loadGeneralStats(): Promise<{ operations: number; delegators: number; voters: number; }> {
         const query = "/stats";
         const result = await Axios.get(wise.config.sql.endpoint.schema + "://" + wise.config.sql.endpoint.host + query);
@@ -24,7 +26,7 @@ export class StatusApiHelper {
     }
 
     public static async isSupporting(accountName: string): Promise<boolean> {
-        const result = await steem.api.getAccountsAsync([ d(accountName) ]);
+        const result = await StatusApiHelper.STEEM.getAccountsAsync([ d(accountName) ]);
         if (result.length < 1) throw new Error("Account " + accountName + "doesnt exist!");
         else {
             return d(result[0].witness_votes).filter((witness: string) => witness === wise.config.witness.account).length > 0;

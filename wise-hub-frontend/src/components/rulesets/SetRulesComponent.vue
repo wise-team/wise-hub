@@ -17,13 +17,6 @@
              &nbsp;&nbsp;&#8594;&nbsp;&nbsp;
              <font-awesome-icon :icon="voterIcon" /> {{ setRules.voter }}
         </h4>
-            
-        <ruleset-component
-            v-for="rulesetId in setRules.rulesets" :key="rulesetId"
-            :set-rules="setRules"
-            :rulesetId="rulesetId"
-            class="mb-4"
-        />
 
         <p v-if="rulesetsToBeDeleted.length > 0" class="text-muted">
             <strong>The following rulesets will be deleted from blockchain:</strong>
@@ -34,6 +27,13 @@
                 </li>
             </ul>
         </p>
+            
+        <ruleset-component
+            v-for="rulesetId in setRules.rulesets" :key="rulesetId"
+            :set-rules="setRules"
+            :rulesetId="rulesetId"
+            class="mb-4"
+        />
         <br />
     </div>
 </template>
@@ -76,10 +76,11 @@ export default Vue.extend({
         setRules(): NormalizedRulesets.NormalizedSetRulesForVoter {
             return s(this.$store).state.rulesets.normalizedRulesets.entities.setRules[this.setRulesId];
         },
-        setRulesBackup(): NormalizedRulesets.NormalizedSetRulesForVoter {
+        setRulesBackup(): NormalizedRulesets.NormalizedSetRulesForVoter | undefined {
             return s(this.$store).state.rulesets.backupNormalizedRulesets.entities.setRules[this.setRulesId];
         },
         rulesetsToBeDeleted(): NormalizedRulesets.NormalizedRuleset [] {
+            if (!this.setRulesBackup) return [];
             return this.setRulesBackup.rulesets.filter(rulesetId => this.setRules.rulesets.indexOf(rulesetId) < 0)
             .map(rulesetId => s(this.$store).state.rulesets.backupNormalizedRulesets.entities.rulesets[rulesetId]);
         },

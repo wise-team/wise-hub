@@ -2,7 +2,7 @@
 <template>
         <div id="header-component">
             <div class="text-center header">
-                <a href="/"><h1><img src="/assets/images/wise/full-color.svg" alt="Wise"></h1></a>
+                <a href="/"><h1 class="title"><img src="/assets/images/wise/full-color.svg" alt="Wise"></h1></a>
                 <p class="text-muted">
                     Vote delegation system for Steem blockchain
                 </p>
@@ -32,6 +32,11 @@ export default Vue.extend({
     #header-component {
         margin-top: 3rem;
         margin-bottom: 3rem;
+    }
+
+    #header-component h1 {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
     #header-component h1 img {
