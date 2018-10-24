@@ -130,12 +130,13 @@ export namespace RulesetsModuleImpl {
             _.unset(state.normalizedRulesets.entities.rules, payload.ruleId);
 
             const newRuleset: NormalizedRulesets.NormalizedRuleset
-                = state.normalizedRulesets.entities.rulesets[payload.rulesetId];
+                = _.cloneDeep(state.normalizedRulesets.entities.rulesets[payload.rulesetId]);
             const ruleIndex = newRuleset.rules.indexOf(payload.ruleId);
+
             if (ruleIndex < 0) {
                 throw new Error("Rule with id " + payload.ruleId + " does not belong to ruleset with id " + newRuleset.id);
             }
-            newRuleset.rules.splice(ruleIndex);
+            newRuleset.rules.splice(ruleIndex, 1);
 
             commit(Mutations.updateRuleset, newRuleset);
         },
@@ -146,7 +147,7 @@ export namespace RulesetsModuleImpl {
             commit(Mutations.updateRule, payload.rule);
 
             const newRuleset: NormalizedRulesets.NormalizedRuleset
-                = state.normalizedRulesets.entities.rulesets[payload.rulesetId];
+                = _.cloneDeep(state.normalizedRulesets.entities.rulesets[payload.rulesetId]);
             newRuleset.rules.push(payload.rule.id);
             commit(Mutations.updateRuleset, newRuleset);
         },
@@ -160,7 +161,7 @@ export namespace RulesetsModuleImpl {
             const targetSetRulesOpt = _.values(state.normalizedRulesets.entities.setRules).filter(
                 (setRules: NormalizedRulesets.NormalizedSetRulesForVoter) => setRules.voter === payload.voter
             );
-            if (targetSetRulesOpt.length > 0) targetSetRules = targetSetRulesOpt[0];
+            if (targetSetRulesOpt.length > 0) targetSetRules = _.cloneDeep(targetSetRulesOpt[0]);
             if (targetSetRules) {
                 targetSetRules.rulesets.push(payload.ruleset.id);
                 commit(Mutations.updateSetRules, targetSetRules);
@@ -181,7 +182,7 @@ export namespace RulesetsModuleImpl {
             _.unset(state.normalizedRulesets.entities.rulesets, payload.rulesetId);
 
             const newSetRules: NormalizedRulesets.NormalizedSetRulesForVoter
-                = state.normalizedRulesets.entities.setRules[payload.setRulesId];
+                = _.cloneDeep(state.normalizedRulesets.entities.setRules[payload.setRulesId]);
             const rulesetIndex = newSetRules.rulesets.indexOf(payload.rulesetId);
             if (rulesetIndex < 0) {
                 throw new Error("Ruleset with id " + payload.rulesetId + " does not belong to set rules with id " + payload.setRulesId);
@@ -195,7 +196,7 @@ export namespace RulesetsModuleImpl {
             { commit, dispatch, state }, payload: { rulesetId: NormalizedRulesets.ID, name: string },
         ): void => {
             const newRuleset: NormalizedRulesets.NormalizedRuleset
-                = state.normalizedRulesets.entities.rulesets[payload.rulesetId];
+                = _.cloneDeep(state.normalizedRulesets.entities.rulesets[payload.rulesetId]);
             newRuleset.name = name;
             commit(Mutations.updateRuleset, newRuleset);
         },
@@ -214,7 +215,7 @@ export namespace RulesetsModuleImpl {
             const targetSetRulesOpt = _.values(state.normalizedRulesets.entities.setRules).filter(
                 (setRules: NormalizedRulesets.NormalizedSetRulesForVoter) => setRules.voter === payload.voter
             );
-            if (targetSetRulesOpt.length > 0) targetSetRules = targetSetRulesOpt[0];
+            if (targetSetRulesOpt.length > 0) targetSetRules = _.cloneDeep(targetSetRulesOpt[0]);
             if (targetSetRules) {
                 targetSetRules.rulesets.push(payload.rulesetId);
                 commit(Mutations.updateSetRules, targetSetRules);
