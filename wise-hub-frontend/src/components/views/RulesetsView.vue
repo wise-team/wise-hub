@@ -68,7 +68,9 @@ export default Vue.extend({
         setRulesItems(): string [] {
             const listOfIds = s(this.$store).state.rulesets.normalizedRulesets.result;
             return listOfIds.filter(setRulesId => 
-                s(this.$store).state.rulesets.normalizedRulesets.entities.setRules[setRulesId].rulesets.length > 0);
+                s(this.$store).state.rulesets.normalizedRulesets.entities.setRules[setRulesId].rulesets.length > 0
+             || s(this.$store).state.rulesets.backupNormalizedRulesets.entities.setRules[setRulesId].rulesets.length > 0
+            );
         },
     },
     components: {

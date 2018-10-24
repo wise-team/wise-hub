@@ -24,6 +24,17 @@
             :rulesetId="rulesetId"
             class="mb-4"
         />
+
+        <p v-if="rulesetsToBeDeleted.length > 0" class="text-muted">
+            <strong>The following rulesets will be deleted from blockchain:</strong>
+            <ul>
+                <li v-for="ruleset in rulesetsToBeDeleted" :key="ruleset.id">
+                    <strong>{{ ruleset.name }}</strong>
+                    <b-link @click="revertRulesetDeletion(ruleset)" style="display: inline-block;">Revert deletion</b-link>
+                </li>
+            </ul>
+        </p>
+        <br />
     </div>
 </template>
 
@@ -33,9 +44,11 @@ import { icons } from "../../icons";
 import { s } from "../../store/store";
 import { d, ucfirst } from "../../util/util";
 import { EffectuatedSetRules } from "steem-wise-core";
+import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
+import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 
 import RulesetComponent from "./RulesetComponent.vue";
-import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
+
 
 export default Vue.extend({
     props: [ "setRulesId" ],
@@ -45,6 +58,15 @@ export default Vue.extend({
         };
     },
     methods: {
+        revertRulesetDeletion(ruleset: NormalizedRulesets.NormalizedRuleset) {
+            s(this.$store).dispatch(
+                RulesetsModule.Actions.addRulesetToSetRules,
+                {
+                    ruleset: ruleset, 
+                    setRulesId: this.setRulesId
+                }
+            );
+        }
     },
     computed: {
         setRulesValid(): boolean {
@@ -53,6 +75,13 @@ export default Vue.extend({
         },
         setRules(): NormalizedRulesets.NormalizedSetRulesForVoter {
             return s(this.$store).state.rulesets.normalizedRulesets.entities.setRules[this.setRulesId];
+        },
+        setRulesBackup(): NormalizedRulesets.NormalizedSetRulesForVoter {
+            return s(this.$store).state.rulesets.backupNormalizedRulesets.entities.setRules[this.setRulesId];
+        },
+        rulesetsToBeDeleted(): NormalizedRulesets.NormalizedRuleset [] {
+            return this.setRulesBackup.rulesets.filter(rulesetId => this.setRules.rulesets.indexOf(rulesetId) < 0)
+            .map(rulesetId => s(this.$store).state.rulesets.backupNormalizedRulesets.entities.rulesets[rulesetId]);
         },
         delegatorIcon() { return icons.delegator },
         voterIcon() { return icons.voter },

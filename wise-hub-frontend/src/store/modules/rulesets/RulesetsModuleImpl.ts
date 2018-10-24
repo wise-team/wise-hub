@@ -152,16 +152,23 @@ export namespace RulesetsModuleImpl {
             commit(Mutations.updateRuleset, newRuleset);
         },
 
-        [Me.Actions.createNewRuleset]: (
-            { commit, dispatch, state }, payload: { ruleset: NormalizedRulesets.NormalizedRuleset, voter: string },
+        [Me.Actions.addRulesetToSetRules]: (
+            { commit, dispatch, state }, payload: { ruleset: NormalizedRulesets.NormalizedRuleset, setRulesId?: string, voter?: string },
         ): void => {
             commit(Mutations.updateRuleset, payload.ruleset);
 
             let targetSetRules: NormalizedRulesets.NormalizedSetRulesForVoter | undefined = undefined;
-            const targetSetRulesOpt = _.values(state.normalizedRulesets.entities.setRules).filter(
-                (setRules: NormalizedRulesets.NormalizedSetRulesForVoter) => setRules.voter === payload.voter
-            );
-            if (targetSetRulesOpt.length > 0) targetSetRules = _.cloneDeep(targetSetRulesOpt[0]);
+            if (payload.voter) {
+                const targetSetRulesOpt = _.values(state.normalizedRulesets.entities.setRules).filter(
+                    (setRules: NormalizedRulesets.NormalizedSetRulesForVoter) => setRules.voter === payload.voter
+                );
+                if (targetSetRulesOpt.length > 0) targetSetRules = _.cloneDeep(targetSetRulesOpt[0]);
+            }
+            else if(payload.setRulesId) {
+                targetSetRules = _.cloneDeep(state.normalizedRulesets.entities.setRules[payload.setRulesId]);
+            }
+
+
             if (targetSetRules) {
                 targetSetRules.rulesets.push(payload.ruleset.id);
                 commit(Mutations.updateSetRules, targetSetRules);
@@ -169,7 +176,7 @@ export namespace RulesetsModuleImpl {
             else {
                 targetSetRules = {
                     id: normalizer.getIdForSetRules(),
-                    voter: payload.voter,
+                    voter: d(payload.voter),
                     rulesets: [ payload.ruleset.id ]
                 };
                 commit(Mutations.updateSetRules, targetSetRules);

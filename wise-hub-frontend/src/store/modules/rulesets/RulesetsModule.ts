@@ -23,7 +23,7 @@ export namespace RulesetsModule {
         public static updateRule = localName("updateRule");
         public static deleteRule = localName("deleteRuleFromRuleset");
 
-        public static createNewRuleset = localName("createNewRuleset");
+        public static addRulesetToSetRules = localName("addRulesetToSetRules");
         public static renameRuleset = localName("renameRuleset");
         public static changeRulesetVoter = localName("changeRulesetVoter");
         public static deleteRuleset = localName("deleteRuleset");
