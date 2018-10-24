@@ -19,7 +19,7 @@ import { d, ucfirst } from "../../../util/util";
 import { Rule } from "steem-wise-core";
 import { NormalizedRulesets } from "../../../store/modules/rulesets/NormalizedRulesets";
 import { RulesetsModule } from "../../../store/modules/rulesets/RulesetsModule";
-
+import * as _ from "lodash";
 
 export default Vue.extend({
     props: [ "ruleId", "enabled" ],
@@ -31,13 +31,20 @@ export default Vue.extend({
     methods: {
     },
     computed: {
+        rule(): NormalizedRulesets.NormalizedRule {
+            return s(this.$store).state.rulesets.normalizedRulesets.entities.rules[this.ruleId];
+        },
         ruleJson: {
             get(): string {
-                return JSON.stringify(s(this.$store).state.rulesets.normalizedRulesets.entities.rules[this.ruleId]);
+                return JSON.stringify(
+                    _.omit(this.rule, "id")
+                );
             },
             set(value: string): void {
                 try {
-                    this.$store.dispatch(RulesetsModule.Actions.updateRule, JSON.parse(value));
+                    const newObj = JSON.parse(value);
+                    newObj.id = this.rule.id;
+                    this.$store.dispatch(RulesetsModule.Actions.updateRule, newObj);
                     this.error = "";
                 }
                 catch (error) {
@@ -50,7 +57,8 @@ export default Vue.extend({
     },
     filters: {
         ucfirst: ucfirst,
-        json: (str: string) => JSON.stringify(str)
+        json: (obj: any) => JSON.stringify(obj),
+        omitId: (obj: any) => _.omit(obj, "id")
     }
 });
 </script>

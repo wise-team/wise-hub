@@ -141,7 +141,7 @@ export namespace RulesetsModuleImpl {
             commit(Mutations.updateRuleset, newRuleset);
         },
 
-        [Me.Actions.createNewRule]: (
+        [Me.Actions.addRuleToRuleset]: (
             { commit, dispatch, state }, payload: { rulesetId: NormalizedRulesets.ID, rule: NormalizedRulesets.NormalizedRule },
         ): void => {
             commit(Mutations.updateRule, payload.rule);

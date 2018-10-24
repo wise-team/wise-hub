@@ -19,7 +19,7 @@ export namespace RulesetsModule {
     export class Actions {
         public static setVoterAndOrDelegator = localName("setVoterAndOrDelegator");
 
-        public static createNewRule = localName("addNewRuleToRuleset");
+        public static addRuleToRuleset = localName("addRuleToRuleset");
         public static updateRule = localName("updateRule");
         public static deleteRule = localName("deleteRuleFromRuleset");
 

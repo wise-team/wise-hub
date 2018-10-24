@@ -24,6 +24,16 @@
                         <font-awesome-icon :icon="addIcon" /> Add rule
                      </b-btn>
                 </p>
+                <p v-if="rulesToBeDeleted.length > 0" class="text-muted">
+                    <strong>The following rules will be deleted from blockchain:</strong>
+                    <ul>
+                        <li v-for="rule in rulesToBeDeleted" :key="rule.id">
+                            <strong>{{ rule.rule }}</strong>
+                            ( <i>{{ rule | omitId | json }}</i> ) 
+                            <b-link @click="revertRuleDeletion(rule)" style="display: inline-block;">Revert deletion</b-link>
+                        </li>
+                    </ul>
+                </p>
             </div>
             <div class="card-footer p-1 bg-secondary text-light rounded">
                 <b-btn v-b-toggle="unique + '-collapse-copy'" variant="light" size="sm" class="m-1">
@@ -77,6 +87,7 @@ import { d, ucfirst, uniqueId } from "../../util/util";
 import { Ruleset, Rule } from "steem-wise-core";
 import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
 import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
+import * as _ from "lodash";
 
 import BehindPanel from "../controls/BehindPanel.vue";
 import RuleComponent from "./RuleComponent.vue";
@@ -98,7 +109,7 @@ export default Vue.extend({
     methods: {
         addRule() {
             s(this.$store).dispatch(
-                RulesetsModule.Actions.createNewRule,
+                RulesetsModule.Actions.addRuleToRuleset,
                 {
                     rulesetId: this.rulesetId, 
                     rule: {
@@ -107,11 +118,27 @@ export default Vue.extend({
                     }
                 }
             );
+        },
+        revertRuleDeletion(rule: NormalizedRulesets.NormalizedRule) {
+            s(this.$store).dispatch(
+                RulesetsModule.Actions.addRuleToRuleset,
+                {
+                    rulesetId: this.rulesetId, 
+                    rule: rule
+                }
+            );
         }
     },
     computed: {
         ruleset(): NormalizedRulesets.NormalizedRuleset {
             return s(this.$store).state.rulesets.normalizedRulesets.entities.rulesets[this.rulesetId];
+        },
+        rulesetBackup(): NormalizedRulesets.NormalizedRuleset {
+            return s(this.$store).state.rulesets.backupNormalizedRulesets.entities.rulesets[this.rulesetId];
+        },
+        rulesToBeDeleted(): NormalizedRulesets.NormalizedRule [] {
+            return this.rulesetBackup.rules.filter(ruleId => this.ruleset.rules.indexOf(ruleId) < 0)
+            .map(ruleId => s(this.$store).state.rulesets.backupNormalizedRulesets.entities.rules[ruleId]);
         },
         isRulesetValid(): boolean {
             return typeof this.ruleset.name !== "undefined"
@@ -131,7 +158,8 @@ export default Vue.extend({
     },
     filters: {
         ucfirst: ucfirst,
-        json: (str: string) => JSON.stringify(str, undefined, 2)
+        json: (obj: any) => JSON.stringify(obj, undefined, 2),
+        omitId: (obj: any) => _.omit(obj, "id")
     }
 });
 </script>
