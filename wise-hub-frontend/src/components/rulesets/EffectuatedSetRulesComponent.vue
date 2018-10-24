@@ -21,7 +21,7 @@
         <ruleset-component
             v-for="rulesetId in setRules.rulesets" :key="rulesetId"
             :rulesetId="rulesetId"
-            class="ml-2 mb-4"
+            class="mb-4"
         />
     </div>
 </template>

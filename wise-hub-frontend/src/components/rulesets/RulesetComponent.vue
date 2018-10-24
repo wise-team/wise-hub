@@ -29,14 +29,66 @@
             class="mb-2 ml-2"
         />-->
         <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ ruleset.name }}</h5>
+            <div class="card-body p-2 p-sm-3 p-xl-4">
+                <h4 class="card-title">{{ ruleset.name }}</h4>
                  <horizontal-rule-component
                     v-for="ruleId in ruleset.rules" :key="ruleId"
                     :ruleId="ruleId"
                     :edit="edit"
                     class="mb-2 ml-2"
                 />
+                <p class="text-center">
+                     <b-btn v-b-toggle="unique + '-collapse'" variant="outline-secondary"
+                      size="sm" class="mt-1">
+                        Add rule
+                     </b-btn>
+                </p>
+
+                <!--<b-btn v-b-toggle="unique + '-collapse'" variant="primary">Toggle Collapse</b-btn>
+                <b-collapse :id="unique + '-collapse'" class="mt-2">
+                    <behind-panel>
+                        <h5>Some options</h5>
+                        <span>{{ ruleset | json }}</span>
+                    </behind-panel>
+                </b-collapse>-->
+            </div>
+            <div class="card-footer p-1 bg-secondary rounded">
+                <b-btn v-b-toggle="unique + '-collapse-copy'" variant="light" size="sm" class="m-1">
+                    Copy
+                </b-btn>
+                <b-btn v-b-toggle="unique + '-collapse-ask'" variant="light" size="sm" class="m-1 mr-3">
+                    Ask
+                </b-btn>
+
+                <b-btn v-b-toggle="unique + '-collapse-rename'" variant="light" size="sm" class="m-1">
+                    Rename
+                </b-btn>
+                <b-btn v-b-toggle="unique + '-collapse-delete'" variant="light" size="sm" class="m-1">
+                    Delete
+                </b-btn>
+                <b-btn v-b-toggle="unique + '-collapse-ch-voter'" variant="light" size="sm" class="m-1">
+                    Ch voter
+                </b-btn>
+
+                <b-collapse :id="unique + '-collapse-copy'" class="mt-2">
+                    <h5>Copy ruleset</h5>
+                </b-collapse>
+
+                <b-collapse :id="unique + '-collapse-ask'" class="mt-2">
+                    <h5>Ask a delegator for it</h5>
+                </b-collapse>
+
+                <b-collapse :id="unique + '-collapse-rename'" class="mt-2">
+                    <h5>Rename ruleset</h5>
+                </b-collapse>
+
+                <b-collapse :id="unique + '-collapse-delete'" class="mt-2">
+                    <h5>Delete ruleset</h5>
+                </b-collapse>
+
+                <b-collapse :id="unique + '-collapse-ch-voter'" class="mt-2">
+                    <h5>Change voter</h5>
+                </b-collapse>
             </div>
         </div>
     </div>
@@ -48,16 +100,18 @@ import { icons } from "../../icons";
 import { s } from "../../store/store";
 import { d, ucfirst, uniqueId } from "../../util/util";
 import { Ruleset } from "steem-wise-core";
+import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
 
+import BehindPanel from "../controls/BehindPanel.vue";
 import RuleComponent from "./RuleComponent.vue";
 import HorizontalRuleComponent from "./HorizontalRuleComponent.vue";
-import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
 
 export default Vue.extend({
     props: [ "rulesetId" ],
     data() {
         return {
-            edit: false
+            edit: false,
+            unique: uniqueId()
         };
     },
     methods: {
@@ -73,7 +127,8 @@ export default Vue.extend({
     },
     components: {
         RuleComponent,
-        HorizontalRuleComponent
+        HorizontalRuleComponent,
+        BehindPanel
     },
     filters: {
         ucfirst: ucfirst,
@@ -85,5 +140,9 @@ export default Vue.extend({
 <style>
 .ruleset-component .ruleset-options {
     float: right;
+}
+
+.ruleset-component .card-footer {
+    border: 2px solid white;
 }
 </style>
