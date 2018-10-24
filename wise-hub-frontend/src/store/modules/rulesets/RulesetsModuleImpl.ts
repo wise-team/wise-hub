@@ -187,7 +187,7 @@ export namespace RulesetsModuleImpl {
             if (rulesetIndex < 0) {
                 throw new Error("Ruleset with id " + payload.rulesetId + " does not belong to set rules with id " + payload.setRulesId);
             }
-            newSetRules.rulesets.splice(rulesetIndex);
+            newSetRules.rulesets.splice(rulesetIndex, 1);
              
             commit(Mutations.updateSetRules, newSetRules);
         },
