@@ -10,7 +10,7 @@ export const data = {
       "code": "MIT",
     },
     "wise": {
-      "version": "2.2.2",
+      "version": "2.2.5",
       "homepage": "https://wise.vote/",
     },
     "steem": {
@@ -48,10 +48,12 @@ export const data = {
       "production": {
         "host": "wise.vote",
         "protocol": "https",
+        "deployBranch": "master",
       },
       "staging": {
         "host": "dev.wise.vote",
         "protocol": "http",
+        "deployBranch": "staging",
       },
     },
     "npm": {
@@ -66,9 +68,9 @@ export const data = {
       "maintainer": "The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>",
       "labels": {
         "domain": "vote.wise",
-        "defaultLabels": [ () => "maintainer=\"The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>\"", () => "vote.wise.wise-version=\"2.2.2\"", () => "vote.wise.license=\"MIT\"", () => "vote.wise.repository=\"wise-hub\"" ],
+        "defaultLabels": [ () => "maintainer=\"The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>\"", () => "vote.wise.wise-version=\"2.2.5\"", () => "vote.wise.license=\"MIT\"", () => "vote.wise.repository=\"wise-hub\"" ],
       },
-      "generateDockerfileFrontMatter": () => "LABEL maintainer=\"The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>\"\nLABEL vote.wise.wise-version=\"2.2.2\"\nLABEL vote.wise.license=\"MIT\"\nLABEL vote.wise.repository=\"wise-hub\"",
+      "generateDockerfileFrontMatter": () => "LABEL maintainer=\"The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>\"\nLABEL vote.wise.wise-version=\"2.2.5\"\nLABEL vote.wise.license=\"MIT\"\nLABEL vote.wise.repository=\"wise-hub\"",
     },
     "repository": {
       "github": {
@@ -197,8 +199,8 @@ export const data = {
     },
     "votingPage": {
       "url": {
-        "production": "https://wise.vote/voting-page",
-        "staging": "http://dev.wise.vote/voting-page",
+        "production": "https://wise.vote/voting-page/",
+        "staging": "http://dev.wise.vote/voting-page/",
       },
       "docker": {
         "services": {
@@ -319,7 +321,7 @@ export const data = {
         "id": 493,
         "client_id": "wisevote.app",
         "owner": "wise.vote",
-        "redirect_uris": [ "https://wise.vote/voting-page", "https://hub.wise.vote/", "http://localhost:8080/" ],
+        "redirect_uris": [ "https://wise.vote/voting-page/", "https://hub.wise.vote/", "http://localhost:8080/" ],
         "name": "WISE",
         "description": "Vote delegation system for STEEM blockchain: https://wise.vote/",
         "icon": "https://wise.vote/assets/wise-full-color-icon-128.png",
