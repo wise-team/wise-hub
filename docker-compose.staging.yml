@@ -1,0 +1,22 @@
+version: "3"
+
+networks:
+  proxy-tier:
+    external:
+      name: caddy-proxy
+
+services:
+  frontend: #§< data.config.hub.docker.services.frontend.name + ':'
+    expose:
+      - "8090"
+    networks:
+      - proxy-tier
+    environment:
+      #§ 'VIRTUAL_HOST: "' + url(data.config.hub.url.staging).hostname + '"'
+      VIRTUAL_HOST: "hub.dev.wise.vote"
+      VIRTUAL_NETWORK: "caddy-proxy"
+      VIRTUAL_PORT: 8090
+      #§ 'CADDY_TLS: ' + ( url(data.config.hub.url.staging).protocol === "https:" ? '"yes"' : '"no"')
+      CADDY_TLS: "no"
+      CADDY_TIMEOUTS: "read 5m, write 2m"
+    restart: always
