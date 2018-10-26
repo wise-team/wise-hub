@@ -3,18 +3,20 @@ import Wise, { EffectuatedSetRules } from "steem-wise-core";
 import { data as wise } from "./wise-config.gen";
 import { d } from "./util/util";
 import { Log } from "./Log";
+import { BuildContext } from "./BuildContext";
 
-declare const __VERSION__: string;
-console.log("steem-wise-hub version: " + __VERSION__);
-console.log("steem-wise-core version: " + Wise.getVersion());
 const repoUrl = d(wise.config.repository.github.organization) + "/" + d(wise.repository.name) + "\"";
-console.log("This is open source software: https://github.com/" + repoUrl);
-
+console.log("Steem-wise-hub. This is open source software: https://github.com/" + repoUrl);
+BuildContext.failIfMissing();
+console.log("steem-wise-hub version: " + BuildContext.VERSION);
+console.log("steem-wise-core version: " + Wise.getVersion());
 if (window.location.hostname === "localhost") {
     (window as any).WISE_LOG_LEVEL = "debug";
     console.log("Localhost detected. Setting window.WISE_LOG_LEVEL=" + (window as any).WISE_LOG_LEVEL);
     Log.log().init();
 }
+
+
 
 /**
  * Import Vue & dependencies

@@ -7,6 +7,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Visualizer = require('webpack-visualizer-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
+const wiseSqlEndpointUrl = process.env.WISE_SQL_ENDPOINT_URL;
+if (!wiseSqlEndpointUrl) throw new Error("You must specify env WISE_SQL_ENDPOINT_URL");
 
 module.exports = {
   entry: './src/index.ts',
@@ -77,12 +79,13 @@ module.exports = {
       filename: './statistics.html'
     }),
     new webpack.DefinePlugin({
+      "_WISE_SQL_ENDPOINT_URL_": JSON.stringify(wiseSqlEndpointUrl),
       'process.env': (process.env.NODE_ENV === 'production') ? {
         NODE_ENV: '"production"'
       } : {
         NODE_ENV: '"development"'
       },
-      "__VERSION__": JSON.stringify(require("./package.json").version),
+      "__VERSION__": JSON.stringify(require("./package.json").version)
     }),
     new HtmlWebpackPlugin({
       filename: '../index.html',

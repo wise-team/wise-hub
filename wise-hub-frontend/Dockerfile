@@ -1,11 +1,15 @@
 #§ 'FROM node:' + data.config.npm.node.version + '-alpine'
 FROM node:10.12-alpine
 
+ARG wise_sql_endpoint_url
+
 ADD . /src/
 WORKDIR /src/
 
 RUN npm install 2>&1 | tr -d '{}[]'
-RUN NODE_ENV=production npm run build 2>&1 | tr -d '{}[]'
+RUN NODE_ENV=production \
+    WISE_SQL_ENDPOINT_URL="$wise_sql_endpoint_url" \
+    npm run build 2>&1 | tr -d '{}[]'
 
 
 # Stage 2

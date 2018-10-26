@@ -3,5 +3,6 @@ version: "3"
 services:
   frontend: #§< data.config.hub.docker.services.frontend.name + ':'
     container_name: wise-hub-frontend #§< 'container_name: ' + data.config.hub.docker.services.frontend.container
-    build: ./wise-hub-frontend
+    build: 
+      context: ./wise-hub-frontend
     image: wise/wise-hub-frontend #§< 'image: ' + data.config.hub.docker.services.frontend.image
