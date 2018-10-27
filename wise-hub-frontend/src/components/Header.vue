@@ -4,7 +4,9 @@
             <div class="text-center header">
                 <a href="/"><h1 class="title"><img src="/assets/images/wise/full-color.svg" alt="Wise"></h1></a>
                 <p class="text-muted">
-                    Vote delegation system for Steem blockchain
+                    Vote delegation system for 
+                    <span v-if="username.length > 0">@{{ username }}</span>
+                    <span v-else>Steem blockchain</span>
                 </p>
             </div>
         </div>
@@ -12,6 +14,8 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { s } from "../store/store";
+import { d } from "../util/util";
 
 export default Vue.extend({
     props: [],
@@ -22,6 +26,9 @@ export default Vue.extend({
     methods: {
     },
     computed: {
+        username(): string {
+            return d(s(this.$store).state.user.username);
+        }
     },
     components: {
     },
@@ -35,8 +42,8 @@ export default Vue.extend({
     }
 
     #header-component h1 {
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
     }
 
     #header-component h1 img {

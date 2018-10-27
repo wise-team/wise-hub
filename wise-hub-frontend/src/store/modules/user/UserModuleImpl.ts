@@ -33,6 +33,7 @@ export namespace UserModuleImpl {
         [Mutations.setUsername](
             state: Me.State, payload: { username: string; },
         ) {
+            console.log("Mutation.setUsername> Set username to " + JSON.stringify(payload.username));
             state.username = payload.username;
         },
         [Mutations.setError](
@@ -59,28 +60,29 @@ export namespace UserModuleImpl {
         [Me.Actions.setUsername]: (
             { commit, dispatch, state }, payload: { username: string },
         ): void => {
-            commit(Mutations.setUsername, payload.username);
+            console.log("Action.setUsername> " + JSON.stringify(payload));
+            commit(Mutations.setUsername, { username: payload.username });
             if (payload.username.length === 0) commit(Mutations.setLoggedIn, false);
         },
 
         [Me.Actions.clearUsername]: (
             { commit, dispatch, state },
         ): void => {
-            commit(Mutations.setUsername, "");
-            commit(Mutations.setLoggedIn, false);
+            commit(Mutations.setUsername, { username: "" });
+            commit(Mutations.setLoggedIn, { loggedIn: false });
         },
 
         [Me.Actions.setLoggedIn]: (
-            { commit, dispatch, state }, payload: { loggedIn: boolean, username: string },
+            { commit, dispatch, state }, payload: { loggedIn: boolean, loginMethod: "steemconnect" },
         ): void => {
-            dispatch(Me.Actions.setUsername, payload.username);
-            commit(Mutations.setLoggedIn, payload.loggedIn);
+            commit(Mutations.setLoggedIn,  { loggedIn: payload.loggedIn });
+            commit(Mutations.setLoginMethod,  { loginMethod: payload.loginMethod });
         },
 
         [Me.Actions.setError]: (
             { commit, dispatch, state }, payload: { error: string },
         ): void => {
-            commit(Mutations.setError, payload.error);
+            commit(Mutations.setError, { error: payload.error });
         },
     };
 

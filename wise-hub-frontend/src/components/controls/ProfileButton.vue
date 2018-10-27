@@ -16,10 +16,21 @@
             <b-dropdown-item href="#">Settings</b-dropdown-item>
             <b-dropdown-item @click="logout">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
+
         <span v-if="!isLoggedIn">
-            <a class="btn btn-secondary" :href="loginUrl">
-                Login with SteemConnect
-            </a>
+            <span class="steem-account-ig">
+                <b-input-group prepend="@">
+                    <b-form-input type="text" placeholder="Steem account" 
+                        v-b-tooltip.hover title="Tell us who are you if you don't want to log in"
+                        v-model="usernameInputModel"
+                    ></b-form-input>
+                    <b-input-group-append>
+                        <a class="btn btn-secondary" :href="loginUrl" v-b-tooltip.hover title="Optional: SteemConnect login is not required">
+                            (SC login)
+                        </a>
+                    </b-input-group-append>
+                </b-input-group>
+            </span>
         </span>
     </b-navbar-nav>
 </template>
@@ -30,6 +41,7 @@ import { icons } from "../../icons";
 import { SteemConnectModule } from "../../store/modules/steemconnect/SteemConnectModule";
 import { s } from "../../store/store";
 import { d } from "../../util/util";
+import { UserModule } from "../../store/modules/user/UserModule";
 
 export default Vue.extend({
     props: [],
@@ -43,8 +55,18 @@ export default Vue.extend({
         },
     },
     computed: {
+        usernameInputModel: {
+            get(): string {
+                console.log("s(this.$store).state.user=" + JSON.stringify(s(this.$store).state.user));
+                return s(this.$store).state.user.username;
+            },
+            set(value: string): void {
+                console.log("ProfileButton> Set user username to " + (value || ""));
+                s(this.$store).dispatch(UserModule.Actions.setUsername, { username: value || "" });
+            }
+        },
         isLoggedIn(): boolean {
-            return s(this.$store).getters[SteemConnectModule.Getters.isLoggedIn];
+            return s(this.$store).state.user.loggedIn
         },
         loginUrl(): string {
             return s(this.$store).getters[SteemConnectModule.Getters.getLoginUrl];

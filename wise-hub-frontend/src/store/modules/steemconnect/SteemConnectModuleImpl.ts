@@ -3,6 +3,7 @@ import { SteemConnectApiHelper } from "./SteemConnectApiHelper";
 
 import { SteemConnectModule as Me } from "./SteemConnectModule";
 import { StatusModule } from "../status/StatusModule";
+import { UserModule } from "../user/UserModule";
 
 export namespace SteemConnectModuleImpl {
     /**
@@ -88,6 +89,8 @@ export namespace SteemConnectModuleImpl {
                         commit(Mutations.setLoggedIn, true);
                         commit(Mutations.setError, undefined);
                         dispatch(StatusModule.Actions.setAccountName, { accountName: resultAccount.name });
+                        dispatch(UserModule.Actions.setUsername, { username: resultAccount.name });
+                        dispatch(UserModule.Actions.setLoggedIn, { loggedIn: true, loginMethod: "steemconnect" });
                     }
                     else {
                         dispatch(Me.Actions.reset);
@@ -109,6 +112,7 @@ export namespace SteemConnectModuleImpl {
                 result => {
                     dispatch(Me.Actions.reset);
                     commit(Mutations.setLoggedIn, false);
+                    dispatch(UserModule.Actions.setLoggedIn, { loggedIn: false });
                 },
                 error => {
                     console.error(error);
