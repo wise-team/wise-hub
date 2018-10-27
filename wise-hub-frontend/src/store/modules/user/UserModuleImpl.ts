@@ -33,7 +33,6 @@ export namespace UserModuleImpl {
         [Mutations.setUsername](
             state: Me.State, payload: { username: string; },
         ) {
-            console.log("Mutation.setUsername> Set username to " + JSON.stringify(payload.username));
             state.username = payload.username;
         },
         [Mutations.setError](
@@ -60,7 +59,6 @@ export namespace UserModuleImpl {
         [Me.Actions.setUsername]: (
             { commit, dispatch, state }, payload: { username: string },
         ): void => {
-            console.log("Action.setUsername> " + JSON.stringify(payload));
             commit(Mutations.setUsername, { username: payload.username });
             if (payload.username.length === 0) commit(Mutations.setLoggedIn, false);
         },

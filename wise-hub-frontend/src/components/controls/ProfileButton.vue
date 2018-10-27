@@ -57,11 +57,9 @@ export default Vue.extend({
     computed: {
         usernameInputModel: {
             get(): string {
-                console.log("s(this.$store).state.user=" + JSON.stringify(s(this.$store).state.user));
                 return s(this.$store).state.user.username;
             },
             set(value: string): void {
-                console.log("ProfileButton> Set user username to " + (value || ""));
                 s(this.$store).dispatch(UserModule.Actions.setUsername, { username: value || "" });
             }
         },

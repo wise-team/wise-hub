@@ -15,10 +15,10 @@
                     v-for="ruleId in ruleset.rules" :key="ruleId"
                     :ruleId="ruleId"
                     :rulesetId="rulesetId"
-                    :edit="edit"
+                    :edit="canEdit"
                     class="mb-4 mb-md-2 ml-2"
                 />
-                <p class="text-center">
+                <p class="text-center" v-if="canEdit">
                      <b-btn @click="addRule()" variant="outline-secondary"
                       size="sm" class="mt-1">
                         <font-awesome-icon :icon="addIcon" /> Add rule
@@ -36,6 +36,9 @@
                 </p>
             </div>
             <div class="card-footer p-1 bg-secondary text-light rounded">
+                <b-btn v-if="canVote" v-b-toggle="unique + '-collapse-vote'" variant="primary" size="sm" class="m-1 mr-3">
+                    Vote
+                </b-btn>
                 <b-btn v-b-toggle="unique + '-collapse-copy'" variant="light" size="sm" class="m-1">
                     Copy
                 </b-btn>
@@ -43,17 +46,22 @@
                     Ask
                 </b-btn>
 
-                <b-btn v-b-toggle="unique + '-collapse-rename'" variant="light" size="sm" class="m-1">
+                <b-btn v-if="canEdit" v-b-toggle="unique + '-collapse-rename'" variant="light" size="sm" class="m-1">
                     Rename
                 </b-btn>
-                <b-btn v-b-toggle="unique + '-collapse-delete'" variant="light" size="sm" class="m-1">
+                <b-btn v-if="canEdit" v-b-toggle="unique + '-collapse-delete'" variant="light" size="sm" class="m-1">
                     Delete
                 </b-btn>
-                <b-btn v-b-toggle="unique + '-collapse-ch-voter'" variant="light" size="sm" class="m-1">
+                <b-btn v-if="canEdit" v-b-toggle="unique + '-collapse-ch-voter'" variant="light" size="sm" class="m-1">
                     Ch voter
                 </b-btn>
 
                 <div class="collapse-panels">
+                    <b-collapse :id="unique + '-collapse-vote'" :accordion="unique + '-options-accordion'">
+                        <h5>Vote</h5>
+                        <p>Vote action. TODO</p>
+                    </b-collapse>
+
                     <b-collapse :id="unique + '-collapse-copy'" :accordion="unique + '-options-accordion'">
                         <copy-ruleset-action-component class="p-2" />
                     </b-collapse>
@@ -144,6 +152,12 @@ export default Vue.extend({
         isRulesetValid(): boolean {
             return typeof this.ruleset.name !== "undefined"
                 && Array.isArray(this.ruleset.rules)
+        },
+        canEdit(): boolean {
+            return s(this.$store).state.user.username === this.setRules.delegator;
+        },
+        canVote(): boolean {
+            return s(this.$store).state.user.username === this.setRules.voter;
         },
         addIcon() { return icons.add },
     },

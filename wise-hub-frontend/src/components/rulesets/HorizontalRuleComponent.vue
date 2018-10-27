@@ -6,7 +6,7 @@
                 <font-awesome-icon :icon="ruleIcon" />
                 {{ rule.rule }}
             </span>
-            <small class="delete-btn" @click="deleteRule()">
+            <small v-if="edit" class="delete-btn" @click="deleteRule()">
                 <font-awesome-icon :icon="deleteIcon" /> delete
             </small>
         </span>
