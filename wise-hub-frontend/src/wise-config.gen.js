@@ -21,13 +21,7 @@ export const data = {
   "url": "https://api.steemit.com",
   "get_block": true,
 }, {
-  "url": "https://steemd.minnowsupportproject.org",
-  "get_block": true,
-}, {
   "url": "https://rpc.buildteam.io",
-  "get_block": true,
-}, {
-  "url": "https://rpc.steemliberator.com",
   "get_block": true,
 } ],
     },
@@ -159,6 +153,7 @@ export const data = {
       "pusher": {
         "requestConcurrencyPerNode": 3,
         "blockProcessingTimeoutMs": 9000,
+        "nextBlockDelayMs": 2900,
       },
       "docker": {
         "services": {
