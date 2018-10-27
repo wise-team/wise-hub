@@ -6,10 +6,4 @@ import { BuildContext } from "../BuildContext";
 
 export class WiseApiHelper {
     private static API = new WiseSQLApi(BuildContext.WISE_SQL_ENDPOINT_URL, Wise.constructDefaultProtocol(), new DirectBlockchainApi(Wise.constructDefaultProtocol()));
-
-    public static async accountExists(username: string): Promise<boolean> {
-        const steem = new steemJs.api.Steem({ url: wise.config.steem.defaultApiUrl });
-        const accountInfo: steemJs.AccountInfo [] = await steem.getAccountsAsync([ username ]);
-        return accountInfo.length > 0;
-    }
 }

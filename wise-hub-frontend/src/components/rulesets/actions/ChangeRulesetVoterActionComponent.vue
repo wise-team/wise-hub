@@ -23,8 +23,8 @@ import Vue from "vue";
 import { icons } from "../../../icons";
 import { s } from "../../../store/store";
 import { d, ucfirst, uniqueId } from "../../../util/util";
-import { WiseApiHelper } from "../../../api/WiseApiHelper";
 import { RulesetsModule } from "../../../store/modules/rulesets/RulesetsModule";
+import { UserModuleApiHelper } from "../../../store/modules/user/UserModuleApiHelper";
 
 export default Vue.extend({
     props: [ "setRulesId", "ruleset" ],
@@ -40,7 +40,7 @@ export default Vue.extend({
             (async () => {
                 try {
                     this.loading = true;
-                    const accountExists = await WiseApiHelper.accountExists(this.voter);
+                    const accountExists = await UserModuleApiHelper.accountExists(this.voter);
                     if (accountExists) {
                         s(this.$store).dispatch(
                             RulesetsModule.Actions.changeRulesetVoter,

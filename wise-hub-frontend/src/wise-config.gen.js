@@ -24,6 +24,7 @@ export const data = {
   "url": "https://rpc.buildteam.io",
   "get_block": true,
 } ],
+      "waitForNextHeadBlockDelayMs": 3100,
     },
     "witness": {
       "account": "wise-team",
@@ -153,7 +154,7 @@ export const data = {
       "pusher": {
         "requestConcurrencyPerNode": 3,
         "blockProcessingTimeoutMs": 9000,
-        "nextBlockDelayMs": 2900,
+        "nextBlockDelayMs": 3100,
       },
       "docker": {
         "services": {
