@@ -22,3 +22,11 @@ h1 {
     margin-top: 3rem !important; /* mt-5 */
     margin-bottom: 3rem !important; /* mb-5 */
 }
+
+.text-very-small {
+    font-size: 50%;
+}
+
+.sup-75 {
+    top: -0.75em !important;
+}

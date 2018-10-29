@@ -16,6 +16,7 @@ export namespace RulesetsModule {
         changed: boolean;
         backupNormalizedRulesets: NormalizedRulesets.Result;
         normalizedRulesets: NormalizedRulesets.Result;
+        modifiedSetRules: NormalizedRulesets.ID [];
     }
 
     export class Actions {
@@ -29,5 +30,9 @@ export namespace RulesetsModule {
         public static renameRuleset = localName("renameRuleset");
         public static changeRulesetVoter = localName("changeRulesetVoter");
         public static deleteRuleset = localName("deleteRuleset");
+    }
+
+    export class Getters {
+        public static isSetRulesModified = localName("isSetRulesModified");
     }
 }

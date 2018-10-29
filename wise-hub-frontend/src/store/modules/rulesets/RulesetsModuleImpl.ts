@@ -15,7 +15,8 @@ export namespace RulesetsModuleImpl {
         loadedFor: "",
         changed: false,
         backupNormalizedRulesets: { entities: { rules: {}, rulesets: {}, setRules: {} }, result: [] },
-        normalizedRulesets: { entities: { rules: {}, rulesets: {}, setRules: {} }, result: [] }
+        normalizedRulesets: { entities: { rules: {}, rulesets: {}, setRules: {} }, result: [] },
+        modifiedSetRules: [],
     };
     export const persistentPaths: string [] = [
         
@@ -33,6 +34,7 @@ export namespace RulesetsModuleImpl {
         public static updateRule =  Me.localName("updateRule");
         public static updateRuleset =  Me.localName("updateRuleset");
         public static updateSetRules =  Me.localName("updateSetRules");
+        public static updateModifiedSetRulesArray =  Me.localName("updateModifiedSetRulesArray");
     }
 
     const mutations: MutationTree<Me.State> = {
@@ -97,12 +99,16 @@ export namespace RulesetsModuleImpl {
                 Vue.set(state.normalizedRulesets.entities.setRules, payload.id, payload);
             }
 
-            console.log("Updated setRules to:");
-            console.log(state.normalizedRulesets.entities.setRules);
             if (!state.backupNormalizedRulesets.entities.setRules[payload.id]
                 || !_.isEqual(state.backupNormalizedRulesets.entities.setRules[payload.id], payload)) {
                 state.changed = true;
             }
+        },
+
+        [Mutations.updateModifiedSetRulesArray](
+            state: Me.State, payload: { modifiedSetRulesIds: string [] },
+        ) {
+            state.modifiedSetRules = payload.modifiedSetRulesIds;
         },
     };
 
@@ -111,6 +117,7 @@ export namespace RulesetsModuleImpl {
      * Actions
      */
     class PrivateActions {
+        public static determineModifiedSetRules =  Me.localName("determineModifiedSetRules");
     }
 
     const normalizer = new NormalizedRulesets();
@@ -135,6 +142,7 @@ export namespace RulesetsModuleImpl {
                         const normalized: NormalizedRulesets.Result = normalizer.normalize(result);
                         commit(Mutations.setNormalizedRulesets, normalized);
                         commit(Mutations.setStatus, { loading: false, error: "" });
+                        dispatch(PrivateActions.determineModifiedSetRules);
                     }
                 }
                 catch (error) {
@@ -147,6 +155,9 @@ export namespace RulesetsModuleImpl {
             { commit, dispatch, state }, payload: NormalizedRulesets.NormalizedRule,
         ): void => {
             commit(Mutations.updateRule, payload);
+            if (!_.isEqual(payload.rule, state.normalizedRulesets.entities.rules[payload.id])) {
+                dispatch(PrivateActions.determineModifiedSetRules);
+            }
         },
 
         [Me.Actions.deleteRule]: (
@@ -164,6 +175,7 @@ export namespace RulesetsModuleImpl {
             newRuleset.rules.splice(ruleIndex, 1);
 
             commit(Mutations.updateRuleset, newRuleset);
+            dispatch(PrivateActions.determineModifiedSetRules);
         },
 
         [Me.Actions.addRuleToRuleset]: (
@@ -175,6 +187,7 @@ export namespace RulesetsModuleImpl {
                 = _.cloneDeep(state.normalizedRulesets.entities.rulesets[payload.rulesetId]);
             newRuleset.rules.push(payload.rule.id);
             commit(Mutations.updateRuleset, newRuleset);
+            dispatch(PrivateActions.determineModifiedSetRules);
         },
 
         [Me.Actions.addRulesetToSetRules]: (
@@ -208,6 +221,7 @@ export namespace RulesetsModuleImpl {
                 };
                 commit(Mutations.updateSetRules, targetSetRules);
             }
+            dispatch(PrivateActions.determineModifiedSetRules);
         },
 
         [Me.Actions.deleteRuleset]: (
@@ -224,6 +238,7 @@ export namespace RulesetsModuleImpl {
             newSetRules.rulesets.splice(rulesetIndex, 1);
              
             commit(Mutations.updateSetRules, newSetRules);
+            dispatch(PrivateActions.determineModifiedSetRules);
         },
 
         [Me.Actions.renameRuleset]: (
@@ -231,8 +246,10 @@ export namespace RulesetsModuleImpl {
         ): void => {
             const newRuleset: NormalizedRulesets.NormalizedRuleset
                 = _.cloneDeep(state.normalizedRulesets.entities.rulesets[payload.rulesetId]);
+            const oldName = newRuleset.name;
             newRuleset.name = payload.name;
             commit(Mutations.updateRuleset, newRuleset);
+            if (payload.name !== oldName) dispatch(PrivateActions.determineModifiedSetRules);
         },
 
         [Me.Actions.changeRulesetVoter]: (
@@ -265,7 +282,36 @@ export namespace RulesetsModuleImpl {
                 };
                 commit(Mutations.updateSetRules, targetSetRules);
             }
+            dispatch(PrivateActions.determineModifiedSetRules);
         },
+
+        [PrivateActions.determineModifiedSetRules]: (
+            { commit, dispatch, state },
+        ): void => {
+            const modifiedSetRulesIds: string [] = 
+                _.values(state.normalizedRulesets.entities.setRules).filter(setRules => {
+                    const backupSetRules = state.backupNormalizedRulesets.entities.setRules[setRules.id];
+                    return (
+                        !backupSetRules
+                        || _.xor(setRules.rulesets, backupSetRules.rulesets).length > 0
+                        || setRules.rulesets.filter(rulesetId => {
+                            const ruleset = state.normalizedRulesets.entities.rulesets[rulesetId];
+                            const backupRuleset = state.backupNormalizedRulesets.entities.rulesets[rulesetId];
+                            return !backupRuleset
+                                || !_.isEqual(_.omit(ruleset, "id", "rules"), _.omit(backupRuleset, "id", "rules"))
+                                || _.xor(ruleset.rules, backupRuleset.rules).length > 0
+                                || ruleset.rules.filter(ruleId => {
+                                    const rule = state.normalizedRulesets.entities.rules[ruleId];
+                                    const backupRule = state.backupNormalizedRulesets.entities.rules[ruleId];
+                                    return !backupRule
+                                        || !_.isEqual(_.omit(rule, "id"), _.omit(backupRule, "id"));
+                                }).length > 0
+                        }).length > 0
+                    );
+                })
+                .map(setRules => setRules.id);
+            commit(Mutations.updateModifiedSetRulesArray, { modifiedSetRulesIds: modifiedSetRulesIds });
+        }
     };
 
 

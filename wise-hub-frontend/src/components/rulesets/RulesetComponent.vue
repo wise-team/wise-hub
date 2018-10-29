@@ -10,7 +10,11 @@
     <div v-else class="ruleset-component">
         <div class="card">
             <div class="card-body p-2 p-sm-3 p-xl-4">
-                <h4 class="card-title">{{ ruleset.name }}</h4>
+                <h4 class="card-title">
+                    {{ ruleset.name }}
+                    <sup v-if="modified" class="sup-75 text-very-small text-danger">*to be saved</sup>
+                </h4>
+
                  <horizontal-rule-component
                     v-for="ruleId in ruleset.rules" :key="ruleId"
                     :ruleId="ruleId"
@@ -36,13 +40,13 @@
                 </p>
             </div>
             <div class="card-footer p-1 bg-secondary text-light rounded">
-                <b-btn v-if="canVote" v-b-toggle="unique + '-collapse-vote'" variant="primary" size="sm" class="m-1 mr-3">
+                <b-btn v-if="canVote" v-b-toggle="unique + '-collapse-vote'" variant="primary" size="sm" class="m-1 mr-3" disabled>
                     Vote
                 </b-btn>
-                <b-btn v-b-toggle="unique + '-collapse-copy'" variant="light" size="sm" class="m-1">
+                <b-btn v-b-toggle="unique + '-collapse-copy'" variant="light" size="sm" class="m-1" disabled>
                     Copy
                 </b-btn>
-                <b-btn v-b-toggle="unique + '-collapse-ask'" variant="light" size="sm" class="m-1 mr-3">
+                <b-btn v-b-toggle="unique + '-collapse-ask'" variant="light" size="sm" class="m-1 mr-3" disabled>
                     Ask
                 </b-btn>
 
@@ -107,7 +111,7 @@ import DeleteRulesetActionComponent from "./actions/DeleteRulesetActionComponent
 import RenameRulesetActionComponent from "./actions/RenameRulesetActionComponent.vue";
 
 export default Vue.extend({
-    props: [ "setRules", "rulesetId" ],
+    props: [ "setRules", "rulesetId", "modified" ],
     data() {
         return {
             edit: false,

@@ -7,15 +7,16 @@
             <pre>{{ setRules | json }}</pre>
         </b-alert>
     </div>
-    <div v-else class="mb-5 effectuatedsetrulescomponent">
-        <h4 class="p-2 pt-3 mb-3 mt-3 rounded esrc-title">
-            <span class="esrc-wise-icon">
+    <div v-else :class="'mb-5 p-2 mt-3 rounded setrules ' + ( modified ? 'setrules-modified' : '' )">
+        <h4 class="p-3 mb-2 setrules-title">
+            <span class="setrules-wise-icon">
                 <img src="/assets/images/wise/full-color-emblem.svg" alt="Wise icon" />
             </span>
 
             <font-awesome-icon :icon="delegatorIcon" /> {{ setRules.delegator }}
              &nbsp;&nbsp;&#8594;&nbsp;&nbsp;
              <font-awesome-icon :icon="voterIcon" /> {{ setRules.voter }}
+             <sup v-if="modified" class="sup-75 text-very-small text-danger">*to be saved</sup>
         </h4>
 
         <p v-if="rulesetsToBeDeleted.length > 0" class="text-muted">
@@ -32,6 +33,7 @@
             v-for="rulesetId in setRules.rulesets" :key="rulesetId"
             :set-rules="setRules"
             :rulesetId="rulesetId"
+            :modified="modified"
             class="mb-4"
         />
         <br />
@@ -54,7 +56,6 @@ export default Vue.extend({
     props: [ "setRulesId" ],
     data() {
         return {
-            
         };
     },
     methods: {
@@ -69,6 +70,9 @@ export default Vue.extend({
         }
     },
     computed: {
+        modified(): boolean {
+            return d(s(this.$store).state.rulesets.modifiedSetRules).indexOf(this.setRulesId) !== -1;
+        },
         setRulesValid(): boolean {
             return typeof this.setRules.voter !== "undefined"
                 && Array.isArray(this.setRules.rulesets)
@@ -98,19 +102,22 @@ export default Vue.extend({
 </script>
 
 <style>
-.effectuatedsetrulescomponent .esrc-title {
+.setrules .setrules-title {
     color: #6b11ff;
 }
 
-.effectuatedsetrulescomponent .esrc-wise-icon {
+.setrules .setrules-wise-icon {
     position: relative;
 }
 
-.effectuatedsetrulescomponent .esrc-wise-icon img {
+.setrules .setrules-wise-icon img {
     position: absolute;
     height: 4rem;
     left: -4.75rem;
     top: -1rem;
 }
 
+.setrules-modified {
+    background: rgba(107, 17, 255, 0.1);
+}
 </style>
