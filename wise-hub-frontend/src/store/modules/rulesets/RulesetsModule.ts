@@ -1,3 +1,4 @@
+import * as steem from "steem";
 import { EffectuatedSetRules, Ruleset, Rule } from "steem-wise-core";
 import { NormalizedRulesets } from "./NormalizedRulesets";
 
@@ -17,6 +18,11 @@ export namespace RulesetsModule {
         backupNormalizedRulesets: NormalizedRulesets.Result;
         normalizedRulesets: NormalizedRulesets.Result;
         modifiedSetRules: NormalizedRulesets.ID [];
+        operationsToBePublished: { 
+            loading: boolean;
+            error: string;
+            operations: { [setRulesId: string]: { ops: steem.OperationWithDescriptor []; error: string; }; }
+        }
     }
 
     export class Actions {

@@ -19,6 +19,14 @@
         <span v-for="setRulesId in setRulesItems" :key="setRulesId">
             <set-rules-component :set-rules-id="setRulesId" />
         </span>
+
+        <span v-if="setRulesItems.length > 0 && modifiedSetRulesIds.length > 0">
+            <hr />
+            <b-alert show variant="primary">
+                <h3 class="alert-heading">Upload changes for all voters</h3>
+                <publish-rulesets-component :ids="modifiedSetRulesIds" />
+            </b-alert>
+        </span>
     </div>
 </template>
 
@@ -29,11 +37,13 @@ import { s } from "../../store/store";
 import { d, ucfirst } from "../../util/util";
 import { EffectuatedSetRules } from "steem-wise-core";
 import { WiseApiHelper } from "../../api/WiseApiHelper";
+import { Log } from "../../Log";
+import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 
 import SetRulesComponent from "../rulesets/SetRulesComponent.vue";
 import LoadingControl from "../controls/LoadingControl.vue";
-import { Log } from "../../Log";
-import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
+import PublishRulesetsComponent from "./PublishRulesetsComponent.vue";
+
 
 export default Vue.extend({
     props: [],
@@ -75,8 +85,12 @@ export default Vue.extend({
                 )
             );
         },
+        modifiedSetRulesIds(): string [] {
+            return s(this.$store).state.rulesets.modifiedSetRules;
+        },
     },
     components: {
+        PublishRulesetsComponent,
         SetRulesComponent,
         LoadingControl
     },

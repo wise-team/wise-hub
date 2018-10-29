@@ -36,7 +36,12 @@
             :modified="modified"
             class="mb-4"
         />
-        <br />
+        
+        <b-alert v-if="modified" show variant="primary">
+            <h4 class="alert-heading">Upload changes for @{{ setRules.voter }}...</h4>
+            <p class="text-muted">... or scroll to the bottom to upload for all voters at once</p>
+            <publish-rulesets-component :ids="[ setRulesId ]" />
+        </b-alert>
     </div>
 </template>
 
@@ -50,6 +55,7 @@ import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRules
 import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 
 import RulesetComponent from "./RulesetComponent.vue";
+import PublishRulesetsComponent from "./PublishRulesetsComponent.vue";
 
 
 export default Vue.extend({
@@ -92,7 +98,8 @@ export default Vue.extend({
         voterIcon() { return icons.voter },
     },
     components: {
-        RulesetComponent
+        RulesetComponent,
+        PublishRulesetsComponent
     },
     filters: {
         ucfirst: ucfirst,

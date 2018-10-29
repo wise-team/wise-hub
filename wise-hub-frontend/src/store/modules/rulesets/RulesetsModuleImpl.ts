@@ -1,11 +1,13 @@
 import { MutationTree, ActionTree, GetterTree, Module } from "vuex";
 import * as _ from "lodash";
+import * as steem from "steem";
 import { RulesetsModuleApiHelper } from "./RulesetsModuleApiHelper";
 import { RulesetsModule as Me } from "./RulesetsModule";
 import { d, assertString } from "../../../util/util";
-import { EffectuatedSetRules, Rule, Ruleset } from "steem-wise-core";
+import Wise, { EffectuatedSetRules, Rule, Ruleset, SetRulesForVoter, RulesUpdater } from "steem-wise-core";
 import { NormalizedRulesets } from "./NormalizedRulesets";
 import Vue from "vue";
+import { DelayedExecutor } from "../../../util/DelayedExecutor";
 
 export namespace RulesetsModuleImpl {
 
@@ -17,6 +19,11 @@ export namespace RulesetsModuleImpl {
         backupNormalizedRulesets: { entities: { rules: {}, rulesets: {}, setRules: {} }, result: [] },
         normalizedRulesets: { entities: { rules: {}, rulesets: {}, setRules: {} }, result: [] },
         modifiedSetRules: [],
+        operationsToBePublished: { 
+            loading: false,
+            error: "",
+            operations: { /* setRules entity id is the key */}
+        }
     };
     export const persistentPaths: string [] = [
         
@@ -35,6 +42,7 @@ export namespace RulesetsModuleImpl {
         public static updateRuleset =  Me.localName("updateRuleset");
         public static updateSetRules =  Me.localName("updateSetRules");
         public static updateModifiedSetRulesArray =  Me.localName("updateModifiedSetRulesArray");
+        public static updateOperationsToBePublished =  Me.localName("updateOperationsToBePublished");
     }
 
     const mutations: MutationTree<Me.State> = {
@@ -110,6 +118,13 @@ export namespace RulesetsModuleImpl {
         ) {
             state.modifiedSetRules = payload.modifiedSetRulesIds;
         },
+
+        [Mutations.updateOperationsToBePublished](
+            state: Me.State, payload: { loading: boolean; error: string; operations: { [setRulesId: string]: { ops: steem.OperationWithDescriptor []; error: string; }; };
+            },
+        ) {
+            state.operationsToBePublished = payload;
+        },
     };
 
 
@@ -117,10 +132,12 @@ export namespace RulesetsModuleImpl {
      * Actions
      */
     class PrivateActions {
-        public static determineModifiedSetRules =  Me.localName("determineModifiedSetRules");
+        public static determineChanges =  Me.localName("determineChanges");
     }
 
     const normalizer = new NormalizedRulesets();
+    const delayedOperationsTBPUpdater = new DelayedExecutor(1100);
+
     const actions: ActionTree<Me.State, Me.State> = {
         [Me.Actions.setVoterAndOrDelegator]: (
             { commit, dispatch, state }, payload: { delegator?: string; voter?: string; },
@@ -142,7 +159,7 @@ export namespace RulesetsModuleImpl {
                         const normalized: NormalizedRulesets.Result = normalizer.normalize(result);
                         commit(Mutations.setNormalizedRulesets, normalized);
                         commit(Mutations.setStatus, { loading: false, error: "" });
-                        dispatch(PrivateActions.determineModifiedSetRules);
+                        dispatch(PrivateActions.determineChanges);
                     }
                 }
                 catch (error) {
@@ -156,7 +173,7 @@ export namespace RulesetsModuleImpl {
         ): void => {
             commit(Mutations.updateRule, payload);
             if (!_.isEqual(payload.rule, state.normalizedRulesets.entities.rules[payload.id])) {
-                dispatch(PrivateActions.determineModifiedSetRules);
+                dispatch(PrivateActions.determineChanges);
             }
         },
 
@@ -175,7 +192,7 @@ export namespace RulesetsModuleImpl {
             newRuleset.rules.splice(ruleIndex, 1);
 
             commit(Mutations.updateRuleset, newRuleset);
-            dispatch(PrivateActions.determineModifiedSetRules);
+            dispatch(PrivateActions.determineChanges);
         },
 
         [Me.Actions.addRuleToRuleset]: (
@@ -187,7 +204,7 @@ export namespace RulesetsModuleImpl {
                 = _.cloneDeep(state.normalizedRulesets.entities.rulesets[payload.rulesetId]);
             newRuleset.rules.push(payload.rule.id);
             commit(Mutations.updateRuleset, newRuleset);
-            dispatch(PrivateActions.determineModifiedSetRules);
+            dispatch(PrivateActions.determineChanges);
         },
 
         [Me.Actions.addRulesetToSetRules]: (
@@ -221,7 +238,7 @@ export namespace RulesetsModuleImpl {
                 };
                 commit(Mutations.updateSetRules, targetSetRules);
             }
-            dispatch(PrivateActions.determineModifiedSetRules);
+            dispatch(PrivateActions.determineChanges);
         },
 
         [Me.Actions.deleteRuleset]: (
@@ -238,7 +255,7 @@ export namespace RulesetsModuleImpl {
             newSetRules.rulesets.splice(rulesetIndex, 1);
              
             commit(Mutations.updateSetRules, newSetRules);
-            dispatch(PrivateActions.determineModifiedSetRules);
+            dispatch(PrivateActions.determineChanges);
         },
 
         [Me.Actions.renameRuleset]: (
@@ -249,7 +266,7 @@ export namespace RulesetsModuleImpl {
             const oldName = newRuleset.name;
             newRuleset.name = payload.name;
             commit(Mutations.updateRuleset, newRuleset);
-            if (payload.name !== oldName) dispatch(PrivateActions.determineModifiedSetRules);
+            if (payload.name !== oldName) dispatch(PrivateActions.determineChanges);
         },
 
         [Me.Actions.changeRulesetVoter]: (
@@ -282,35 +299,72 @@ export namespace RulesetsModuleImpl {
                 };
                 commit(Mutations.updateSetRules, targetSetRules);
             }
-            dispatch(PrivateActions.determineModifiedSetRules);
+            dispatch(PrivateActions.determineChanges);
         },
 
-        [PrivateActions.determineModifiedSetRules]: (
-            { commit, dispatch, state },
+        [PrivateActions.determineChanges]: (
+            { commit, dispatch, state, rootState },
         ): void => {
-            const modifiedSetRulesIds: string [] = 
-                _.values(state.normalizedRulesets.entities.setRules).filter(setRules => {
-                    const backupSetRules = state.backupNormalizedRulesets.entities.setRules[setRules.id];
-                    return (
-                        !backupSetRules
-                        || _.xor(setRules.rulesets, backupSetRules.rulesets).length > 0
-                        || setRules.rulesets.filter(rulesetId => {
-                            const ruleset = state.normalizedRulesets.entities.rulesets[rulesetId];
-                            const backupRuleset = state.backupNormalizedRulesets.entities.rulesets[rulesetId];
-                            return !backupRuleset
-                                || !_.isEqual(_.omit(ruleset, "id", "rules"), _.omit(backupRuleset, "id", "rules"))
-                                || _.xor(ruleset.rules, backupRuleset.rules).length > 0
-                                || ruleset.rules.filter(ruleId => {
-                                    const rule = state.normalizedRulesets.entities.rules[ruleId];
-                                    const backupRule = state.backupNormalizedRulesets.entities.rules[ruleId];
-                                    return !backupRule
-                                        || !_.isEqual(_.omit(rule, "id"), _.omit(backupRule, "id"));
+            commit(Mutations.updateOperationsToBePublished, { loading: true, error: "", operations: {} });
+            (async () => {
+                try {
+                    const modifiedSetRulesIds: string [] = 
+                        _.values(state.normalizedRulesets.entities.setRules).filter(setRules => {
+                            const backupSetRules = state.backupNormalizedRulesets.entities.setRules[setRules.id];
+                            return (
+                                !backupSetRules
+                                || _.xor(setRules.rulesets, backupSetRules.rulesets).length > 0
+                                || setRules.rulesets.filter(rulesetId => {
+                                    const ruleset = state.normalizedRulesets.entities.rulesets[rulesetId];
+                                    const backupRuleset = state.backupNormalizedRulesets.entities.rulesets[rulesetId];
+                                    return !backupRuleset
+                                        || !_.isEqual(_.omit(ruleset, "id", "rules"), _.omit(backupRuleset, "id", "rules"))
+                                        || _.xor(ruleset.rules, backupRuleset.rules).length > 0
+                                        || ruleset.rules.filter(ruleId => {
+                                            const rule = state.normalizedRulesets.entities.rules[ruleId];
+                                            const backupRule = state.backupNormalizedRulesets.entities.rules[ruleId];
+                                            return !backupRule
+                                                || !_.isEqual(_.omit(rule, "id"), _.omit(backupRule, "id"));
+                                        }).length > 0
                                 }).length > 0
-                        }).length > 0
-                    );
-                })
-                .map(setRules => setRules.id);
-            commit(Mutations.updateModifiedSetRulesArray, { modifiedSetRulesIds: modifiedSetRulesIds });
+                            );
+                        })
+                        .map(setRules => setRules.id);
+                    commit(Mutations.updateModifiedSetRulesArray, { modifiedSetRulesIds: modifiedSetRulesIds });
+                    
+                    delayedOperationsTBPUpdater.execute(async () => {
+                        try {
+                            const protocol = Wise.constructDefaultProtocol();
+                            const delegator = d((rootState as any).user.username);
+                            const opsForAll: { [ setRulesId: string ]: { ops: steem.OperationWithDescriptor []; error: string; }} = {};
+
+                            const denormalizedSRFV: SetRulesForVoter [] = normalizer.denormalizeSetRules(
+                                modifiedSetRulesIds, state.normalizedRulesets
+                            );
+                            denormalizedSRFV.forEach((srfv, index) => {
+                                try {
+                                    const opsForVoter = RulesUpdater.getUploadRulesetsForVoterOps(
+                                        protocol, delegator, srfv.voter, srfv.rulesets
+                                    );
+                                    opsForAll[modifiedSetRulesIds[index]] = { ops: opsForVoter, error: "" };
+                                }
+                                catch(error) {
+                                    opsForAll[modifiedSetRulesIds[index]] = { ops: [], error: error + "" };
+                                }
+                            });
+                            commit(Mutations.updateOperationsToBePublished, { loading: false, error: "", operations: opsForAll });
+                        }
+                        catch(error) {
+                            console.error(error);
+                            commit(Mutations.updateOperationsToBePublished, { loading: false, error: error + "", operations: {} });
+                        }
+                    });
+                }
+                catch(error) {
+                    console.error(error);
+                    commit(Mutations.updateOperationsToBePublished, { loading: false, error: error + "", operations: {} });
+                }
+            })();
         }
     };
 

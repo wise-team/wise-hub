@@ -40,13 +40,20 @@
                 </p>
             </div>
             <div class="card-footer p-1 bg-secondary text-light rounded">
-                <b-btn v-if="canVote" v-b-toggle="unique + '-collapse-vote'" variant="primary" size="sm" class="m-1 mr-3" disabled>
+                <b-btn v-if="canVote" v-b-toggle="unique + '-collapse-vote'" 
+                    variant="primary" size="sm" class="m-1 mr-3" 
+                    disabled v-b-tooltip.hover title="This feature is not implemented yet. Stay tuned!"
+                >
                     Vote
                 </b-btn>
-                <b-btn v-b-toggle="unique + '-collapse-copy'" variant="light" size="sm" class="m-1" disabled>
+                <b-btn v-b-toggle="unique + '-collapse-copy'" variant="light" size="sm" class="m-1" 
+                    disabled v-b-tooltip.hover title="This feature is not implemented yet. Stay tuned!"
+                >
                     Copy
                 </b-btn>
-                <b-btn v-b-toggle="unique + '-collapse-ask'" variant="light" size="sm" class="m-1 mr-3" disabled>
+                <b-btn v-b-toggle="unique + '-collapse-ask'" variant="light" size="sm" class="m-1 mr-3" 
+                    disabled  v-b-tooltip.hover title="This feature is not implemented yet. Stay tuned!"
+                >
                     Ask
                 </b-btn>
 
@@ -102,7 +109,6 @@ import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 import * as _ from "lodash";
 
 import BehindPanel from "../controls/BehindPanel.vue";
-import RuleComponent from "./RuleComponent.vue";
 import HorizontalRuleComponent from "./HorizontalRuleComponent.vue";
 import AskForRulesetActionComponent from "./actions/AskForRulesetActionComponent.vue";
 import ChangeRulesetVoterActionComponent from "./actions/ChangeRulesetVoterActionComponent.vue";
@@ -166,7 +172,6 @@ export default Vue.extend({
         addIcon() { return icons.add },
     },
     components: {
-        RuleComponent,
         HorizontalRuleComponent,
         BehindPanel,
         AskForRulesetActionComponent,

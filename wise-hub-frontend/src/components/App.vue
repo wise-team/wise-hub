@@ -60,6 +60,7 @@ export default Vue.extend({
 
 .main-container {
     min-height: 500px;
+    margin-bottom: 4rem;
 }
 
 @media (min-height: 850px) {
