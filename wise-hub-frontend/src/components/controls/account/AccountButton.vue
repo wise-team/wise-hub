@@ -1,7 +1,8 @@
-<!-- src/components/controls/ProfileButton.vue -->
+<!-- src/components/controls/account/AccountButton.vue -->
 <template>
-    <b-navbar-nav class="ml-auto profile-button">
-        <b-nav-item v-if="isLoggedIn">
+    <!-- when user is logged in -->
+    <b-navbar-nav v-if="isLoggedIn" class="ml-auto profile-button">
+        <b-nav-item>
             <div class="steem-avatar" v-if="accountOrEmpty.length > 0">
                 <img :src="'https://steemitimages.com/u/' + accountOrEmpty + '/avatar'" alt="Voter avatar" />
             </div>
@@ -9,39 +10,35 @@
 
             <span class="steemconnect-error-msg">{{ errorMessage }}</span>
         </b-nav-item>
-        <b-nav-item-dropdown v-if="isLoggedIn" class="profile-section">
+        <b-nav-item-dropdown class="profile-section">
             <template slot="button-content">
                 <em class="username">@{{ username }}</em>
             </template>
             <b-dropdown-item href="#">Settings</b-dropdown-item>
             <b-dropdown-item @click="logout">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
-
-        <span v-if="!isLoggedIn">
-            <span class="steem-account-ig">
-                <b-input-group prepend="@">
-                    <b-form-input type="text" placeholder="Steem account" 
-                        v-b-tooltip.hover title="Tell us who are you if you don't want to log in"
-                        v-model="usernameInputModel"
-                    ></b-form-input>
-                    <b-input-group-append>
-                        <a class="btn btn-secondary" :href="loginUrl" v-b-tooltip.hover title="Optional: SteemConnect login is not required">
-                            (SC login)
-                        </a>
-                    </b-input-group-append>
-                </b-input-group>
-            </span>
-        </span>
     </b-navbar-nav>
+
+    <!-- when user is not logged in -->
+    <b-nav-form v-else class="justify-content-end">
+        <b-form-input class="account-username-input" 
+            type="text" placeholder="Steem account" 
+            v-b-tooltip.hover title="Tell us who are you if you don't want to log in"
+            v-model="usernameInputModel"
+        ></b-form-input>
+        <a class="btn btn-outline-secondary ml-2" :href="loginUrl" v-b-tooltip.hover title="Optional: SteemConnect login is not required">
+            or SC login
+        </a>
+    </b-nav-form>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { icons } from "../../icons";
-import { SteemConnectModule } from "../../store/modules/steemconnect/SteemConnectModule";
-import { s } from "../../store/store";
-import { d } from "../../util/util";
-import { UserModule } from "../../store/modules/user/UserModule";
+import { icons } from "../../../icons";
+import { SteemConnectModule } from "../../../store/modules/steemconnect/SteemConnectModule";
+import { s } from "../../../store/store";
+import { d } from "../../../util/util";
+import { UserModule } from "../../../store/modules/user/UserModule";
 
 export default Vue.extend({
     props: [],
@@ -57,10 +54,13 @@ export default Vue.extend({
     computed: {
         usernameInputModel: {
             get(): string {
-                return s(this.$store).state.user.username;
+                const accountName = s(this.$store).state.user.username;
+                return accountName.length > 0 ? ("@" + s(this.$store).state.user.username) : "";
             },
             set(value: string): void {
-                s(this.$store).dispatch(UserModule.Actions.setUsername, { username: value || "" });
+                s(this.$store).dispatch(UserModule.Actions.setUsername, { 
+                    username: value ? value.replace(/@/iu, "") : ""
+                });
             }
         },
         isLoggedIn(): boolean {
@@ -108,5 +108,9 @@ export default Vue.extend({
 
 .steemconnect-error-msg {
     color: red;
+}
+
+.account-username-input {
+    max-width: 7rem;
 }
 </style>

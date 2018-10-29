@@ -21,6 +21,9 @@ import faPlug from "@fortawesome/fontawesome-free-solid/faPlug";
 import faChartLine from "@fortawesome/fontawesome-free-solid/faChartLine";
 import faPlus from "@fortawesome/fontawesome-free-solid/faPlus";
 import faTrashAlt from "@fortawesome/fontawesome-free-solid/faTrashAlt";
+import faBook from "@fortawesome/fontawesome-free-solid/faBook";
+import faExternalLinkAlt from "@fortawesome/fontawesome-free-solid/faExternalLinkAlt";
+
 
 import { Rule } from "steem-wise-core";
 
@@ -32,7 +35,8 @@ export const icons = {
     notice: faCircle,
     add: faPlus,
     delete: faTrashAlt,
-
+    manual: faBook,
+    externalLink: faExternalLinkAlt,
 
     // brands
     github: faGithub,

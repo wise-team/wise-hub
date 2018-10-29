@@ -6,7 +6,7 @@
                 <p class="text-muted">
                     Vote delegation system for 
                     <span v-if="username.length > 0">@{{ username }}</span>
-                    <span v-else>Steem blockchain</span>
+                    <span v-else>Steem</span>
                 </p>
             </div>
         </div>
