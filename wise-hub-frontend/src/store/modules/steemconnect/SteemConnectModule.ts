@@ -25,5 +25,6 @@ export namespace SteemConnectModule {
     export class Getters {
         public static getLoginUrl: string = localName("getLoginUrl");
         public static isLoggedIn: string = localName("isLoggedIn");
+        public static isLoading: string = localName("isLoading");
     };
 }

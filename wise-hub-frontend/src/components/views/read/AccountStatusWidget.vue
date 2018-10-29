@@ -102,7 +102,13 @@ export default Vue.extend({
 
 .you-and-wise img {
     display: inline-block;
-    height: 8rem;
+    height: 4rem;
+}
+
+@media (min-width: 992px) { 
+    .you-and-wise img {
+        height: 6rem;
+    }
 }
 
 .you-and-wise .avatar {

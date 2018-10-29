@@ -130,6 +130,7 @@ export namespace SteemConnectModuleImpl {
     const getters: GetterTree<Me.State, Me.State> = {
         [Me.Getters.getLoginUrl]: (state: Me.State): string => SteemConnectApiHelper.getLoginUrl(),
         [Me.Getters.isLoggedIn]: (state: Me.State): boolean => state.loggedIn,
+        [Me.Getters.isLoading]: (state: Me.State): boolean => state.loggedIn && !state.account,
     };
 
 

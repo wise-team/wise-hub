@@ -20,6 +20,6 @@ export namespace UserModule {
     }
 
     export class Getters {
-        public static isLoggedIn: string = localName("isLoggedIn");
+        public static isLoading: string = localName("isLoading");
     };
 }

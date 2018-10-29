@@ -1,6 +1,7 @@
 import { MutationTree, ActionTree, GetterTree, Module } from "vuex";
 
 import { UserModule as Me } from "./UserModule";
+import { SteemConnectModule } from "../steemconnect/SteemConnectModule";
 
 export namespace UserModuleImpl {
     /**
@@ -27,6 +28,7 @@ export namespace UserModuleImpl {
         public static setError =  Me.localName("setError");
         public static setLoggedIn = Me.localName("setLoggedIn");
         public static setLoginMethod = Me.localName("setLoginMethod");
+        public static setLoading = Me.localName("setLoading");
     }
 
     const mutations: MutationTree<Me.State> = {
@@ -89,6 +91,8 @@ export namespace UserModuleImpl {
      * Getters
      */
     const getters: GetterTree<Me.State, Me.State> = {
+        [Me.Getters.isLoading]: (state: Me.State, getters: any, rootState: any, rootGetters: any): boolean => 
+            rootGetters[SteemConnectModule.Getters.isLoading]
     };
 
 

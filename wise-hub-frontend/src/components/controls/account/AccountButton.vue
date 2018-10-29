@@ -2,7 +2,7 @@
 <template>
     <!-- when user is logged in -->
     <b-navbar-nav v-if="isLoggedIn" class="ml-auto profile-button">
-        <b-nav-item>
+        <b-nav-item class="avatar-item">
             <div class="steem-avatar" v-if="accountOrEmpty.length > 0">
                 <img :src="'https://steemitimages.com/u/' + accountOrEmpty + '/avatar'" alt="Voter avatar" />
             </div>
@@ -10,7 +10,9 @@
 
             <span class="steemconnect-error-msg">{{ errorMessage }}</span>
         </b-nav-item>
-        <b-nav-item-dropdown class="profile-section">
+        <b-nav-item-dropdown class="profile-section" right
+        extra-toggle-classes="btn btn-secondary profile-section-toggle-btn"
+        >
             <template slot="button-content">
                 <em class="username">@{{ username }}</em>
             </template>
@@ -21,6 +23,7 @@
 
     <!-- when user is not logged in -->
     <b-nav-form v-else class="justify-content-end">
+        <span v-if="isLoading"><font-awesome-icon :icon="loadingIcon" spin />&nbsp;</span>
         <b-form-input class="account-username-input" 
             type="text" placeholder="Steem account" 
             v-b-tooltip.hover title="Tell us who are you if you don't want to log in"
@@ -52,6 +55,9 @@ export default Vue.extend({
         },
     },
     computed: {
+        isLoading(): boolean {
+            return s(this.$store).getters[UserModule.Getters.isLoading];
+        },
         usernameInputModel: {
             get(): string {
                 const accountName = s(this.$store).state.user.username;
@@ -86,6 +92,16 @@ export default Vue.extend({
 </script>
 
 <style>
+.profile-button .avatar-item {
+    display: none;
+}
+
+@media (min-width: 992px) { 
+    .profile-button .avatar-item {
+        display: list-item;
+    }
+}
+
 .profile-button .steem-avatar {
     height: 1rem;
     width: 4rem;
@@ -112,5 +128,9 @@ export default Vue.extend({
 
 .account-username-input {
     max-width: 7rem;
+}
+
+.profile-section-toggle-btn {
+    color: white !important;
 }
 </style>
