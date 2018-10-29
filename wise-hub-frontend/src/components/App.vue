@@ -1,27 +1,26 @@
 <!-- src/components/App.vue -->
 <template>
-    <b-container class="main-container">
-        <b-row>
-            <b-col>
-                <header-component />
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col>
-                <navigation-component />
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col class="router-view-container">
-                <router-view></router-view>
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col>
-                <footer-component />
-            </b-col>
-        </b-row>
-    </b-container>
+    <div id="main">
+        <b-container class="main-container">
+            <b-row>
+                <b-col>
+                    <header-component />
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col>
+                    <navigation-component />
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col class="router-view-container">
+                    <router-view></router-view>
+                </b-col>
+            </b-row>
+        </b-container>
+
+        <footer-component />
+    </div>
 </template>
 
 <script lang="ts">
@@ -53,5 +52,25 @@ export default Vue.extend({
 <style>
 .router-view-container {
     margin-top: 1rem;
+}
+
+#main {
+    width: 100%;
+}
+
+.main-container {
+    min-height: 500px;
+}
+
+@media (min-height: 850px) {
+    .main-container {
+        min-height: 650px;
+    }
+}
+
+@media (min-height: 110px) {
+    .main-container {
+        min-height: 800px;
+    }
 }
 </style>
