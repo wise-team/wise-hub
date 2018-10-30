@@ -6,14 +6,14 @@
                 <div class="p-2 mt-3 text-center text-small w-100">
                     <strong>More info</strong>, star &amp; fork on
                         <b-button variant="secondary" size="sm"
-                            :href="'https://github.com/' + wise.config.repository.github.organization + '/' + wise.repository.name">
-                        <font-awesome-icon :icon="githubIcon" /> {{ wise.config.repository.github.organization + '/' + wise.repository.name }}
+                            :href="'https://github.com/' + githubOrganization + '/' + repositoryName">
+                        <font-awesome-icon :icon="githubIcon" /> {{ githubOrganization + '/' + repositoryName }}
                     </b-button>
                     <p> </p>
                     <p style="font-size: 0.75rem;">
                         Copyright &copy; 2018-{{ new Date().getFullYear() }}
-                        by <a :href="'https://steemit.com/@' + wise.config.team.steem.account">@{{ wise.config.team.steem.account }}</a>
-                        Under {{ wise.config.license.code }} license.
+                        by <a :href="'https://steemit.com/@' + wiseTeamSteemAccount">@{{ wiseTeamSteemAccount }}</a>
+                        Under {{ licenseCode }} license.
                     </p>
                 </div>
             </b-row>
@@ -24,14 +24,16 @@
 <script lang="ts">
 import Vue from "vue";
 import { icons } from "../icons";
-import { data as wise } from "../wise-config.gen";
 import { d } from "../util/util";
 
 export default Vue.extend({
     props: [],
     data() {
         return {
-            wise: wise
+            githubOrganization: /*§ §*/ "wise-team" /*§ ' "' + data.config.repository.github.organization + '" ' §.*/,
+            repositoryName: /*§ §*/ "wise-hub" /*§ ' "' + data.repository.name + '" ' §.*/,
+            wiseTeamSteemAccount: /*§ §*/ "wise-team" /*§ ' "' + data.config.team.steem.account + '" ' §.*/,
+            licenseCode: /*§ §*/ "MIT" /*§ ' "' + data.config.license.code + '" ' §.*/,
         };
     },
     methods: {

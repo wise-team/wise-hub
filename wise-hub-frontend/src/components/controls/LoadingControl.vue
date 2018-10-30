@@ -13,7 +13,6 @@
 <script lang="ts">
 import Vue from "vue";
 import { icons } from "../../icons";
-import { data as wise } from "../../wise-config.gen";
 import { d, assertString, formatBigInt, timeDifferenceStr } from "../../util/util";
 
 export default Vue.extend({

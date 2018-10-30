@@ -60,7 +60,7 @@ export default Vue.extend({
     computed: {
         setRulesArray(): NormalizedRulesets.NormalizedSetRulesForVoter [] {
             return this.ids.map((setRulesId: string) => 
-                this.$store.state.rulesets.normalizedRulesets.entities.setRules[setRulesId]);
+                s(this.$store).state.rulesets.normalizedRulesets.entities.setRules[setRulesId]);
         },
         operationsLoading(): boolean {
             return s(this.$store).state.rulesets.operationsToBePublished.loading;  

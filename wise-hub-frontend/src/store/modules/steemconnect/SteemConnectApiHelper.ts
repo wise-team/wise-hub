@@ -1,15 +1,14 @@
 /* tslint:disable member-ordering no-console */
 import * as sc2 from "steemconnect";
 import * as BluebirdPromise from "bluebird";
-import { data as wise } from "../../../wise-config.gen";
 import { d } from "../../../util/util";
 import { queryParams } from "../../../util/url-util";
+import { WindowContext } from "../../../WindowContext";
 
 export class SteemConnectApiHelper {
     private static LS_ACCESS_TOKEN_KEY = "ec2accesstoken";
     private static SC2_APP_ACCOUNT = "wisevote.app";
-    private static SC2_CALLBACK_URL: string = (location.hostname === "localhost" || location.hostname === "127.0.0.1" ?
-                                            "http://localhost:8080/" : wise.config.hub.url.production );
+    private static SC2_CALLBACK_URL: string = WindowContext.STEEMCONNECT_REDIRECT_URI;
     private static SC2_SCOPE: string [] = ["custom_json"];
 
     public static getLoginUrl(): string {

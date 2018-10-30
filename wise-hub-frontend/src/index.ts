@@ -1,15 +1,21 @@
 /* tslint:disable no-console */
 import Wise, { EffectuatedSetRules } from "steem-wise-core";
-import { data as wise } from "./wise-config.gen";
 import { d } from "./util/util";
 import { Log } from "./Log";
 import { BuildContext } from "./BuildContext";
 
-const repoUrl = d(wise.config.repository.github.organization) + "/" + d(wise.repository.name) + "\"";
+
+/**
+ * Configuration
+ */
+const repoUrl = /*§ §*/ "wise-team/wise-hub" /*§ ' "' + data.config.repository.github.organization + '/' + data.repository.name + '" ' §.*/;
 console.log("Steem-wise-hub. This is open source software: https://github.com/" + repoUrl);
 BuildContext.failIfMissing();
+WindowContext.failIfMissing();
 console.log("steem-wise-hub version: " + BuildContext.VERSION);
 console.log("steem-wise-core version: " + Wise.getVersion());
+console.log("Hosted in environment type: " + WindowContext.ENVIRONMENT_TYPE);
+
 if (window.location.hostname === "localhost") {
     (window as any).WISE_LOG_LEVEL = "debug";
     console.log("Localhost detected. Setting window.WISE_LOG_LEVEL=" + (window as any).WISE_LOG_LEVEL);
@@ -46,6 +52,7 @@ import TransactionDetailsView from "./components/views/transaction-details/Trans
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 import "./style.css";
+import { WindowContext } from "./WindowContext";
 
 /**
  * Initialize dependencies

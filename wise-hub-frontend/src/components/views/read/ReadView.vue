@@ -33,12 +33,14 @@
 import Vue from "vue";
 import { icons } from "../../../icons";
 import { StatusModule } from "../../../store/modules/status/StatusModule";
-import { data as wise } from "../../../wise-config.gen";
 import { s } from "../../../store/store";
 import { d, assertString, formatBigInt, timeDifferenceStr } from "../../../util/util";
 
 import AccountStatusWidget from "./AccountStatusWidget.vue";
 import GeneralStatusWidget from "./GeneralStatusWidget.vue";
+
+const articleLinkBase = /*§ §*/ "https://steemit.com/@{author}/{permlink}" /*§ ' "' + data.config.hub.visual.read.lastActivity.articleLinkBase + '" ' §.*/;
+const trxLinkBase = /*§ §*/ "https://steemd.com/tx/{trx}" /*§ ' "' + data.config.hub.visual.read.lastActivity.trxLinkBase + '" ' §.*/;
 
 function accountIconImg(accountName: string): string {
     return "<img class=\"avatar-in-text\" src=\"https://steemitimages.com/u/" + accountName + "/avatar\" alt=\"@" + accountName + " avatar\" />";
@@ -77,7 +79,7 @@ export default Vue.extend({
                 }
                 else if (op.operation_type === "send_voteorder") {
                     text += "" + accountIconImg(op.voter) + " @" + op.voter + " asked " + accountIconImg(op.delegator) + " @" + op.delegator + " to vote on ";
-                    const articleLink = wise.config.hub.visual.read.lastActivity.articleLinkBase.split("{author}").join(op.data.author).split("{permlink}").join(op.data.permlink);
+                    const articleLink = articleLinkBase.split("{author}").join(op.data.author).split("{permlink}").join(op.data.permlink);
                     text += "<a href=\"" + articleLink + "\">" + op.data.author + "/" + op.data.permlink + "</a> ";
                     text += " with weight " + Math.round(op.data.weight/100) + "%";
                     text += " basing on ruleset named \"" + op.data.rulesetName + "\"";
@@ -94,7 +96,7 @@ export default Vue.extend({
                 }
                 text += ". ";
 
-                text +=  "Transaction: <a rel=\"noopener noreferrer nofollow\" target=\"_blank\" href=\"" + wise.config.hub.visual.read.lastActivity.trxLinkBase.split("{trx}").join(op.transaction_id) + "\">"
+                text +=  "Transaction: <a rel=\"noopener noreferrer nofollow\" target=\"_blank\" href=\"" + trxLinkBase.split("{trx}").join(op.transaction_id) + "\">"
                 + "#" + op.transaction_id.substring(0, 8) + "..."
                 + "</a>";
                 table.push({

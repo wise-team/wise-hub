@@ -1,13 +1,14 @@
 import Axios from "axios";
 import * as steemJs from "steem";
-import { data as wise } from "../../../wise-config.gen";
 import { d } from "../../../util/util";
 import { StatusModule } from "./StatusModule";
 import { BuildContext } from "../../../BuildContext";
+import { WindowContext } from "../../../WindowContext";
 
 export class StatusApiHelper {
-    private static ENDPOINT_URL = BuildContext.WISE_SQL_ENDPOINT_URL;
-    private static STEEM: steemJs.api.Steem = new steemJs.api.Steem({ url: wise.config.steem.defaultApiUrl });
+    private static WITNESS_ACCOUNT = /*§ §*/ "wise-team" /*§ ' "' + data.config.witness.account + '" ' §.*/;
+    private static ENDPOINT_URL = WindowContext.WISE_SQL_ENDPOINT_URL;
+    private static STEEM: steemJs.api.Steem = new steemJs.api.Steem({ url: WindowContext.STEEMD_ENDPOINT_URL });
 
     public static async loadGeneralStats(): Promise<{ operations: number; delegators: number; voters: number; }> {
         const query = "/stats";
@@ -31,12 +32,12 @@ export class StatusApiHelper {
         const result = await StatusApiHelper.STEEM.getAccountsAsync([ d(accountName) ]);
         if (result.length < 1) throw new Error("Account " + accountName + "doesnt exist!");
         else {
-            return d(result[0].witness_votes).filter((witness: string) => witness === wise.config.witness.account).length > 0;
+            return d(result[0].witness_votes).filter((witness: string) => witness === StatusApiHelper.WITNESS_ACCOUNT).length > 0;
         }
     }
 
     public static async loadLatestOperations(): Promise<StatusModule.WiseOperation []> {
-        const query = "/operations?order=moment.desc&limit=" + wise.config.hub.visual.read.lastActivity.numOfOpsToShow;
+        const query = "/operations?order=moment.desc&limit=50";
         const result = await Axios.get(StatusApiHelper.ENDPOINT_URL + query);
 
         const operations: StatusModule.WiseOperation [] = [];
