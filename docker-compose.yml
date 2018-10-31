@@ -20,4 +20,15 @@ services:
       STEEMCONNECT_REDIRECT_URI: "https://localhost:8080/"
       DOLLAR: '$$' #enables use of dollar sign in template.conf
     command: /bin/bash -c "envsubst < /etc/nginx/conf.d/mysite.template > /etc/nginx/conf.d/default.conf && cat /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
-      
+  
+  #§ d(data.config.hub.docker.services.backend.name) + ':'
+  backend:
+    build: wise-hub-backend
+    #§ 'image: ' + d(data.config.hub.docker.services.backend.image)
+    image: wise/hub-backend
+    #§ 'container_name: ' + d(data.config.hub.docker.services.backend.container)
+    container_name: wise-hub-backend
+    expose:
+      - 3000
+    environment:
+      WISE_LOG_LEVEL: debug
