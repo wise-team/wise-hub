@@ -25,7 +25,17 @@ const PORT = 3000;
 /*****************
  **     RUN     **
  *****************/
-const app = new App();
-app.app.listen(PORT, () => {
-    console.log("Express server listening on port " + PORT);
-});
+
+(async () => {
+    try {
+        const app = new App();
+        await app.init();
+
+        app.app.listen(PORT, () => {
+            console.log("Express server listening on port " + PORT);
+        });
+    }
+    catch (error) {
+        Log.log().exception(Log.level.error, error);
+    }
+ })();

@@ -28,7 +28,23 @@ services:
     image: wise/hub-backend
     #§ 'container_name: ' + d(data.config.hub.docker.services.backend.container)
     container_name: wise-hub-backend
+    cap_add:
+      - IPC_LOCK
     expose:
       - 3000
     environment:
       WISE_LOG_LEVEL: debug
+      WISE_VAULT_URL: "http://vault-dev:8200"
+      WISE_VAULT_DEV_MODE: "yes"
+
+  vault-dev:
+    image: vault
+    container_name: vault-dev
+    command: vault server -config /vault/config/local.json
+    cap_add:
+      - IPC_LOCK
+    environment:
+      - 'VAULT_API_ADDR=http://0.0.0.0:8200'
+      - 'VAULT_LOCAL_CONFIG={"backend": { "inmem": {} }, "default_lease_ttl": "168h", "max_lease_ttl": "720h", "listener": [{"tcp": {"address": "0.0.0.0:8200","tls_disable": 1}}]}'
+    ports:
+      - 127.0.0.1:8200:8200

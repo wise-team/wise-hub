@@ -7,13 +7,14 @@
     "node": ">=10.12"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc && npm run tslint",
+    "build": "rm -rf dist && tsc",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@types/steem-js-alpha": "https://github.com/wise-team/types-for-steem-js/raw/master/bin/types-steem-js-alpha-latest.tgz",
+    "axios": "^0.18.0",
     "bluebird": "^3.5.2",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",

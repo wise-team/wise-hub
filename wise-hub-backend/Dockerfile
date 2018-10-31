@@ -1,11 +1,13 @@
 #§ 'FROM node:' + data.config.npm.node.version + '-alpine'
 FROM node:10.12-alpine
 
-
-ADD . /app/
 WORKDIR /app/
 
+ADD package.json package-lock.json /app/
 RUN npm install
+
+
+ADD . /app/
 RUN npm run build
 
 CMD node dist/index.js
