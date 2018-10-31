@@ -6,6 +6,7 @@
 
     <title>WISE for steem: hub</title>
     <style type="text/css">
+        html, body { margin: 0; padding: 0; }
         .loading-info {
             text-align: center;
             position: fixed;
@@ -51,17 +52,22 @@
 </head>
 <body>
     <script type="text/javascript">
-        if (!window._WINDOW_CONTEXT) {
-            // follow declarations in src/WindowContext.ts
-            window._WINDOW_CONTEXT = {
-                ENVIRONMENT_TYPE: "development",
-                WISE_SQL_ENDPOINT_URL: /*§ §*/ "https://sql.wise.vote/" /*§ ' "' + data.config.sql.url.production + '" ' §.*/,
-                STEEMD_ENDPOINT_URL: /*§ §*/ "https://api.steemit.com" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/,
-                STEEMCONNECT_REDIRECT_URI: "https://localhost:8080/",
-            };
+        // follow declarations in src/WindowContext.ts
+        window._WINDOW_CONTEXT = {
+            ENVIRONMENT_TYPE: "development",
+            WISE_SQL_ENDPOINT_URL: /*§ §*/ "https://sql.wise.vote/" /*§ ' "' + data.config.sql.url.production + '" ' §.*/,
+            STEEMD_ENDPOINT_URL:/*§ §*/ "https://api.steemit.com" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/,
+            STEEMCONNECT_REDIRECT_URI: "https://localhost:8080/",
+        };
+        const nginxSSIWiseDynamicContext = '<!--#echo var="wise_dynamic_context_json" encoding="none" -->';
+        if (nginxSSIWiseDynamicContext.indexOf("<!--") !== 0) {
+            window._WINDOW_CONTEXT = JSON.parse(nginxSSIWiseDynamicContext);
         }
     </script>
     <div id="environment-info" style="width: 100%; padding: 0.5rem; background: yellow; color: black; border-bottom: 2px solid #ddd; display: none;"></div>
+   
+
+
     <div id="app">
         <div class="loading-info">
             <h1>WISE</h1>
@@ -75,6 +81,8 @@
                 or contact us by email: <strong><!--§ data.config.team.securityEmail §-->jedrzejblew@gmail.com<!--§ §.--></strong>.</p>
         </div>
     </div>
+
+
     <script type="text/javascript">
         (() => {
             if (!window._WINDOW_CONTEXT || window._WINDOW_CONTEXT.ENVIRONMENT_TYPE !== "production") {
@@ -86,5 +94,5 @@
     </script>
 
     <!-- Prayer: Gloria Patri, et Filio, et Spiritui Sancto, sicut erat in principio et nunc et semper et in saecula saeculorum. Amen. In te, Domine, speravi: non confundar in aeternum. -->
-<script type="text/javascript" src="/dist/wise-hub.js?273e72e8a4b0c5c08ceb"></script></body>
+<script type="text/javascript" src="/dist/wise-hub.js?f67162ebe409c0b8390d"></script></body>
 </html>

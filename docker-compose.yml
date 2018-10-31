@@ -1,8 +1,23 @@
 version: "3"
 
 services:
-  frontend: #§< data.config.hub.docker.services.frontend.name + ':'
-    container_name: wise-hub-frontend #§< 'container_name: ' + data.config.hub.docker.services.frontend.container
-    build: 
-      context: ./wise-hub-frontend
-    image: wise/wise-hub-frontend #§< 'image: ' + data.config.hub.docker.services.frontend.image
+  #§ data.config.hub.docker.services.nginx.name + ':'
+  nginx:
+    image: nginx
+    #§ 'container_name: ' + data.config.hub.docker.services.frontend.container
+    container_name: wise-hub-frontend
+    volumes:
+      - ./nginx/site.template.conf:/etc/nginx/conf.d/mysite.template:ro
+      - .:/srv:ro
+    ports:
+      - "8080:80"
+    environment:
+      WISE_ENVIRONMENT_TYPE: development
+      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
+      WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
+      #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
+      STEEMD_ENDPOINT_URL: https://api.steemit.com
+      STEEMCONNECT_REDIRECT_URI: "https://localhost:8080/"
+      DOLLAR: '$$' #enables use of dollar sign in template.conf
+    command: /bin/bash -c "envsubst < /etc/nginx/conf.d/mysite.template > /etc/nginx/conf.d/default.conf && cat /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
+      

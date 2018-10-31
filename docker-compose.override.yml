@@ -1,10 +1,1 @@
 version: "3"
-
-services:
-  frontend: #§< data.config.hub.docker.services.frontend.name + ':'
-    build:
-      args:
-        #§ 'wise_sql_endpoint_url: "' + data.config.sql.url.production + '"'
-        wise_sql_endpoint_url: "https://sql.wise.vote/"
-    ports:
-      - "8090:8090"
