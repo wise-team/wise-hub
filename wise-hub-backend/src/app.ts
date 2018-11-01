@@ -1,15 +1,22 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
+import * as Redis from "ioredis";
+import { common } from "./common.gen";
 import { Vault } from "./lib/vault/Vault";
 
 export class App {
     public app: express.Application;
+    private redis: Redis.Redis;
     private vault: Vault;
 
     constructor() {
         this.app = express();
         this.config();
         this.routes();
+
+        const redisUrl = process.env.REDIS_URL;
+        if (!redisUrl) throw new Error("Env REDIS_URL is missing.");
+        this.redis = new Redis(redisUrl);
 
         const vaultAddr = process.env.WISE_VAULT_URL;
         if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
@@ -52,7 +59,8 @@ export class App {
                 sealed: vaultStatus.sealed
             };
 
-            respObj.publicSecret = await this.vault.getSecret("hub/public/status");
+            respObj.publicSecret = await this.vault.getSecret("/hub/public/status");
+            respObj.daemon = await this.redis.hgetall(common.redis.daemonStatus.key);
 
             res.send(JSON.stringify(respObj));
         });

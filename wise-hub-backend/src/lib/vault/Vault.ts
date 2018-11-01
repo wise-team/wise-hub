@@ -50,8 +50,21 @@ export class Vault {
     }
 
     public async getSecret(secretPath: string): Promise<any> {
-        const resp =  await this.call("GET", "/v1/secret/" + secretPath, {});
-        return resp.data;
+        if (secretPath.substring(0, 1) !== "/") throw new Error("Secret path must start with \"/\"");
+        const resp =  await this.call("GET", "/v1/secret" + secretPath, {});
+        return d(resp.data.data);
+    }
+
+    public async setSecret(secretPath: string, secret: any) {
+        if (secretPath.substring(0, 1) !== "/") throw new Error("Secret path must start with \"/\"");
+        const resp =  await this.call("PUT", "/v1/secret" + secretPath, secret);
+        if (resp.status !== 204) throw new Error("Error while setting the secret. Status is not 204");
+    }
+
+    public async deleteSecret(secretPath: string) {
+        if (secretPath.substring(0, 1) !== "/") throw new Error("Secret path must start with \"/\"");
+        const resp =  await this.call("DELETE", "/v1/secret" + secretPath, {});
+        if (resp.status !== 204) throw new Error("Error while deleting the secret. Status is not 204");
     }
 
     public async call(method: "GET" | "POST" | "PUT" | "DELETE", path: string, data: any, token: string = this.token): Promise<AxiosResponse> {
@@ -74,6 +87,10 @@ export class Vault {
         const initResp = await Axios.post(this.vaultAddr + "/v1/sys/init", { secret_shares: 1, secret_threshold: 1 });
         const rootToken = d(initResp.data.root_token);
         const unsealKeyBase64 = d(initResp.data.keys_base64[0]);
+
+        Log.log().info("VAULT_ROOT_TOKEN=\"" + rootToken + "\"");
+        Log.log().info("Enter this vault:");
+        Log.log().info("$ docker exec -it vault-dev sh -c \"vault login " + rootToken + " && sh\"");
 
         // unseal
         Log.log().debug("Unseal vault (/v1/sys/unseal)");
@@ -105,7 +122,7 @@ export class Vault {
         await this.login(roleId, roleSecret);
 
         Log.log().debug("Create secret");
-        await this.call("POST", "secret/hub/public/status", { "login_time": new Date().toISOString() });
+        await this.setSecret("/hub/public/status", { "login_time": new Date().toISOString() });
 
         Log.log().info("Vault dev mode init done");
     }

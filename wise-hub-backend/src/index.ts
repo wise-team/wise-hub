@@ -31,8 +31,9 @@ const PORT = 3000;
         const app = new App();
         await app.init();
 
+        Log.log().info("Initialization done.");
         app.app.listen(PORT, () => {
-            console.log("Express server listening on port " + PORT);
+            Log.log().info("Express server listening on port " + PORT);
         });
     }
     catch (error) {
