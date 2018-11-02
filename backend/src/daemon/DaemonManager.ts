@@ -22,7 +22,7 @@ export class DaemonManager {
         console.log("Starting from block " + startBlock);
 
         const daemon = new Daemon(this.redis, this.delegatorManager, this.apiHelper);
-        await daemon.run();
+        await daemon.run(startBlock);
     }
 
     public async determineStartBlock() {

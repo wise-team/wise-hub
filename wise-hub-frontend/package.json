@@ -1,6 +1,6 @@
 {
   "name": "steem-wise-hub-frontend",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Cool & handy web interface for Wise: the frontend",
   "engines": {
     "node": ">=10.12"
@@ -47,7 +47,7 @@
     "lodash": "^4.17.11",
     "normalizr": "^3.3.0",
     "steem": "^0.7.2",
-    "steem-wise-core": "^3.0.1",
+    "steem-wise-core": "^3.0.2",
     "steemconnect": "^2.0.0",
     "uuid": "^3.3.2",
     "vue": "^2.5.17",

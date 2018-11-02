@@ -1,11 +1,14 @@
 import { Vault } from "../lib/vault/Vault";
 import * as Redis from "ioredis";
+import * as _ from "lodash";
 import { common } from "../common/common";
 
 export class DelegatorManager {
     private vault: Vault;
     private redis: Redis.Redis;
     private delegators: string [] = [];
+    private onDelegatorAddListeners: ((delegator: string) => any) [] = [];
+    private onDelegatorDelListeners: ((delegator: string) => any) [] = [];
 
     public constructor(vault: Vault, redis: Redis.Redis) {
         this.vault = vault;
@@ -26,10 +29,37 @@ export class DelegatorManager {
         });
     }
 
+    public onDelegatorAdd(listener: (delegator: string) => any) {
+        this.onDelegatorAddListeners.push(listener);
+    }
+
+    public onDelegatorDel(listener: (delegator: string) => any) {
+        this.onDelegatorDelListeners.push(listener);
+    }
+
     public async reloadDelegators() {
-        this.delegators = await this.redis.smembers(common.redis.delegators);
+        const newDelegatorList = await this.redis.smembers(common.redis.delegators);
+
+        const deleted = _.difference(this.delegators, newDelegatorList);
+        const added = _.difference(newDelegatorList, this.delegators);
+        this.delegators = newDelegatorList;
+
+        deleted.forEach(delegator => {
+            console.log("Delete delegator " + delegator);
+            this.onDelegatorDelListeners.forEach(listener => listener(delegator));
+        });
+
+        added.forEach(delegator => {
+            console.log("Add delegator " + delegator);
+            this.onDelegatorAddListeners.forEach(listener => listener(delegator));
+        });
+
         console.log("Delegators: " + JSON.stringify(this.delegators, undefined, 2));
 
         setTimeout(() => { this.reloadDelegators(); }, 1000 * 3600 * 1);
+    }
+
+    public hasDelegator(account: string): boolean {
+        return this.delegators.indexOf(account) !== -1;
     }
 }

@@ -10,6 +10,8 @@ export const common = {
                 lag_update_time_iso: "lag_update_time_iso"
             }
         },
+        rules: "hub:daemon:rules",
+        daemonErrors: "hub:daemon:errors",
         delegators: "hub:delegators",
         channels: {
             delegators: {
