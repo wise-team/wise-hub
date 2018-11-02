@@ -1,0 +1,44 @@
+{
+    "unseal": {
+      "keys": [
+        "89bd1681fb8e09147c334d7cec520ac39536b53f927dbd70acc24583181f823705",
+        "21b4eda5b7beba01416c646ee6eb95b0cc73d93c57aadb62a6ed06318073a3dd69",
+        "36472d44c857a3adfd4ad093e2f63a201fffe1cbdcdce79fa2ac7f8c7e4b401751",
+        "74306383615c786ebd025c7d844b5ed77521b3dac32dd371c40283583719b4a603"
+      ],
+      "keys_base64": [
+        "ib0WgfuOCRR8M0187FIKw5U2tT+Sfb1wrMJFgxgfgjcF",
+        "IbTtpbe+ugFBbGRu5uuVsMxz2TxXqttipu0GMYBzo91p",
+        "NkctRMhXo639StCT4vY6IB//4cvc3Oefoqx/jH5LQBdR",
+        "dDBjg2FceG69Alx9hEte13Uhs9rDLdNxxAKDWDcZtKYD"
+      ]
+    },
+    "users": [
+      {
+        "username": "jblew",
+        "password": "Swwtj0hp4rxJm0eJmy6LFHwso2k=",
+        "policies": [
+          "admin"
+        ]
+      },
+      {
+        "username": "noisy",
+        "password": "Bz9Kls23DFLU7VH8O+vHxVLtcTc=",
+        "policies": [
+          "admin"
+        ]
+      }
+    ],
+    "appRoles": [
+      {
+        "role": "wise-hub-api",
+        "role_id": "1ea43521-fb5d-38b8-b874-6f7e72e4c305",
+        "secret_id": "332f22ff-bfc2-3f8e-11a6-ba6198a1d942"
+      },
+      {
+        "role": "wise-hub-daemon",
+        "role_id": "26d4e640-7bd2-d327-0b57-b4d711dbefd4",
+        "secret_id": "93fb541f-353a-60d7-d343-f2ead09e110f"
+      }
+    ]
+  }
