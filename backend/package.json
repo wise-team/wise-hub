@@ -1,15 +1,13 @@
 {
   "name": "wise-hub-backend",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Backend for Wise HUB",
-  "main": "dist/index.js",
   "engines": {
     "node": ">=10.12"
   },
   "scripts": {
     "build": "rm -rf dist && tsc",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -20,7 +18,7 @@
     "express": "^4.16.4",
     "ioredis": "^4.2.0",
     "morgan": "^1.9.1",
-    "steem-wise-core": "^3.0.0"
+    "steem-wise-core": "^3.0.1"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.24",

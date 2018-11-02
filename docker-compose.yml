@@ -29,31 +29,45 @@ services:
     expose:
       - 6379
 
-  #§ d(data.config.hub.docker.services.backend.name) + ':'
-  backend:
-    build: wise-hub-backend
-    #§ 'image: ' + d(data.config.hub.docker.services.backend.image)
-    image: wise/hub-backend
-    #§ 'container_name: ' + d(data.config.hub.docker.services.backend.container)
-    container_name: wise-hub-backend
+  #§ d(data.config.hub.docker.services.api.name) + ':'
+  api:
+    build:
+      context: backend
+      dockerfile: Dockerfile.api
+    #§ 'image: ' + d(data.config.hub.docker.services.api.image)
+    image: wise/hub-api
+    # In dev mode this service also initializes dev vault
+    command: sh -c "sleep 3 && node dist/vault-dev/init-vault-dev.js && sleep 2 && node dist/api/index.js"
+    #§ 'container_name: ' + d(data.config.hub.docker.services.api.container)
+    container_name: wise-hub-api
     cap_add:
       - IPC_LOCK
     expose:
       - 3000
+    volumes: # because this service initializes dev vault, it needs to write the secrets to proper paths
+      #§ '- "./tmp' + data.config.hub.docker.services.api.appRole.secretMount + ':' + data.config.hub.docker.services.api.appRole.secretMount + ':rw"'
+      - "./tmp/secret/api-role.json:/secret/api-role.json:rw"
+      #§ '- "./tmp' + data.config.hub.docker.services.daemon.appRole.secretMount + ':' + data.config.hub.docker.services.daemon.appRole.secretMount + ':rw"'
+      - "./tmp/secret/daemon-role.json:/secret/daemon-role.json:rw"
     environment:
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.container + ':6379/'
       REDIS_URL: redis://wise-hub-redis:6379/
       WISE_LOG_LEVEL: debug
       WISE_VAULT_URL: "http://vault-dev:8200"
-      WISE_VAULT_DEV_MODE: "yes"
 
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
-    build: wise-hub-daemon
+    build:
+      context: backend
+      dockerfile: Dockerfile.daemon
     #§ 'image: ' + d(data.config.hub.docker.services.daemon.image)
     image: wise/hub-daemon
+    command: sh -c "sleep 8 && node dist/daemon/index.js"
     #§ 'container_name: ' + d(data.config.hub.docker.services.daemon.container)
     container_name: wise-hub-daemon
+    volumes:
+      #§ '- "./tmp' + data.config.hub.docker.services.daemon.appRole.secretMount + ':' + data.config.hub.docker.services.daemon.appRole.secretMount + ':rw"'
+      - "./tmp/secret/daemon-role.json:/secret/daemon-role.json:rw"
     cap_add:
       - IPC_LOCK
     environment:
@@ -61,7 +75,6 @@ services:
       REDIS_URL: redis://wise-hub-redis:6379/
       WISE_LOG_LEVEL: debug
       WISE_VAULT_URL: "http://vault-dev:8200"
-      WISE_VAULT_DEV_MODE: "yes"
 
   vault-dev:
     image: vault
@@ -75,4 +88,3 @@ services:
       - 'VAULT_LOCAL_CONFIG={"backend": { "inmem": {} }, "default_lease_ttl": "168h", "max_lease_ttl": "720h", "listener": [{"tcp": {"address": "0.0.0.0:8200","tls_disable": 1}}]}'
     ports:
       - 127.0.0.1:8200:8200
-

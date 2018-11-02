@@ -1,8 +1,8 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as Redis from "ioredis";
-import { common } from "./common.gen";
-import { Vault } from "./lib/vault/Vault";
+import { common } from "../common/common";
+import { Vault } from "../lib/vault/Vault";
 
 export class App {
     public app: express.Application;
@@ -20,9 +20,8 @@ export class App {
 
         const vaultAddr = process.env.WISE_VAULT_URL;
         if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
-        const vaultDevMode = process.env.WISE_VAULT_DEV_MODE;
-        if (!vaultDevMode) throw new Error("Env WISE_VAULT_DEV_MODE does not exist.");
-        this.vault = new Vault(vaultAddr, vaultDevMode === "yes");
+
+        this.vault = new Vault(vaultAddr);
     }
 
     public async init() {
