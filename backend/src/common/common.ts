@@ -9,6 +9,13 @@ export const common = {
                 lag_seconds: "lag_seconds",
                 lag_update_time_iso: "lag_update_time_iso"
             }
+        },
+        delegators: "hub:delegators",
+        channels: {
+            delegators: {
+                key: "channel_delegators",
+                list_changed: "list_changed"
+            }
         }
     }
 };

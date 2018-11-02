@@ -57,13 +57,36 @@ export class App {
             res.send("Hello world at /api/auth");
         });
 
-        this.app.get("/api/user/settings", async (req, res) => {
 
+
+        this.app.get("/api/test/delegator/add/:name", async (req, res) => {
+            if (!req.params.name) {
+                res.status(500);
+                res.send("Missing steem account name");
+                return;
+            }
+            const numChanged = await this.redis.sadd(common.redis.delegators, req.params.name);
+            if (numChanged > 0) await this.redis.publish(common.redis.channels.delegators.key, common.redis.channels.delegators.list_changed);
+            res.send("Added " + req.params.name);
         });
 
-        this.app.put("/api/user/settings", async (req, res) => {
-
+        this.app.get("/api/test/delegator/delete/:name", async (req, res) => {
+            if (!req.params.name) {
+                res.status(500);
+                res.send("Missing steem account name");
+                return;
+            }
+            const numChanged = await this.redis.srem(common.redis.delegators, req.params.name);
+            if (numChanged > 0) await this.redis.publish(common.redis.channels.delegators.key, common.redis.channels.delegators.list_changed);
+            res.send("Deleted " + req.params.name);
         });
+
+        this.app.get("/api/test/delegator/", async (req, res) => {
+            const delegators = await this.redis.smembers(common.redis.delegators);
+            res.send("Delegators: " + delegators.join(", "));
+        });
+
+
 
         this.app.get("/api/status", async (req, res) => {
             const respObj: any = {};

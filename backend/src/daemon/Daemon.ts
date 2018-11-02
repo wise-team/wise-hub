@@ -1,18 +1,21 @@
 import { Redis } from "ioredis";
 import { common } from "../common/common";
 import Wise, { UniversalSynchronizer, Api } from "steem-wise-core";
+import { DelegatorManager } from "./DelegatorManager";
+import { ApiHelper } from "./ApiHelper";
 
 export class Daemon {
-    private api: Api;
     private redis: Redis;
     // private synchronizer: UniversalSynchronizer;
+    private delegatorManager: DelegatorManager;
+    private apiHelper: ApiHelper;
 
-    public constructor(redis: Redis, api: Api) {
+    public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper) {
         this.redis = redis;
-        this.api = api;
-        // this.synchronizer = new UniversalSynchronizer(api, Wise.constructDefaultProtocol(), {
-        //
-        // });
+        this.apiHelper = apiHelper;
+        this.delegatorManager = delegatorManager;
+        /*this.synchronizer = new UniversalSynchronizer(api, Wise.constructDefaultProtocol(), {
+        });*/
     }
 
     public async run() {

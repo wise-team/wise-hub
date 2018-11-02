@@ -30,8 +30,12 @@ services:
     image: redis:alpine
     #§ 'container_name: ' + data.config.hub.docker.services.redis.container
     container_name: wise-hub-redis
+    command: redis-server --appendonly yes
     expose:
       - 6379
+    volumes:
+      #§ '- ' + data.config.hub.docker.services.redis.volume + ':/data:rw'
+      - wise_hub_redis:/data:rw
 
   #§ d(data.config.hub.docker.services.api.name) + ':'
   api:
@@ -87,6 +91,11 @@ services:
       #§ '- ' + data.config.hub.docker.services.daemon.secrets.appRoleSecret
       - hub-daemon-approle-secret
     environment:
+      START_FROM_BLOCK: HEAD
+      #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
+      STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io"
+      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
+      WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
       #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.daemon.appRole.role
       VAULT_APPROLE_NAME: wise-hub-daemon
       #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.daemon.secrets.appRoleId
@@ -118,3 +127,7 @@ secrets:
   hub-daemon-approle-secret:
     #§ 'file: ./secrets/' + data.config.hub.docker.services.daemon.secrets.appRoleSecret
     file: ./secrets/hub-daemon-approle-secret
+
+volumes:
+  #§ data.config.hub.docker.services.redis.volume + ':'
+  wise_hub_redis:

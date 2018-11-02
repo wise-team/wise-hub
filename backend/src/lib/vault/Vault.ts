@@ -81,9 +81,15 @@ export class Vault {
     }
 
     public async getSecret(secretPath: string): Promise<any> {
-        if (secretPath.substring(0, 1) !== "/") throw new Error("Secret path must start with \"/\"");
-        const resp =  await this.call("GET", "/v1/secret" + secretPath, {});
-        return d(resp.data.data);
+        try {
+            if (secretPath.substring(0, 1) !== "/") throw new Error("Secret path must start with \"/\"");
+            const resp =  await this.call("GET", "/v1/secret" + secretPath, {});
+            return d(resp.data.data);
+        }
+        catch (error) {
+            if (error.response.status === 404) return undefined;
+            else throw error;
+        }
     }
 
     public async setSecret(secretPath: string, secret: any) {
