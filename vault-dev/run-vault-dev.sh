@@ -3,6 +3,9 @@ set -e # fail on first error
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # parent dir of scripts dir
 cd "${DIR}"
 
+docker network rm vault-net | echo ""
+docker network create vault-net
+
 docker-compose down
 docker-compose up -d
 
@@ -37,16 +40,24 @@ curl \
     --data "{ \"key\":\"${UNSEAL_KEY_2}\" }" \
     ${VAULT_ADDR}/v1/sys/unseal
 
+#docker secret rm ${SECRETNAME_API_ROLE_ID} ; echo ""
+#docker secret rm ${SECRETNAME_API_ROLE_SECRET} ; echo ""
+#docker secret rm ${SECRETNAME_DAEMON_ROLE_ID} ; echo ""
+#docker secret rm ${SECRETNAME_DAEMON_ROLE_SECRET} ; echo ""
 
-docker secret rm ${SECRETNAME_API_ROLE_ID} ; echo ""
-docker secret rm ${SECRETNAME_API_ROLE_SECRET} ; echo ""
-docker secret rm ${SECRETNAME_DAEMON_ROLE_ID} ; echo ""
-docker secret rm ${SECRETNAME_DAEMON_ROLE_SECRET} ; echo ""
+#echo "${API_ROLE_ID}" | docker secret create ${SECRETNAME_API_ROLE_ID} -
+#echo "${API_ROLE_SECRET}" | docker secret create ${SECRETNAME_API_ROLE_SECRET} -
+#echo "${DAEMON_ROLE_ID}" | docker secret create ${SECRETNAME_DAEMON_ROLE_ID} -
+#echo "${DAEMON_ROLE_SECRET}" | docker secret create ${SECRETNAME_DAEMON_ROLE_SECRET} -
 
-echo "${API_ROLE_ID}" | docker secret create ${SECRETNAME_API_ROLE_ID} -
-echo "${API_ROLE_SECRET}" | docker secret create ${SECRETNAME_API_ROLE_SECRET} -
-echo "${DAEMON_ROLE_ID}" | docker secret create ${SECRETNAME_DAEMON_ROLE_ID} -
-echo "${DAEMON_ROLE_SECRET}" | docker secret create ${SECRETNAME_DAEMON_ROLE_SECRET} -
+SECRETS_DIR="${DIR}/../secrets"
+mkdir -p "${SECRETS_DIR}"
+printf "${API_ROLE_ID}" > "${SECRETS_DIR}/${SECRETNAME_API_ROLE_ID}"
+printf "${API_ROLE_SECRET}" > "${SECRETS_DIR}/${SECRETNAME_API_ROLE_SECRET}"
+printf "${DAEMON_ROLE_ID}" > "${SECRETS_DIR}/${SECRETNAME_DAEMON_ROLE_ID}"
+printf "${DAEMON_ROLE_SECRET}" > "${SECRETS_DIR}/${SECRETNAME_DAEMON_ROLE_SECRET}"
 
 
 echo "Unseal done"
+
+docker attach vault-dev

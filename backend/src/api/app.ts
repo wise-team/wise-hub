@@ -3,6 +3,7 @@ import * as bodyParser from "body-parser";
 import * as Redis from "ioredis";
 import { common } from "../common/common";
 import { Vault } from "../lib/vault/Vault";
+import { AppRole } from "../lib/AppRole";
 
 export class App {
     public app: express.Application;
@@ -25,7 +26,19 @@ export class App {
     }
 
     public async init() {
+        console.log("Vault init...");
         await this.vault.init();
+
+        console.log("AppRole login");
+        const policies = /*§ §*/["wise-hub-api"]/*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
+        await AppRole.login(this.vault, policies);
+
+        console.log("Get steemconnectClientId");
+        const vaultkey_for_steemconnectClientId = /*§ §*/ "/human/steemconnect/client_id" /*§ ' "' + data.config.vault.secrets.humanEnter.steemConnectClientId.key + '" ' §.*/;
+        const steemconnectClientId: { v: string } = await this.vault.getSecret(vaultkey_for_steemconnectClientId);
+
+        console.log("SC key:");
+        console.log(steemconnectClientId.v.substring(0, 5));
     }
 
     private config(): void {
@@ -40,14 +53,17 @@ export class App {
             res.send("Error: backend serves all pages at /api/...");
         });
 
-        this.app.get("/api", (req, res) => {
-            res.send("Hello world at /api");
-        });
-
         this.app.get("/api/auth", (req, res) => {
             res.send("Hello world at /api/auth");
         });
 
+        this.app.get("/api/user/settings", async (req, res) => {
+
+        });
+
+        this.app.put("/api/user/settings", async (req, res) => {
+
+        });
 
         this.app.get("/api/status", async (req, res) => {
             const respObj: any = {};

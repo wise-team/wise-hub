@@ -1,4 +1,8 @@
 version: "3.7"
+networks:
+  vault-net:
+    external:
+      name: vault-net
 
 services:
   #§ data.config.hub.docker.services.nginx.name + ':'
@@ -36,7 +40,6 @@ services:
       dockerfile: Dockerfile.api
     #§ 'image: ' + d(data.config.hub.docker.services.api.image)
     image: wise/hub-api
-    # In dev mode this service also initializes dev vault
     command: sh -c "node dist/api/index.js"
     #§ 'container_name: ' + d(data.config.hub.docker.services.api.container)
     container_name: wise-hub-api
@@ -62,6 +65,9 @@ services:
       REDIS_URL: redis://wise-hub-redis:6379/
       WISE_LOG_LEVEL: debug
       WISE_VAULT_URL: "http://vault-dev:8200"
+    networks:
+      - default
+      - vault-net
 
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
@@ -91,17 +97,24 @@ services:
       REDIS_URL: redis://wise-hub-redis:6379/
       WISE_LOG_LEVEL: debug
       WISE_VAULT_URL: "http://vault-dev:8200"
+    networks:
+      - default
+      - vault-net
 
 secrets:
   #§ data.config.hub.docker.services.api.secrets.appRoleId + ':'
   hub-api-approle-id:
-    external: true
+    #§ 'file: ./secrets/' + data.config.hub.docker.services.api.secrets.appRoleId
+    file: ./secrets/hub-api-approle-id
   #§ data.config.hub.docker.services.api.secrets.appRoleSecret + ':'
   hub-api-approle-secret:
-    external: true
+    #§ 'file: ./secrets/' + data.config.hub.docker.services.api.secrets.appRoleSecret
+    file: ./secrets/hub-api-approle-secret
   #§ data.config.hub.docker.services.daemon.secrets.appRoleId + ':'
   hub-daemon-approle-id:
-    external: true
+    #§ 'file: ./secrets/' + data.config.hub.docker.services.daemon.secrets.appRoleId
+    file: ./secrets/hub-daemon-approle-id
   #§ data.config.hub.docker.services.daemon.secrets.appRoleSecret + ':'
   hub-daemon-approle-secret:
-    external: true
+    #§ 'file: ./secrets/' + data.config.hub.docker.services.daemon.secrets.appRoleSecret
+    file: ./secrets/hub-daemon-approle-secret

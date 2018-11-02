@@ -1,5 +1,10 @@
 version: "3"
 
+networks:
+  vault-net:
+    external:
+      name: vault-net
+
 services:
   vault-dev:
     image: vault
@@ -15,3 +20,6 @@ services:
       - 'VAULT_LOCAL_CONFIG={"backend": { "file": { "path": "/vault/backend_file" } }, "default_lease_ttl": "168h", "max_lease_ttl": "720h", "listener": [{"tcp": {"address": "0.0.0.0:8200","tls_disable": 1}}]}'
     ports:
       - 127.0.0.1:8200:8200
+    networks:
+      - default
+      - vault-net
