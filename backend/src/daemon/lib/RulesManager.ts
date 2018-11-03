@@ -1,8 +1,10 @@
+import * as BluebirdPromise from "bluebird";
 import { Redis } from "ioredis";
 import { ApiHelper } from "../ApiHelper";
 import { common } from "../../common/common";
 import { Api, EffectuatedSetRules, SteemOperationNumber } from "steem-wise-core";
 import { StaticConfig } from "../StaticConfig";
+import { Log } from "../../lib/Log";
 
 
 export class RulesManager {
@@ -14,42 +16,75 @@ export class RulesManager {
         this.api = api;
     }
 
-    public async getRules(delegator: string, voter: string, moment: SteemOperationNumber): Promise<EffectuatedSetRules> {
-        const redisKey = common.redis.rules + ":" + delegator + ":" + voter;
-        const rulesJsonFromRedis = await this.redis.get(redisKey);
-        if (rulesJsonFromRedis) {
-            console.log("Loaded rules from " + redisKey);
-            return JSON.parse(rulesJsonFromRedis);
+    public async loadAllRules(delegator: string, moment: SteemOperationNumber) {
+        await this.redis.set(common.redis.rules + ":" + delegator + ":@loading", "yes");
+        console.log("Loading rulesets for " + delegator + "...");
+        const allRules: EffectuatedSetRules [] = await this.api.loadRulesets({ delegator: delegator }, moment);
+        for (let i = 0; i < allRules.length; i++) {
+            const esr = allRules[i];
+            await this.saveRules(esr.delegator, esr.voter, esr);
         }
-        else {
-            let esr: EffectuatedSetRules = {
-                rulesets: [],
-                delegator: delegator,
-                voter: voter,
-                moment: SteemOperationNumber.NEVER
-            };
-            const esrArray: EffectuatedSetRules [] = await this.api.loadRulesets({ delegator: delegator, voter: voter }, moment);
-            if (esrArray.length === 1) {
-                esr = esrArray[0];
-            }
-            else if (esrArray.length > 1) throw new Error("Too much rulesets returned from the api");
+        await this.redis.set(common.redis.rules + ":" + delegator + ":@ready", "yes");
+        await this.redis.set(common.redis.rules + ":" + delegator + ":@loading", "no");
+    }
 
-            console.log("Loaded rules from api, saving to " + redisKey);
-            this.redis.set(redisKey, JSON.stringify(esr), "EX", StaticConfig.RULES_IN_REDIS_TTL);
-            return esr;
+    public async getRules(delegator: string, voter: string, moment: SteemOperationNumber): Promise<EffectuatedSetRules> {
+        while (true) {
+            const ready = await this.redis.get(common.redis.rules + ":" + delegator + ":@ready");
+            if (ready === "yes") break;
+            else {
+                const loading = await this.redis.get(common.redis.rules + ":" + delegator + ":@loading");
+                if (loading) {
+                    Log.log().warn("Delegator " + delegator + " is not ready. Waiting 1000ms...");
+                    await BluebirdPromise.delay(1000);
+                }
+                else {
+                    await this.loadAllRules(delegator, moment);
+                }
+            }
         }
+
+        const redisKey = common.redis.rules + ":" + delegator + ":" + voter;
+        const rulesFromRedis: [string, string] [] = await this.redis.hgetall(redisKey);
+        console.log("rulesJsonFromRedis=" + JSON.stringify(rulesFromRedis, undefined, 2));
+
+        let newest: EffectuatedSetRules = {
+            rulesets: [],
+            delegator: delegator,
+            voter: voter,
+            moment: SteemOperationNumber.NEVER
+        };
+
+        for (let i = 0; i < rulesFromRedis.length; i++) {
+            const blockNum = parseInt(rulesFromRedis[i][0]);
+            if (blockNum <= moment.blockNum) {
+                if (!newest || blockNum > newest.moment.blockNum) {
+                    newest = JSON.parse(rulesFromRedis[i][1]);
+                }
+            }
+        }
+
+        return newest;
     }
 
     public async saveRules(delegator: string, voter: string, esr: EffectuatedSetRules) {
         const redisKey = common.redis.rules + ":" + delegator + ":" + voter;
-        this.redis.set(redisKey, JSON.stringify(esr), "EX", StaticConfig.RULES_IN_REDIS_TTL);
+        await this.redis.hset(redisKey, esr.moment.blockNum + "", JSON.stringify(esr));
+        console.log("save: " + JSON.stringify(esr, undefined, 2));
     }
 
-    public async clearForDelegator(delegator: string) {
-        console.log("Running costly command clearForDelegator(" + delegator + ")");
+    public async deleteAllRules(delegator: string) {
+        await this.redis.set(common.redis.rules + ":" + delegator + ":@ready", "no");
+        await this.redis.set(common.redis.rules + ":" + delegator + ":@loading", "no");
+        const startMs = Date.now();
         const pattern = common.redis.rules + ":" + delegator + ":*";
-        const keys = await this.redis.keys(pattern);
-        const removedCount = await this.redis.del(...keys);
-        console.log("Deleted " + removedCount + " items in clearForDelegator(" + delegator + ")");
+        const keys: string [] = await this.redis.keys(pattern);
+        if (keys.length > 0) {
+            if (keys.length > 500) Log.log().warn("Deleting " + keys.length + " keys!");
+            const removedCount = await this.redis.del(...keys);
+            if (removedCount !== keys.length) throw new Error("Not all keys were removed (keys.length=" + keys.length + ",removedCount=" + removedCount);
+            const ellapsedMs = Date.now() - startMs;
+            if (ellapsedMs > 20) console.log();
+        }
     }
 }

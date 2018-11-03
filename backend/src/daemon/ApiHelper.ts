@@ -43,8 +43,13 @@ export class ApiHelper {
 
     public constructApiForDaemon(): Api {
         const directBlockchain = new DirectBlockchainApi(this.getWiseProtocol(), undefined, { url: this.steemApis[0] });
-        return new WiseSQLApi(this.wiseSQLUrl, this.getWiseProtocol(), directBlockchain);
+        return directBlockchain;
     }
+
+    /*public constructApiForRules(): Api {
+        const directBlockchain = new DirectBlockchainApi(this.getWiseProtocol(), undefined, { url: this.steemApis[0] });
+        return new WiseSQLApi(this.wiseSQLUrl, this.getWiseProtocol(), directBlockchain);
+    }*/
 
     public async sendOps(ops: steemJs.OperationWithDescriptor []) {
         try {

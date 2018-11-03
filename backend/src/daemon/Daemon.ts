@@ -26,8 +26,11 @@ export class Daemon {
         this.api = this.apiHelper.constructApiForDaemon();
 
         this.rulesManager = new RulesManager(this.redis, this.api);
+        this.delegatorManager.onDelegatorAdd(addedDelegator => {
+            this.rulesManager.loadAllRules(addedDelegator, this.synchronizer.getLastProcessedOperation());
+        });
         this.delegatorManager.onDelegatorDel(deletedDelegator => {
-            this.rulesManager.clearForDelegator(deletedDelegator);
+            this.rulesManager.deleteAllRules(deletedDelegator);
         });
 
         this.validationRunner = new ValidationRunner(this.redis, this.api);
@@ -65,7 +68,7 @@ export class Daemon {
     }
 
     private onBlockProcessingFinished(blockNum: number) {
-        if (blockNum % (15 * 60 / 3) == 0) console.log("Finished processing block " + blockNum);
+        if (blockNum % 10 == 0) console.log("Finished processing block " + blockNum);
         this.redis.hset(common.redis.daemonStatus.key, common.redis.daemonStatus.props.last_processed_block, blockNum + "");
     }
 
@@ -89,7 +92,7 @@ export class Daemon {
         if (this.delegatorManager.hasDelegator(op.delegator)) {
             this.safeAsyncCall(async () => {
                 try {
-                    const esr: EffectuatedSetRules = await this.rulesManager.getRulesSupportLaterMoment(op.delegator, op.voter, op.moment);
+                    const esr: EffectuatedSetRules = await this.rulesManager.getRules(op.delegator, op.voter, op.moment);
                     const verdict: ValidationRunner.Verdict = await this.validationRunner.validate(cmd, op, esr);
                     this.voteorderCommit(cmd, op, verdict);
                 }

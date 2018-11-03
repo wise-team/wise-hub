@@ -27,9 +27,9 @@ export class ValidationRunner {
             }
         }
         catch (error) {
+            console.error("TODO better error handling in ValidationRunner");
             if (error.name === "FetchError") throw error;
             else return { pass: false, msg: error.message };
-            console.error("TODO better error handling in ValidationRunner");
             // TODO more complicated error handling
         }
     }

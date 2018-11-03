@@ -58,6 +58,17 @@ export class App {
         });
 
 
+        this.app.get("/api/rules", async (req, res) => {
+            const out: any = {};
+
+            const keys = await this.redis.keys(common.redis.rules + "*");
+            for (let i = 0; i < keys.length; i++) {
+                out[keys[i]] = await this.redis.hgetall(keys[i]);
+            }
+
+            res.send(JSON.stringify(out, undefined, 2));
+        });
+
 
         this.app.get("/api/test/delegator/add/:name", async (req, res) => {
             if (!req.params.name) {
