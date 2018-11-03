@@ -1,17 +1,14 @@
-import { Vault } from "../lib/vault/Vault";
 import * as Redis from "ioredis";
 import * as _ from "lodash";
 import { common } from "../common/common";
 
 export class DelegatorManager {
-    private vault: Vault;
     private redis: Redis.Redis;
     private delegators: string [] = [];
     private onDelegatorAddListeners: ((delegator: string) => any) [] = [];
     private onDelegatorDelListeners: ((delegator: string) => any) [] = [];
 
-    public constructor(vault: Vault, redis: Redis.Redis) {
-        this.vault = vault;
+    public constructor(redis: Redis.Redis) {
         this.redis = redis;
     }
 

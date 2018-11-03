@@ -63,7 +63,13 @@ export class App {
 
             const keys = await this.redis.keys(common.redis.rules + "*");
             for (let i = 0; i < keys.length; i++) {
-                out[keys[i]] = await this.redis.hgetall(keys[i]);
+                const key = keys[i];
+                if (key.indexOf("@") !== -1) {
+                    out[keys[i]] = await this.redis.get(keys[i]);
+                }
+                else {
+                    out[keys[i]] = await this.redis.hgetall(keys[i]);
+                }
             }
 
             res.send(JSON.stringify(out, undefined, 2));

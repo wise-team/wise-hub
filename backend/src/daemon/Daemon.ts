@@ -74,6 +74,7 @@ export class Daemon {
 
     private onError(error: Error, proceeding: boolean) {
         Log.log().exception(Log.level.error, error);
+        if (!proceeding) Log.log().error("This is an irreversible error!");
     }
 
     private onSetRules(setRules: SetRules, op: EffectuatedWiseOperation) {

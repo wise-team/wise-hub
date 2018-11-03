@@ -43,7 +43,7 @@ services:
       context: backend
       dockerfile: Dockerfile.api
     #§ 'image: ' + d(data.config.hub.docker.services.api.image)
-    image: wise/hub-api
+    image: wise/hub-backend
     command: sh -c "node dist/api/index.js"
     #§ 'container_name: ' + d(data.config.hub.docker.services.api.container)
     container_name: wise-hub-api
@@ -75,33 +75,46 @@ services:
 
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
-    build:
-      context: backend
-      dockerfile: Dockerfile.daemon
+    build: backend
     #§ 'image: ' + d(data.config.hub.docker.services.daemon.image)
-    image: wise/hub-daemon
+    image: wise/hub-backend
     command: sh -c "node dist/daemon/index.js"
     #§ 'container_name: ' + d(data.config.hub.docker.services.daemon.container)
     container_name: wise-hub-daemon
-    cap_add:
-      - IPC_LOCK
-    secrets:
-       #§ '- ' + data.config.hub.docker.services.daemon.secrets.appRoleId
-      - hub-daemon-approle-id
-      #§ '- ' + data.config.hub.docker.services.daemon.secrets.appRoleSecret
-      - hub-daemon-approle-secret
     environment:
-      START_FROM_BLOCK: HEAD
+      START_FROM_BLOCK: 27172910
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
       STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io"
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
       WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
-      #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.daemon.appRole.role
+      #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.container + ':6379/'
+      REDIS_URL: redis://wise-hub-redis:6379/
+      WISE_LOG_LEVEL: debug
+    networks:
+      - default
+
+  #§ d(data.config.hub.docker.services.publisher.name) + ':'
+  publisher:
+    build: backend
+    #§ 'image: ' + d(data.config.hub.docker.services.publisher.image)
+    image: wise/hub-backend
+    command: sh -c "node dist/publisher/index.js"
+    #§ 'container_name: ' + d(data.config.hub.docker.services.publisher.container)
+    container_name: wise-hub-publisher
+    cap_add:
+      - IPC_LOCK
+    secrets:
+      #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleId
+      - hub-publisher-approle-id
+      #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
+      - hub-publisher-approle-secret
+    environment:
+      #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.publisher.appRole.role
       VAULT_APPROLE_NAME: wise-hub-daemon
-      #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.daemon.secrets.appRoleId
-      VAULT_APPROLE_ID_FILE: /run/secrets/hub-daemon-approle-id
-      #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.daemon.secrets.appRoleSecret
-      VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-daemon-approle-secret
+      #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId
+      VAULT_APPROLE_ID_FILE: /run/secrets/hub-publisher-approle-id
+      #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
+      VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-publisher-approle-secret
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.container + ':6379/'
       REDIS_URL: redis://wise-hub-redis:6379/
       WISE_LOG_LEVEL: debug
@@ -119,14 +132,14 @@ secrets:
   hub-api-approle-secret:
     #§ 'file: ./secrets/' + data.config.hub.docker.services.api.secrets.appRoleSecret
     file: ./secrets/hub-api-approle-secret
-  #§ data.config.hub.docker.services.daemon.secrets.appRoleId + ':'
-  hub-daemon-approle-id:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.daemon.secrets.appRoleId
-    file: ./secrets/hub-daemon-approle-id
-  #§ data.config.hub.docker.services.daemon.secrets.appRoleSecret + ':'
-  hub-daemon-approle-secret:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.daemon.secrets.appRoleSecret
-    file: ./secrets/hub-daemon-approle-secret
+  #§ data.config.hub.docker.services.publisher.secrets.appRoleId + ':'
+  hub-publisher-approle-id:
+    #§ 'file: ./secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId
+    file: ./secrets/hub-publisher-approle-id
+  #§ data.config.hub.docker.services.publisher.secrets.appRoleSecret + ':'
+  hub-publisher-approle-secret:
+    #§ 'file: ./secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
+    file: ./secrets/hub-publisher-approle-secret
 
 volumes:
   #§ data.config.hub.docker.services.redis.volume + ':'

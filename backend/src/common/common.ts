@@ -13,6 +13,10 @@ export const common = {
         rules: "hub:daemon:rules",
         daemonErrors: "hub:daemon:errors",
         delegators: "hub:delegators",
+        toPublishQueue: "hub:publisher:queue:to_publish",
+        publishProcessingQueue: "hub:publisher:queue:publish_processing",
+        daemonHartbeat: "hub:hartbeat:daemon",
+        publisherHartbeat: "hub:hartbeat:publisher",
         channels: {
             delegators: {
                 key: "channel_delegators",

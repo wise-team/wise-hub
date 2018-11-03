@@ -10,8 +10,6 @@ RUN npm install
 ADD . /app/
 RUN npm run build
 
-CMD node dist/daemon/index.js
-
 ##§ '\n' + data.config.docker.generateDockerfileFrontMatter(data) + '\n' §##
 LABEL maintainer="The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>"
 LABEL vote.wise.wise-version="3.0.2"

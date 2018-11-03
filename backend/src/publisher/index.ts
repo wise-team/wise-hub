@@ -2,11 +2,9 @@ import * as fs from "fs";
 import { Log } from "../lib/Log";
 import * as Redis from "ioredis";
 import { common } from "../common/common";
-import { Daemon } from "./Daemon";
-import { DelegatorManager } from "./DelegatorManager";
+import { Vault } from "../lib/vault/Vault";
 import { AppRole } from "../lib/AppRole";
-import { DaemonManager } from "./DaemonManager";
-import { ApiHelper } from "./ApiHelper";
+import { Publisher } from "./Publisher";
 
 /******************
  ** INTIAL SETUP **
@@ -29,9 +27,10 @@ const redisUrl = process.env.REDIS_URL;
 if (!redisUrl) throw new Error("Env REDIS_URL is missing.");
 const redis = new Redis(redisUrl);
 
-const delegatorManager = new DelegatorManager(redis);
-const apiHelper = new ApiHelper();
-const daemonManager = new DaemonManager(redis, delegatorManager, apiHelper);
+const vaultAddr = process.env.WISE_VAULT_URL;
+ if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
+const vault = new Vault(vaultAddr);
+
 
 
 /*****************
@@ -39,20 +38,17 @@ const daemonManager = new DaemonManager(redis, delegatorManager, apiHelper);
  *****************/
 (async () => {
     try {
-        Log.log().info("Initialising daemon....");
+        Log.log().info("Initialising publisher....");
 
+        await vault.init();
+        const requiredPolicies = /*§ §*/["wise-hub-daemon"]/*§ JSON.stringify(data.config.hub.docker.services.publisher.appRole.policies(data.config)) §.*/;
+        console.log("AppRole login to Vault...");
+        await AppRole.login(vault, requiredPolicies);
+        await vault.setSecret("/hub/public/status", { start_time: new Date().toISOString(), policies: requiredPolicies });
         console.log("Login successful");
 
-        console.log("ApiHelper init...");
-        await apiHelper.init();
-
-        console.log("DelegatorManager init...");
-        await delegatorManager.init(redisUrl);
-
-        Log.log().info("Daemon init done.");
-
-        console.log("Running the daemon...");
-        daemonManager.run();
+        const publisher = new Publisher(redis, vault);
+        publisher.run();
     }
     catch (error) {
         Log.log().exception(Log.level.error, error);
