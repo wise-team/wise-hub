@@ -56,6 +56,7 @@ export class ToSendQueue {
             ops: ops,
             delegator: delegator
         };
+        Log.log().cheapDebug(() => "ToSendQueue.addToPublishQueue.ops=" + JSON.stringify(otp));
         await redis.lpush(common.redis.toPublishQueue, JSON.stringify(otp));
     }
 }

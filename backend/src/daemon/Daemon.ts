@@ -8,6 +8,7 @@ import { Log } from "../lib/Log";
 import { RulesManager } from "./lib/RulesManager";
 import { ValidationRunner } from "./ValidationRunner";
 import { StaticConfig } from "./StaticConfig";
+import { ToSendQueue } from "../publisher/ToSendQueue";
 
 export class Daemon {
     private api: Api;
@@ -136,11 +137,15 @@ export class Daemon {
                 };
                 opsToSend.push(["vote", voteOp]);
             }
-            this.safeAsyncCall(async () => await this.apiHelper.sendOps(opsToSend));
+            this.safeAsyncCall(async () => await this.sendOps(op.delegator, opsToSend));
         }
         catch (error) {
             Log.log().exception(Log.level.error, error);
         }
+    }
+
+    private async sendOps(delegator: string, ops: steemJs.OperationWithDescriptor []) {
+        ToSendQueue.addToPublishQueue(this.redis, delegator, ops);
     }
 
     private safeAsyncCall(fn: () => any) {

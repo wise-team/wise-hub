@@ -1,6 +1,8 @@
 import * as steemJs from "steem";
 import Wise, { WiseSQLProtocol, EffectuatedWiseOperation, WiseSQLApi, DirectBlockchainApi, Protocol, Api } from "steem-wise-core";
 import { Log } from "../lib/Log";
+import { Redis } from "ioredis";
+import { common } from "../common/common";
 
 export class ApiHelper {
     private protocol: Protocol = Wise.constructDefaultProtocol();
@@ -50,13 +52,4 @@ export class ApiHelper {
         const directBlockchain = new DirectBlockchainApi(this.getWiseProtocol(), undefined, { url: this.steemApis[0] });
         return new WiseSQLApi(this.wiseSQLUrl, this.getWiseProtocol(), directBlockchain);
     }*/
-
-    public async sendOps(ops: steemJs.OperationWithDescriptor []) {
-        try {
-            console.log("send ops: " + JSON.stringify(ops, undefined, 2));
-        }
-        catch (error) {
-            Log.log().exception(Log.level.error, error);
-        }
-    }
 }
