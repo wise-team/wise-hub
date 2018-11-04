@@ -1,6 +1,6 @@
 import { Redis } from "ioredis";
 import { common } from "../common/common";
-import { DelegatorManager } from "./DelegatorManager";
+import { DelegatorManager } from "../lib/DelegatorManager";
 import { Daemon } from "./Daemon";
 import { ApiHelper } from "./ApiHelper";
 import { DynamicGlobalProperties } from "steem";

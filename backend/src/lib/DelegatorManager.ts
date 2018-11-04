@@ -59,4 +59,14 @@ export class DelegatorManager {
     public hasDelegator(account: string): boolean {
         return this.delegators.indexOf(account) !== -1;
     }
+
+    public static async addDelegator(redis: Redis.Redis, username: string) {
+        const numChanged = await redis.sadd(common.redis.delegators, username);
+        if (numChanged > 0) await redis.publish(common.redis.channels.delegators.key, common.redis.channels.delegators.list_changed);
+    }
+
+    public static async removeDelegator(redis: Redis.Redis, username: string) {
+        const numChanged = await redis.srem(common.redis.delegators, username);
+        if (numChanged > 0) await redis.publish(common.redis.channels.delegators.key, common.redis.channels.delegators.list_changed);
+    }
 }

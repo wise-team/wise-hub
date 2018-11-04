@@ -3,7 +3,7 @@ import { Log } from "../lib/Log";
 import * as Redis from "ioredis";
 import { common } from "../common/common";
 import { Daemon } from "./Daemon";
-import { DelegatorManager } from "./DelegatorManager";
+import { DelegatorManager } from "../lib/DelegatorManager";
 import { AppRole } from "../lib/AppRole";
 import { DaemonManager } from "./DaemonManager";
 import { ApiHelper } from "./ApiHelper";

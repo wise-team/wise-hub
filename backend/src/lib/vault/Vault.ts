@@ -100,7 +100,7 @@ export class Vault {
 
     public async deleteSecret(secretPath: string) {
         if (secretPath.substring(0, 1) !== "/") throw new Error("Secret path must start with \"/\"");
-        const resp =  await this.call("DELETE", "/v1/secret" + secretPath, {});
+        const resp =  await this.call("DELETE", "/v1/secret" + secretPath, undefined);
         if (resp.status !== 204) throw new Error("Error while deleting the secret. Status is not 204");
     }
 

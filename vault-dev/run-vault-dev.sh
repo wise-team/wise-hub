@@ -9,6 +9,9 @@ docker network create vault-net
 docker-compose down
 docker-compose up -d
 
+echo "Sleep 5 for the server to start up"
+sleep 5
+
 VAULT_ADDR="http://127.0.0.1:8200"
 INIT_FILE="../../secret-vault-dev/vault-dev-config.json"
 

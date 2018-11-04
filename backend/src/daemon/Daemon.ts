@@ -2,7 +2,7 @@ import * as steemJs from "steem";
 import { Redis } from "ioredis";
 import { common } from "../common/common";
 import Wise, { UniversalSynchronizer, Api, SteemOperationNumber, SetRules, EffectuatedWiseOperation, SendVoteorder, EffectuatedSetRules, ConfirmVote, WiseOperation } from "steem-wise-core";
-import { DelegatorManager } from "./DelegatorManager";
+import { DelegatorManager } from "../lib/DelegatorManager";
 import { ApiHelper } from "./ApiHelper";
 import { Log } from "../lib/Log";
 import { RulesManager } from "./lib/RulesManager";

@@ -39,9 +39,7 @@ services:
 
   #§ d(data.config.hub.docker.services.api.name) + ':'
   api:
-    build:
-      context: backend
-      dockerfile: Dockerfile.api
+    build: backend
     #§ 'image: ' + d(data.config.hub.docker.services.api.image)
     image: wise/hub-backend
     command: sh -c "node dist/api/index.js"
@@ -69,6 +67,10 @@ services:
       REDIS_URL: redis://wise-hub-redis:6379/
       WISE_LOG_LEVEL: debug
       WISE_VAULT_URL: "http://vault-dev:8200"
+      # refer this guide for session options: https://github.com/expressjs/session
+      SESSION_OPTIONS: '{ "cookie": { "secure": false }, "resave": false, "saveUninitialized": false }'
+      STEEMCONNECT_CALLBACK_URL: "http://localhost:8080/api/auth/callback"
+      LOGIN_REDIRECT_URL: "/"
     networks:
       - default
       - vault-net
@@ -82,7 +84,7 @@ services:
     #§ 'container_name: ' + d(data.config.hub.docker.services.daemon.container)
     container_name: wise-hub-daemon
     environment:
-      START_FROM_BLOCK: 27172910
+      START_FROM_BLOCK: HEAD
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
       STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io"
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
@@ -144,3 +146,5 @@ secrets:
 volumes:
   #§ data.config.hub.docker.services.redis.volume + ':'
   wise_hub_redis:
+
+# TODO: do not forget about restart always on production

@@ -23,5 +23,17 @@ export const common = {
                 list_changed: "list_changed"
             }
         }
+    },
+    vault: {
+        secrets: {
+            sessionSecret: /*§ §*/ "/generated/session/salt" /*§ ' "' + data.config.vault.secrets.generated.sessionSalt + '" ' §.*/,
+            steemConnectClientSecret: /*§ §*/ "/human/steemconnect/client_id" /*§ ' "' + data.config.vault.secrets.humanEnter.steemConnectClientId.key + '" ' §.*/,
+            hub: /*§ §*/{
+  "users": "/hub/steemconnect/users",
+  "userProfiles": "/hub/steemconnect/users/profiles",
+  "accessTokens": "/hub/steemconnect/users/access_tokens",
+  "refreshTokens": "/hub/steemconnect/users/refresh_tokens"
+}/*§ JSON.stringify(d(data.config.hub.vault.secrets), undefined, 2) §.*/,
+        }
     }
 };
