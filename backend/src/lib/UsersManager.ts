@@ -6,6 +6,8 @@ import { d } from "./util";
 import * as jwt_decode from "jwt-decode";
 import * as sc2 from "steemconnect";
 import { DelegatorManager } from "./DelegatorManager";
+import Axios from "axios";
+import { Log } from "./Log";
 
 
 export class UsersManager {
@@ -81,6 +83,55 @@ export class UsersManager {
 
         await this.deleteAccessToken(username);
         await this.deleteRefreshToken(username);
+    }
+
+    public async constructOfflineSteemConnect(username: string, scope: string []): Promise<sc2.SteemConnectV2> {
+        let accessToken = await this.getAccessToken(username);
+        if (!accessToken) throw new Error("User \"" + username + "\" not found!");
+
+        scope.forEach(requiredScopeElem => {
+            if (d(accessToken).payload.scope.indexOf(requiredScopeElem) === -1) {
+                throw new Error("This access token does not allow " + requiredScopeElem + " in its scope");
+            }
+        });
+
+        if ((Date.now() / 1000) >= accessToken.payload.exp || this.options.debug_refreshAccessTokenOnEverySCConstruct) {
+            accessToken = await this.refreshAccessToken(username, scope);
+        }
+
+        const sc =  sc2.Initialize({
+            app: this.oauth2ClientId,
+            callbackURL: undefined,
+            scope: scope,
+        });
+        sc.setAccessToken(accessToken.token);
+        return sc;
+    }
+
+    private async refreshAccessToken(username: string, scope: string []): Promise<{ token: string, payload: AccessTokenJWTPayload }> {
+        if (!this.options.canIssueRefreshTokens) throw new Error("This users manager has canIssueRefreshTokens set to false.");
+        const refreshToken = await this.getRefreshToken(username);
+        if (!refreshToken) throw new Error("User " + username + " does not have a refresh token");
+
+        scope.forEach(requiredScopeElem => {
+            if (refreshToken.payload.scope.indexOf(requiredScopeElem) === -1) {
+                throw new Error("This refresh token does not allow " + requiredScopeElem + " in its scope");
+            }
+        });
+
+        const steemConnectSecret: { v: string } = await this.vault.getSecret(common.vault.secrets.steemConnectClientSecret);
+        if (!steemConnectSecret) throw new Error("Could not get SteemConnect client secret");
+
+        const resp = await Axios.post(this.oauth2Settings.tokenUrl, {
+            refresh_token: refreshToken.token,
+            client_id: this.oauth2ClientId,
+            client_secret: d(steemConnectSecret.v),
+            scope: refreshToken.payload.scope.join(",")
+        });
+        const data: { access_token: string } = d(resp.data);
+        const accessToken = d(data.access_token);
+        await this.setAccessToken(username, accessToken);
+        return d(await this.getAccessToken(username));
     }
 
     public async saveUserSettings(username: string, settings: UserSettings): Promise<User> {
@@ -187,6 +238,7 @@ export class UsersManager {
 
 export interface UsersManagerOptions {
     canIssueRefreshTokens: boolean;
+    debug_refreshAccessTokenOnEverySCConstruct?: boolean;
 }
 
 interface AccessTokenJWTPayload {
@@ -203,6 +255,7 @@ interface AccessTokenJWTPayload {
  */
 function isAccessTokenJWTPayload(o: object): o is AccessTokenJWTPayload {
     return (<AccessTokenJWTPayload>o).role !== undefined
+    && (<AccessTokenJWTPayload>o).role === "app"
     && (<AccessTokenJWTPayload>o).proxy !== undefined
     && (<AccessTokenJWTPayload>o).user !== undefined
     && (<AccessTokenJWTPayload>o).scope !== undefined
@@ -224,6 +277,7 @@ interface RefreshTokenJWTPayload {
  */
 function isRefreshTokenJWTPayload(o: object): o is RefreshTokenJWTPayload {
     return (<RefreshTokenJWTPayload>o).role !== undefined
+    && (<AccessTokenJWTPayload>o).role === "refresh"
     && (<RefreshTokenJWTPayload>o).proxy !== undefined
     && (<RefreshTokenJWTPayload>o).user !== undefined
     && (<RefreshTokenJWTPayload>o).scope !== undefined
