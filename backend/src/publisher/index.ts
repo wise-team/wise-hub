@@ -42,10 +42,10 @@ const vault = new Vault(vaultAddr);
 
         await vault.init();
         const requiredPolicies = /*§ §*/["wise-hub-daemon"]/*§ JSON.stringify(data.config.hub.docker.services.publisher.appRole.policies(data.config)) §.*/;
-        console.log("AppRole login to Vault...");
+        Log.log().debug("AppRole login to Vault...");
         await AppRole.login(vault, requiredPolicies);
         await vault.setSecret("/hub/public/status", { start_time: new Date().toISOString(), policies: requiredPolicies });
-        console.log("Login successful");
+        Log.log().info("AppRole login successful");
 
         const publisher = new Publisher(redis, vault);
         publisher.run();

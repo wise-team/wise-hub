@@ -39,11 +39,11 @@ import App from "./components/App.vue";
 import { store, Actions } from "./store/store";
 import ReadView from "./components/views/read/ReadView.vue";
 import VoteView from "./components/views/vote/VoteView.vue";
-import DelegateView from "./components/views/delegate/DelegateView.vue";
+import DelegateView from "./components/delegate/DelegateView.vue";
 import NotFoundView from "./components/views/NotFoundView.vue";
 import RulesetsView from "./components/rulesets/RulesetsView.vue";
 import RulesetsEditorView from "./components/views/rulesets-editor/RulesetsEditorView.vue";
-import AccountView from "./components/views/account/AccountView.vue";
+import AccountView from "./components/account/AccountView.vue";
 import TransactionDetailsView from "./components/views/transaction-details/TransactionDetailsView.vue";
 
 /**

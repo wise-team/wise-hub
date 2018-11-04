@@ -23,7 +23,7 @@ import faPlus from "@fortawesome/fontawesome-free-solid/faPlus";
 import faTrashAlt from "@fortawesome/fontawesome-free-solid/faTrashAlt";
 import faBook from "@fortawesome/fontawesome-free-solid/faBook";
 import faExternalLinkAlt from "@fortawesome/fontawesome-free-solid/faExternalLinkAlt";
-
+import faTimes  from "@fortawesome/fontawesome-free-solid/faTimes";
 
 import { Rule } from "steem-wise-core";
 
@@ -37,6 +37,9 @@ export const icons = {
     delete: faTrashAlt,
     manual: faBook,
     externalLink: faExternalLinkAlt,
+    enabled: faCheck,
+    disabled: faTimes,
+    success: faCheck,
 
     // brands
     github: faGithub,

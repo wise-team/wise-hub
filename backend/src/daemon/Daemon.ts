@@ -57,18 +57,18 @@ export class Daemon {
     }
 
     private onStart() {
-        console.log("Synchronizer started");
+        Log.log().info("Synchronizer started");
     }
 
     private onFinished() {
-        console.log("Synchronizer stop");
+        Log.log().info("Synchronizer stop");
     }
 
     private onBlockProcessingStart(blockNum: number) {
     }
 
     private onBlockProcessingFinished(blockNum: number) {
-        if (blockNum % 10 == 0) console.log("Finished processing block " + blockNum);
+        if (blockNum % 30 == 0) Log.log().info("Finished processing block " + blockNum);
         this.redis.hset(common.redis.daemonStatus.key, common.redis.daemonStatus.props.last_processed_block, blockNum + "");
     }
 
@@ -107,10 +107,10 @@ export class Daemon {
 
     private async voteorderCommit(cmd: SendVoteorder, op: EffectuatedWiseOperation, verdict: ValidationRunner.Verdict) {
         if (verdict.pass) {
-            console.log("PASS VOTEORDER: " + JSON.stringify(op, undefined, 2));
+            Log.log().cheapDebug(() => "PASS VOTEORDER: " + JSON.stringify(op, undefined, 2));
         }
         else {
-            console.log("REJECT VOTEORDER(msg=" + verdict.msg + "): " + JSON.stringify(op, undefined, 2));
+            Log.log().cheapDebug(() => "REJECT VOTEORDER(msg=" + verdict.msg + "): " + JSON.stringify(op, undefined, 2));
         }
 
         const opsToSend: steemJs.OperationWithDescriptor[] = [];

@@ -17,14 +17,14 @@
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link class="nav-link" to="/vote">
-                        <font-awesome-icon :icon="voteIcon" /> Vote
-                    </router-link>
-                </li>
-                <li class="nav-item">
                     <router-link class="nav-link" to="/delegate">
                         <font-awesome-icon :icon="delegateIcon" /> Delegate
                     </router-link>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" :href="votingpageUrl" target="_blank" rel="nofollow noopener">
+                        <font-awesome-icon :icon="voteIcon" /> Vote
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a :href="manualUrl" class="nav-link" target="_blank" rel="nofollow noopener">
@@ -51,14 +51,15 @@ export default Vue.extend({
     data() {
         return {
             uuid: uniqueId(),
-            manualUrl: /*§ §*/ "https://wise.vote/introduction" /*§ ' "' + data.config.manual.url.production + '" ' §.*/
+            manualUrl: /*§ §*/ "https://wise.vote/introduction" /*§ ' "' + data.config.manual.url.production + '" ' §.*/,
+            votingpageUrl: /*§ §*/ "https://wise.vote/voting-page/" /*§ ' "' + data.config.votingPage.url.production + '" ' §.*/,
         };
     },
     methods: {
     },
     computed: {
         username(): string {
-            return s(this.$store).state.user.username || "";
+            return s(this.$store).state.auth.username || "";
         },
         delegateIcon() { return icons.delegator; },
         voteIcon() { return icons.voter; },

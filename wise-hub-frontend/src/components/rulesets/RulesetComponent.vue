@@ -164,10 +164,10 @@ export default Vue.extend({
                 && Array.isArray(this.ruleset.rules)
         },
         canEdit(): boolean {
-            return s(this.$store).state.user.username === this.setRules.delegator;
+            return s(this.$store).state.auth.username === this.setRules.delegator;
         },
         canVote(): boolean {
-            return s(this.$store).state.user.username === this.setRules.voter;
+            return s(this.$store).state.auth.username === this.setRules.voter;
         },
         addIcon() { return icons.add },
     },

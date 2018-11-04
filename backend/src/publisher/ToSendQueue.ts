@@ -1,6 +1,7 @@
 import { Redis } from "ioredis";
 import { common } from "../common/common";
 import * as steemJs from "steem";
+import { Log } from "../lib/Log";
 
 export class ToSendQueue {
     private redis: Redis;
@@ -17,7 +18,7 @@ export class ToSendQueue {
             dirtyListElementsPresent = (!!resp);
             if (dirtyListElementsPresent) dirtyCount++;
         }
-        console.log("Pushed unfinished publish operations to queue: " + dirtyCount);
+        Log.log().info("Pushed dirty (ones that were still processed at shutdown) publish operations to queue: " + dirtyCount);
     }
 
     public async hasIncomingOperations(): Promise<boolean> {

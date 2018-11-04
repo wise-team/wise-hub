@@ -4,6 +4,7 @@ import { UsersManager } from "../../lib/UsersManager";
 import { asyncReq, d } from "../lib/util";
 import { AuthManager } from "../auth/AuthManager";
 import { User, isUserSettings } from "../../common/model/User";
+import { common } from "../../common/common";
 
 export class UserRoutes {
     private redis: Redis;
@@ -19,23 +20,37 @@ export class UserRoutes {
     }
 
     public routes(app: express.Application) {
-        app.get("/api/user",
+        app.get(common.urls.api.user.base,
             AuthManager.isUserAuthenticated,
             (req, res) => asyncReq(res, async () => {
-                const user: User = d(req.user);
-                res.send(JSON.stringify(user));
+                const requser: User = d(req.user);
+                const user: User | undefined = await this.usersManager.getUser(d(requser.account));
+                if (!user) {
+                    res.status(404);
+                    res.send("Not found.");
+                }
+                else {
+                    res.send(JSON.stringify(user));
+                }
             })
         );
 
-        app.get("/api/user/settings",
+        app.get(common.urls.api.user.settings,
             AuthManager.isUserAuthenticated,
             (req, res) => asyncReq(res, async () => {
-                const user: User = d(req.user);
-                res.send(JSON.stringify(user.settings));
+                const requser: User = d(req.user);
+                const user: User | undefined = await this.usersManager.getUser(d(requser.account));
+                if (!user) {
+                    res.status(404);
+                    res.send("Not found.");
+                }
+                else {
+                    res.send(JSON.stringify(user.settings));
+                }
             })
         );
 
-        app.post("/api/user/settings",
+        app.post(common.urls.api.user.settings,
             AuthManager.isUserAuthenticated,
             (req, res) => asyncReq(res, async () => {
                 const userSettings = req.body;

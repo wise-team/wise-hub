@@ -35,9 +35,10 @@
 <script lang="ts">
 import Vue from "vue";
 import { icons } from "../../../icons";
-import { SteemConnectModule } from "../../../store/modules/steemconnect/SteemConnectModule";
+import { AuthModule } from "../../../store/modules/auth/AuthModule";
 import { s } from "../../../store/store";
 import { d, assertString, formatBigInt } from "../../../util/util";
+import { AuthModuleApiHelper } from "../../../store/modules/auth/AuthModuleApiHelper";
 
 export default Vue.extend({
     props: [],
@@ -64,7 +65,7 @@ export default Vue.extend({
               return formatBigInt(s(this.$store).state.status.generalStats.operations);
         },
         loginUrl(): string {
-            return s(this.$store).getters[SteemConnectModule.Getters.getLoginUrl];
+            return AuthModuleApiHelper.getLoginUrl(AuthModuleApiHelper.LoginScope_EMPTY);
         },
         loadingIcon() { return icons.loading; },
         errorIcon() { return icons.error; },

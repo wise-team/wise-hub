@@ -69,6 +69,7 @@ services:
       WISE_VAULT_URL: "http://vault-dev:8200"
       # refer this guide for session options: https://github.com/expressjs/session
       SESSION_OPTIONS: '{ "cookie": { "secure": false }, "resave": false, "saveUninitialized": false }'
+      #§ 'STEEMCONNECT_CALLBACK_URL: "http://localhost:8080' + data.config.hub.urls.api.auth.callback + '"'
       STEEMCONNECT_CALLBACK_URL: "http://localhost:8080/api/auth/callback"
       LOGIN_REDIRECT_URL: "/"
     networks:
@@ -84,7 +85,7 @@ services:
     #§ 'container_name: ' + d(data.config.hub.docker.services.daemon.container)
     container_name: wise-hub-daemon
     environment:
-      START_FROM_BLOCK: HEAD
+      START_FROM_BLOCK: HEAD_RESET
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
       STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io"
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production

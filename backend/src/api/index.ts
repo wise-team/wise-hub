@@ -33,9 +33,16 @@ const PORT = 3000;
         const app = new App();
         await app.init();
 
-        Log.log().info("Initialization done.");
-        app.app.listen(PORT, () => {
+        Log.log().info("WiseHUB backend/api done.");
+        const srv = app.app.listen(PORT, () => {
             Log.log().info("Express server listening on port " + PORT);
+        });
+
+        process.on("SIGTERM", function () {
+            srv.close(function () {
+                Log.log().info("Graceful shutdown");
+                process.exit(0);
+            });
         });
     }
     catch (error) {

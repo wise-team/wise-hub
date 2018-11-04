@@ -1,7 +1,14 @@
 
+import * as steem from "steem";
+
 export interface User {
     account: string;
-    profile: any;
+    profile: undefined | {
+        name: string;
+        account: steem.AccountInfo;
+        scope: string [];
+        user_metadata: any;
+    };
     scope: string [];
     settings: UserSettings;
 }

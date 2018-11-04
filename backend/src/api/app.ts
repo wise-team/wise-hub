@@ -11,6 +11,8 @@ import { AuthManager } from "./auth/AuthManager";
 import { UsersManager } from "../lib/UsersManager";
 import { StatusRoutes } from "./routes/StatusRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
+import * as helmet from "helmet";
+import { Log } from "../lib/Log";
 
 export class App {
     public app: express.Application;
@@ -52,12 +54,12 @@ export class App {
     }
 
     public async init() {
-        console.log("Vault init...");
         await this.vault.init();
 
-        console.log("AppRole login");
+        Log.log().debug("AppRole login...");
         const policies = /*§ §*/["wise-hub-api"]/*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
         await AppRole.login(this.vault, policies);
+        Log.log().info("AppRole login success");
 
         await this.usersManager.init();
 
@@ -86,6 +88,9 @@ export class App {
         const resolvedSessionOptions = _.merge({}, this.sessionOptions, sessionDynamicOpts);
 
         this.app.use(ExpressSession(resolvedSessionOptions));
+        this.app.use(helmet());
+        this.app.use(helmet.noCache());
+        this.app.disable("etag"); // prevent express from sending 304
 
         await this.authManager.configure(this.app);
     }

@@ -33,6 +33,9 @@ const delegatorManager = new DelegatorManager(redis);
 const apiHelper = new ApiHelper();
 const daemonManager = new DaemonManager(redis, delegatorManager, apiHelper);
 
+process.on("SIGTERM", () => {
+    daemonManager.stop();
+});
 
 /*****************
  **     RUN     **
@@ -41,17 +44,11 @@ const daemonManager = new DaemonManager(redis, delegatorManager, apiHelper);
     try {
         Log.log().info("Initialising daemon....");
 
-        console.log("Login successful");
-
-        console.log("ApiHelper init...");
         await apiHelper.init();
-
-        console.log("DelegatorManager init...");
         await delegatorManager.init(redisUrl);
 
         Log.log().info("Daemon init done.");
 
-        console.log("Running the daemon...");
         daemonManager.run();
     }
     catch (error) {

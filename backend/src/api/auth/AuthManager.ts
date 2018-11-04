@@ -3,6 +3,7 @@ import * as BluebirdPromise from "bluebird";
 import * as express from "express";
 import * as passport from "passport";
 import * as sc2 from "steemconnect";
+import { d } from "../lib/util";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as OAuth2Strategy } from "passport-oauth2";
 import { User, defaultUserSettings } from "../../common/model/User";
@@ -11,6 +12,7 @@ import { common } from "../../common/common";
 import { asyncReq } from "../lib/util";
 import { UsersManager } from "../../lib/UsersManager";
 import { Log } from "../../lib/Log";
+import { AccountInfo } from "steem";
 
 export class AuthManager {
     private oauth2ClientId: string = /*§ §*/"wisevote.app"/*§ JSON.stringify(data.config.steemconnect.settings.client_id)  §.*/;
@@ -19,7 +21,6 @@ export class AuthManager {
   "tokenUrl": "https://steemconnect.com/api/oauth2/token",
   "tokenRevocationUrl": "https://steemconnect.com/api/oauth2/token/revoke"
 }/*§ §.*/;
-    private defaultScope: string [] = [ "custom_json", "offline" ];
 
     private steemconnectCallbackUrl: string;
     private loginRedirectUrl: string;
@@ -49,15 +50,13 @@ export class AuthManager {
                 clientID: this.oauth2ClientId,
                 clientSecret: steemConnectSecret.v,
                 callbackURL: this.steemconnectCallbackUrl,
-                scope: this.defaultScope,
+                scope: [],
                 scopeSeparator: ","
             } as any,
             (accessToken: string, refreshToken: string, profile: any,  cb: (error: any, user: any) => void) => {
                 (async () => {
                     try {
-                        console.log("Performing login");
                         const user: User = await this.performLogin(accessToken, refreshToken);
-                        console.log("Call back");
                         return cb(undefined, user);
                     }
                     catch (error) {
@@ -81,11 +80,19 @@ export class AuthManager {
     }
 
     public routes(app: express.Application) {
-        app.get("/api/auth/",
-            passport.authenticate("oauth2")
+        app.get(common.urls.api.auth.login.scope.empty,
+            passport.authenticate("oauth2", { scope: [ "login" ] })
         );
 
-        app.get("/api/auth/callback",
+        app.get(common.urls.api.auth.login.scope.custom_json,
+            passport.authenticate("oauth2", { scope: [ "custom_json" ] })
+        );
+
+        app.get(common.urls.api.auth.login.scope.custom_json_vote_offline,
+            passport.authenticate("oauth2", { scope: [ "custom_json", "vote", "offline" ] })
+        );
+
+        app.get(common.urls.api.auth.callback,
             passport.authenticate("oauth2", {
                 failureRedirect: this.loginRedirectUrl + "?msg=" + encodeURIComponent("Login failed"),
                 successRedirect: this.loginRedirectUrl + "?msg=" + encodeURIComponent("Login succeeded"),
@@ -97,27 +104,27 @@ export class AuthManager {
             }
         );
 
-        app.get("/api/auth/test_login",
+        app.get(common.urls.api.auth.test_login,
             AuthManager.isUserAuthenticated,
             (req, res) => {
                 res.send(JSON.stringify({ authorized: true }));
             }
         );
 
-        app.get("/api/auth/logout",
+        app.get(common.urls.api.auth.logout,
             AuthManager.isUserAuthenticated,
             (req, res) => asyncReq(res, async () => {
-                await this.usersManager.logout(req.user);
-                const sc2 = this.createEphemericSC2();
-                await new Promise<any>((resolve, reject) => {
-                    sc2.revokeToken((err, result) => {
-                        if (err) reject(err);
-                        else resolve(result);
-                        console.log("REVOKE=" + JSON.stringify(result));
-                    });
-                });
                 req.logout();
-                res.send(JSON.stringify({ logout: true }));
+                res.send(JSON.stringify({ logout: true, revoke_all: false }));
+            })
+        );
+
+        app.get(common.urls.api.auth.revoke_all,
+            AuthManager.isUserAuthenticated,
+            (req, res) => asyncReq(res, async () => {
+                await this.usersManager.logout(d(req.user));
+                req.logout();
+                res.send(JSON.stringify({ logout: true, revoke_all: true }));
             })
         );
     }
@@ -131,18 +138,10 @@ export class AuthManager {
         }
     }
 
-    private createEphemericSC2(): sc2.SteemConnectV2 {
-        return sc2.Initialize({
-            app: this.oauth2ClientId,
-            callbackURL: this.steemconnectCallbackUrl,
-            scope: this.defaultScope,
-        });
-    }
-
     private async performLogin(accessToken: string, refreshToken: string): Promise<User> {
         const sc2 = this.createEphemericSC2();
         sc2.setAccessToken(accessToken);
-        const me: { account: object, user_metadata: object } =
+        const me: { name: string, account: AccountInfo, scope: string [], user_metadata: object } =
             await new Promise<any>((resolve, reject) => {
                 sc2.me((error, result) => {
                     if (error) reject(error);
@@ -150,11 +149,19 @@ export class AuthManager {
                 });
             });
         const user: User = await this.usersManager.login({
-            scope: this.defaultScope,
+            scope: [],
             account: "jblew",
             profile: me,
             settings: defaultUserSettings
         }, accessToken, refreshToken);
         return user;
+    }
+
+    private createEphemericSC2(): sc2.SteemConnectV2 {
+        return sc2.Initialize({
+            app: this.oauth2ClientId,
+            callbackURL: this.steemconnectCallbackUrl,
+            scope: [], // in this manager we do not perform any scoped operations
+        });
     }
 }

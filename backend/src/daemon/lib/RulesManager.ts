@@ -84,7 +84,7 @@ export class RulesManager {
             const removedCount = await this.redis.del(...keys);
             if (removedCount !== keys.length) throw new Error("Not all keys were removed (keys.length=" + keys.length + ",removedCount=" + removedCount);
             const ellapsedMs = Date.now() - startMs;
-            if (ellapsedMs > 20) console.log();
+            if (ellapsedMs > 20) Log.log().warn("Deleting delegator keys from redis took " + ellapsedMs + "ms");
         }
     }
 }

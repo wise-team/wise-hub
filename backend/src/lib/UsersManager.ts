@@ -4,10 +4,18 @@ import { User, defaultUserSettings, UserSettings } from "../common/model/User";
 import { common } from "../common/common";
 import { d } from "./util";
 import * as jwt_decode from "jwt-decode";
+import * as sc2 from "steemconnect";
 import { DelegatorManager } from "./DelegatorManager";
 
 
 export class UsersManager {
+    private oauth2ClientId: string = /*§ §*/"wisevote.app"/*§ JSON.stringify(data.config.steemconnect.settings.client_id)  §.*/;
+    private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/{
+  "baseAuthorizationUrl": "https://steemconnect.com/oauth2/authorize",
+  "tokenUrl": "https://steemconnect.com/api/oauth2/token",
+  "tokenRevocationUrl": "https://steemconnect.com/api/oauth2/token/revoke"
+}/*§ §.*/;
+
     private options: UsersManagerOptions;
     private vault: Vault;
     private redis: Redis;
@@ -22,6 +30,8 @@ export class UsersManager {
     }
 
     public async login(user_: User, accessToken: string, refreshToken: string): Promise<User> {
+        if (!accessToken) throw new Error("Access token is missing");
+
         const username = d(user_.account);
         let user: User = {
             account: username,
@@ -40,15 +50,35 @@ export class UsersManager {
             };
         }
 
+        if (accessToken) {
+            const tokenPayload = await this.setAccessToken(username, accessToken);
+            user.scope = tokenPayload.scope;
+        }
+        if (refreshToken) {
+            const tokenPayload = await this.setRefreshToken(username, refreshToken);
+            user.scope = tokenPayload.scope;
+        }
+
         await this.setUser(username, user);
-        if (accessToken) await this.setAccessToken(username, accessToken);
-        if (refreshToken) await this.setRefreshToken(username, refreshToken);
 
         return user;
     }
 
     public async logout(user: User) {
         const username = d(user.account);
+        const accessToken = await this.getAccessToken(username);
+
+        if (accessToken) {
+            const sc2 = this.createEphemericSC2();
+            sc2.setAccessToken(accessToken.token);
+            await new Promise<any>((resolve, reject) => {
+                sc2.revokeToken((err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+        }
+
         await this.deleteAccessToken(username);
         await this.deleteRefreshToken(username);
     }
@@ -57,17 +87,19 @@ export class UsersManager {
         const user: User | undefined = await this.getUser(username);
         if (!user) throw new Error("User \"" + username + "\" does not exist");
         user.settings = settings;
+
         await this.setUser(username, user);
         return d(await this.getUser(username));
     }
 
-    private async getUser(username: string): Promise<User | undefined> {
+    public async getUser(username: string): Promise<User | undefined> {
         const secretKey = common.vault.secrets.hub.userProfiles + "/" + username;
         const resp: { v: User } | undefined = await this.vault.getSecret(secretKey);
         return (resp ? resp.v : undefined);
     }
 
     private async setUser(username: string, user: User) {
+        // TODO user object can be a huge object. Check if encryption time in vault isnt issue
         const secretKey = common.vault.secrets.hub.userProfiles + "/" + username;
         await this.vault.setSecret(secretKey, { v: user });
 
@@ -89,9 +121,14 @@ export class UsersManager {
         return { token: d(resp.v), payload: jwtPayload as AccessTokenJWTPayload };
     }
 
-    private async setAccessToken(username: string, accessToken: string) {
+    private async setAccessToken(username: string, accessToken: string): Promise<AccessTokenJWTPayload> {
+        const jwtPayload = jwt_decode(accessToken);
+        if (!isAccessTokenJWTPayload(jwtPayload)) throw new Error("This token is not AccessTokenJWTPayload");
+
         const secretKey = common.vault.secrets.hub.accessTokens + "/" + username;
         await this.vault.setSecret(secretKey, { v: accessToken });
+
+        return jwtPayload;
     }
 
     private async deleteAccessToken(username: string) {
@@ -115,9 +152,14 @@ export class UsersManager {
         return { token: d(resp.v), payload: jwtPayload as RefreshTokenJWTPayload };
     }
 
-    private async setRefreshToken(username: string, refreshToken: string) {
+    private async setRefreshToken(username: string, refreshToken: string): Promise<RefreshTokenJWTPayload> {
+        const jwtPayload = jwt_decode(refreshToken);
+        if (!isRefreshTokenJWTPayload(jwtPayload)) throw new Error("This token is not RefreshTokenJWTPayload");
+
         const secretKey = common.vault.secrets.hub.refreshTokens + "/" + username;
         await this.vault.setSecret(secretKey, { v: refreshToken });
+
+        return jwtPayload;
     }
 
     private async deleteRefreshToken(username: string) {
@@ -129,6 +171,17 @@ export class UsersManager {
             if (error.response.status === 404) return undefined;
             else throw error;
         }
+    }
+
+    private createEphemericSC2(): sc2.SteemConnectV2 {
+        const steemconnectCallbackUrlEnv = process.env.STEEMCONNECT_CALLBACK_URL;
+        if (!steemconnectCallbackUrlEnv) throw new Error("Env STEEMCONNECT_CALLBACK_URL is missing");
+
+        return sc2.Initialize({
+            app: this.oauth2ClientId,
+            callbackURL: steemconnectCallbackUrlEnv,
+            scope: [], // in this manager we do not perform any scoped operations
+        });
     }
 }
 
@@ -175,5 +228,6 @@ function isRefreshTokenJWTPayload(o: object): o is RefreshTokenJWTPayload {
     && (<RefreshTokenJWTPayload>o).user !== undefined
     && (<RefreshTokenJWTPayload>o).scope !== undefined
     && Array.isArray((<RefreshTokenJWTPayload>o).scope)
-    && (<RefreshTokenJWTPayload>o).iat !== undefined;
+    && (<RefreshTokenJWTPayload>o).iat !== undefined
+    && (<AccessTokenJWTPayload>o).exp /* !!! */ === /* !!! */ undefined;
 }

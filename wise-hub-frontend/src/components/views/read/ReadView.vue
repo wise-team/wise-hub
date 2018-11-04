@@ -56,7 +56,7 @@ export default Vue.extend({
     },
     computed: {
         accountName(): string {
-            return d(s(this.$store).state.steemConnect).account ? d(s(this.$store).state.steemConnect.account).name : "";
+            return d(s(this.$store).state.auth.username);
         },
         isLoading(): boolean {
             return s(this.$store).state.status.latestOperations.loading

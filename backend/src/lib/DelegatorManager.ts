@@ -1,6 +1,7 @@
 import * as Redis from "ioredis";
 import * as _ from "lodash";
 import { common } from "../common/common";
+import { Log } from "./Log";
 
 export class DelegatorManager {
     private redis: Redis.Redis;
@@ -20,7 +21,6 @@ export class DelegatorManager {
         await subscriberRedis.subscribe(channelKey).then(() => {});
         subscriberRedis.on("message", (channel, message) => {
             if (channel === channelKey && message === common.redis.channels.delegators.list_changed) {
-                console.log("Got list changed message, updating delegator list");
                 this.reloadDelegators();
             }
         });
@@ -42,16 +42,16 @@ export class DelegatorManager {
         this.delegators = newDelegatorList;
 
         deleted.forEach(delegator => {
-            console.log("Delete delegator " + delegator);
+            Log.log().info("Delete delegator " + delegator);
             this.onDelegatorDelListeners.forEach(listener => listener(delegator));
         });
 
         added.forEach(delegator => {
-            console.log("Add delegator " + delegator);
+            Log.log().info("Add delegator " + delegator);
             this.onDelegatorAddListeners.forEach(listener => listener(delegator));
         });
 
-        console.log("Delegators: " + JSON.stringify(this.delegators, undefined, 2));
+        Log.log().info("Delegators: " + JSON.stringify(this.delegators, undefined, 2));
 
         setTimeout(() => { this.reloadDelegators(); }, 1000 * 3600 * 1);
     }

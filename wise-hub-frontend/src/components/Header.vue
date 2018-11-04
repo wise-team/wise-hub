@@ -27,7 +27,7 @@ export default Vue.extend({
     },
     computed: {
         username(): string {
-            return d(s(this.$store).state.user.username);
+            return d(s(this.$store).state.auth.username);
         }
     },
     components: {

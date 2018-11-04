@@ -3,14 +3,12 @@ import Vuex, { GetterTree } from "vuex";
 import { Module, ModuleTree, ActionTree, Dispatch, Commit } from "vuex";
 import createPersistedState from "vuex-persistedstate";
 
-import { SteemConnectModule } from "./modules/steemconnect/SteemConnectModule";
-import { SteemConnectModuleImpl } from "./modules/steemconnect/SteemConnectModuleImpl";
 import { StatusModule } from "./modules/status/StatusModule";
 import { StatusModuleImpl } from "./modules/status/StatusModuleImpl";
 import { RulesetsModule } from "./modules/rulesets/RulesetsModule";
 import { RulesetsModuleImpl } from "./modules/rulesets/RulesetsModuleImpl";
-import { UserModule } from "./modules/user/UserModule";
-import { UserModuleImpl } from "./modules/user/UserModuleImpl";
+import { AuthModule } from "./modules/auth/AuthModule";
+import { AuthModuleImpl } from "./modules/auth/AuthModuleImpl";
 
 Vue.use(Vuex);
 
@@ -34,7 +32,7 @@ const actions: ActionTree<State, State> = {
   [Actions.initialize]: (
       { commit, dispatch, state }, payload?: {} | undefined,
   ): void => {
-      dispatch(SteemConnectModule.Actions.initialize);
+      dispatch(AuthModule.Actions.initialize);
       dispatch(StatusModule.Actions.initialize);
   },
 };
@@ -44,24 +42,21 @@ const actions: ActionTree<State, State> = {
  * Modules
  */
 export interface Modules {
-  [SteemConnectModule.modulePathName]: Module<SteemConnectModule.State, State>;
   [StatusModule.modulePathName]: Module<StatusModule.State, State>;
   [RulesetsModule.modulePathName]: Module<RulesetsModule.State, State>;
-  [UserModule.modulePathName]: Module<UserModule.State, State>
+  [AuthModule.modulePathName]: Module<AuthModule.State, State>
 }
 const modules: Modules & ModuleTree<State> = {
-  [SteemConnectModule.modulePathName]: SteemConnectModuleImpl.steemConnectModule,
   [StatusModule.modulePathName]: StatusModuleImpl.module,
   [RulesetsModule.modulePathName]: RulesetsModuleImpl.module,
-  [UserModule.modulePathName]: UserModuleImpl.module
+  [AuthModule.modulePathName]: AuthModuleImpl.module
 };
 
 const persistentPaths: string [] = [];
-persistentPaths.push("unusedPathToBeSavedByTheVuexPersistedStateBecauseIfPathsArrayIsEmptyItSavesEverything");
-SteemConnectModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(SteemConnectModule.modulePathName+ "." + persistentPath));
+persistentPaths.push("_prevent_empty_save");
 StatusModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(StatusModule.modulePathName+ "." + persistentPath));
 RulesetsModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(RulesetsModule.modulePathName+ "." + persistentPath));
-UserModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(UserModule.modulePathName+ "." + persistentPath));
+AuthModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(AuthModule.modulePathName+ "." + persistentPath));
 
 
 /**
@@ -69,10 +64,9 @@ UserModuleImpl.persistentPaths.forEach(persistentPath => persistentPaths.push(Us
  */
 export interface Store {
   state: {
-    [SteemConnectModule.modulePathName]: SteemConnectModule.State;
     [StatusModule.modulePathName]: StatusModule.State;
     [RulesetsModule.modulePathName]: RulesetsModule.State;
-    [UserModule.modulePathName]: UserModule.State;
+    [AuthModule.modulePathName]: AuthModule.State;
   },
   dispatch: Dispatch,
   commit: Commit,

@@ -30,7 +30,7 @@ export class Publisher {
                     await BluebirdPromise.delay(StaticConfig.PUBLISH_THROTTLING_MS);
                 }
                 else {
-                    if (i % 10 == 0) console.log("No ops to publish at " + (new Date().toISOString()));
+                    if (i % 10 == 0) Log.log().info("No ops to publish at " + (new Date().toISOString()));
                 }
             }
             catch (error) {
