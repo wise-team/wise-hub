@@ -31,11 +31,12 @@ export class DaemonLog {
     }
 
     private async _emit(msg: LogMessage, delegator?: string) {
+        if (delegator && !msg.delegator) msg.delegator = delegator;
         const msgStr = JSON.stringify(msg);
+
         if (delegator) {
-            if (!msg.delegator) msg.delegator = delegator;
             const key = common.redis.daemonLogFor + ":" + delegator;
-            Log.log().debug("Push to " + key);
+            // Log.log().debug("Push to " + key);
             await this.redis.lpush(key, msgStr);
             await this.redis.ltrim(key, 0, common.daemonLog.maxHistoryLength);
         }
@@ -46,7 +47,6 @@ export class DaemonLog {
 
         const channel = common.redis.channels.realtimeKey;
         await this.redis.publish(channel, msgStr);
-        console.log("Published to " + channel + ", msg=" + msgStr);
     }
 }
 

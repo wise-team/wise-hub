@@ -13,7 +13,7 @@
                 </li>
                 <li class="nav-item">
                     <router-link class="nav-link" to="/">
-                        <font-awesome-icon :icon="trendingIcon" /> Read
+                        <font-awesome-icon :icon="trendingIcon" /> History
                     </router-link>
                 </li>
                 <li class="nav-item">
@@ -30,6 +30,11 @@
                     <a :href="manualUrl" class="nav-link" target="_blank" rel="nofollow noopener">
                         <font-awesome-icon :icon="manualIcon" /> Manual <!--<sup><font-awesome-icon :icon="externalLinkIcon" /></sup>-->
                     </a>
+                </li>
+                <li class="nav-item">
+                    <router-link class="nav-link" to="/daemon">
+                        <font-awesome-icon :icon="trendingIcon" /> Status
+                    </router-link>
                 </li>
             </b-navbar-nav>
         </b-collapse>

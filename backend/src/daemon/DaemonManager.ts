@@ -26,7 +26,7 @@ export class DaemonManager {
         this.daemonLog = daemonLog;
 
         this.api = this.apiHelper.constructApiForDaemon();
-        this.rulesManager = new RulesManager(this.redis, this.api);
+        this.rulesManager = new RulesManager(this.redis);
         this.daemon = new Daemon(this.redis, this.delegatorManager, this.apiHelper, this.api, this.rulesManager, this.daemonLog);
     }
 

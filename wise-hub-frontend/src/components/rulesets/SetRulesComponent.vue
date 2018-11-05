@@ -7,8 +7,8 @@
             <pre>{{ setRules | json }}</pre>
         </b-alert>
     </div>
-    <div v-else :class="'mb-5 p-2 mt-3 rounded setrules ' + ( modified ? 'setrules-modified' : '' )">
-        <h4 class="p-3 mb-2 setrules-title">
+    <div v-else class="mb-5 mt-3 rounded setrules">
+        <h4 class="p-2 mb-2 setrules-title">
             <span class="setrules-wise-icon">
                 <img src="/assets/images/wise/full-color-emblem.svg" alt="Wise icon" />
             </span>
@@ -16,7 +16,7 @@
             <font-awesome-icon :icon="delegatorIcon" /> {{ setRules.delegator }}
              &nbsp;&nbsp;&#8594;&nbsp;&nbsp;
              <font-awesome-icon :icon="voterIcon" /> {{ setRules.voter }}
-             <sup v-if="modified" class="sup-75 text-very-small text-danger">*to be saved</sup>
+             <!--<sup v-if="modified" class="sup-75 text-very-small text-danger">*to be saved</sup>-->
         </h4>
 
         <p v-if="rulesetsToBeDeleted.length > 0" class="text-muted">
@@ -29,19 +29,18 @@
             </ul>
         </p>
             
-        <ruleset-component
+        <ruleset-collapse-component
             v-for="rulesetId in setRules.rulesets" :key="rulesetId"
             :set-rules="setRules"
             :rulesetId="rulesetId"
-            :modified="modified"
-            class="mb-4"
+            class="ml-3 mb-3"
         />
         
-        <b-alert v-if="modified" show variant="primary">
+        <!--<b-alert v-if="modified" show variant="primary">
             <h4 class="alert-heading">Upload changes for @{{ setRules.voter }}...</h4>
             <p class="text-muted">... or scroll to the bottom to upload for all voters at once</p>
             <publish-rulesets-component :ids="[ setRulesId ]" />
-        </b-alert>
+        </b-alert>-->
     </div>
 </template>
 
@@ -54,7 +53,7 @@ import { EffectuatedSetRules } from "steem-wise-core";
 import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
 import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 
-import RulesetComponent from "./RulesetComponent.vue";
+import RulesetCollapseComponent from "./RulesetCollapseComponent.vue";
 import PublishRulesetsComponent from "./PublishRulesetsComponent.vue";
 
 
@@ -76,9 +75,6 @@ export default Vue.extend({
         }
     },
     computed: {
-        modified(): boolean {
-            return d(s(this.$store).state.rulesets.modifiedSetRules).indexOf(this.setRulesId) !== -1;
-        },
         setRulesValid(): boolean {
             return typeof this.setRules.voter !== "undefined"
                 && Array.isArray(this.setRules.rulesets)
@@ -98,7 +94,7 @@ export default Vue.extend({
         voterIcon() { return icons.voter },
     },
     components: {
-        RulesetComponent,
+        RulesetCollapseComponent,
         PublishRulesetsComponent
     },
     filters: {
@@ -120,7 +116,7 @@ export default Vue.extend({
 .setrules .setrules-wise-icon img {
     position: absolute;
     height: 4rem;
-    left: -4.75rem;
+    left: -5rem;
     top: -1rem;
 }
 

@@ -47,14 +47,14 @@ redis.subscribe(common.redis.channels.realtimeKey, (error: any, count: number) =
 });
 redis.on("message", function (channel: string, message: string) {
     try {
-        io.of(common.socketio.namespaces.general).emit("msg", message);
-        console.log("io.of(" + common.socketio.namespaces.general + ").emit(msg, " + message + ")");
+        io.to(common.socketio.rooms.general).emit("msg", message);
+        Log.log().debug("io.to(" + common.socketio.rooms.general + ").emit(msg, " + message + ")");
 
         const msgObj: any = JSON.parse(message);
         if (msgObj.delegator) {
             const delegator = msgObj.delegator;
-            io.of(common.socketio.namespaces.delegatorBase + delegator).emit("msg", message);
-            console.log("io.of(" + common.socketio.namespaces.delegatorBase + delegator + ").emit(msg, " + message + ")");
+            io.to(common.socketio.rooms.delegatorBase + delegator).emit("msg", message);
+            Log.log().debug("io.to(" + common.socketio.rooms.delegatorBase + delegator + ").emit(msg, " + message + ")");
         }
     }
     catch (error) {
@@ -72,9 +72,23 @@ app.get("/", function(req, res) {
 });
 
 io.on("connection", function(socket) {
-    Log.log().info("Client connection to realtime");
+    const query: any = socket.handshake.query;
+    const delegator = query.delegator;
+
+    let room = common.socketio.rooms.general;
+    if (delegator && delegator.length > 0 && delegator !== "undefined") {
+        room = common.socketio.rooms.delegatorBase + delegator;
+    }
+    socket.join(room, (err: any) => {
+        if (err) {
+            Log.log().error("Error while joining room " + room + ": " + err);
+            Log.log().exception(Log.level.error, err);
+        }
+        else {
+            Log.log().info("Client joined room '" + room + "'");
+        }
+    });
 });
-console.log("io on connection ok");
 
 
 

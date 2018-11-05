@@ -14,6 +14,7 @@ import { UserRoutes } from "./routes/UserRoutes";
 import * as helmet from "helmet";
 import { Log } from "../lib/Log";
 import { DaemonRoutes } from "./routes/DaemonRoutes";
+import { RulesetsRoutes } from "./routes/RulesetsRoutes";
 
 export class App {
     public app: express.Application;
@@ -28,6 +29,7 @@ export class App {
     private statusRoutes: StatusRoutes;
     private userRoutes: UserRoutes;
     private daemonRoutes: DaemonRoutes;
+    private rulesetsRoutes: RulesetsRoutes;
 
     constructor() {
         this.app = express();
@@ -54,6 +56,7 @@ export class App {
         this.statusRoutes = new StatusRoutes(this.redis, this.vault);
         this.userRoutes = new UserRoutes(this.redis, this.usersManager);
         this.daemonRoutes = new DaemonRoutes(this.redis);
+        this.rulesetsRoutes = new RulesetsRoutes(this.redis, this.usersManager);
     }
 
     public async init() {
@@ -69,6 +72,7 @@ export class App {
         await this.userRoutes.init();
         await this.statusRoutes.init();
         await this.daemonRoutes.init();
+        await this.rulesetsRoutes.init();
 
         await this.config();
         await this.routes();
@@ -108,6 +112,7 @@ export class App {
         this.statusRoutes.routes(this.app);
         this.userRoutes.routes(this.app);
         this.daemonRoutes.routes(this.app);
+        this.rulesetsRoutes.routes(this.app);
 
         this.app.get("/api/rules", async (req, res) => {
             const out: any = {};

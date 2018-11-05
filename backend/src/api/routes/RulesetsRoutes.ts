@@ -1,10 +1,14 @@
 import { Redis } from "ioredis";
 import * as express from "express";
-import { UsersManager } from "../../lib/UsersManager";
+import * as sc2 from "steemconnect";
 import { asyncReq, d } from "../lib/util";
 import { AuthManager } from "../auth/AuthManager";
 import { User, isUserSettings } from "../../common/model/User";
 import { common } from "../../common/common";
+import { RulesManager } from "../../daemon/rules/RulesManager";
+import Wise, { SteemOperationNumber, SetRulesForVoter, RulesUpdater } from "steem-wise-core";
+import { Vault } from "../../lib/vault/Vault";
+import { UsersManager } from "../../lib/UsersManager";
 
 export class RulesetsRoutes {
     private redis: Redis;
@@ -20,46 +24,31 @@ export class RulesetsRoutes {
     }
 
     public routes(app: express.Application) {
-        app.get(common.urls.api.user.base,
+        app.post("/api/rulesets/publish",
             AuthManager.isUserAuthenticated,
             (req, res) => asyncReq(res, async () => {
-                const requser: User = d(req.user);
-                const user: User | undefined = await this.usersManager.getUser(d(requser.account));
-                if (!user) {
-                    res.status(404);
-                    res.send("Not found.");
+                const delegator = d(req.user.account);
+                const srfv: SetRulesForVoter = d(req.body);
+                if (!SetRulesForVoter.isSetRulesForVoter(srfv)) {
+                    throw new Error("Payload is not SetRulesForVoter");
                 }
-                else {
-                    res.send(JSON.stringify(user));
-                }
-            })
-        );
+                const ops = RulesUpdater.getUploadRulesetsForVoterOps(
+                    Wise.constructDefaultProtocol(),
+                    delegator, d(srfv.voter), srfv.rulesets
+                );
 
-        app.get(common.urls.api.user.settings,
-            AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq(res, async () => {
-                const requser: User = d(req.user);
-                const user: User | undefined = await this.usersManager.getUser(d(requser.account));
-                if (!user) {
-                    res.status(404);
-                    res.send("Not found.");
-                }
-                else {
-                    res.send(JSON.stringify(user.settings));
-                }
-            })
-        );
+                const sc: sc2.SteemConnectV2 =
+                    await this.usersManager.constructOfflineSteemConnect(delegator, [ "custom_json" ]);
 
-        app.post(common.urls.api.user.settings,
-            AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq(res, async () => {
-                const userSettings = req.body;
-                if (!userSettings) throw new Error("Undefined payload");
-                if (!isUserSettings(userSettings)) throw new Error("Invalid user settings");
+                const resp = await new Promise<any>((resolve, reject) => {
+                    sc.broadcast(ops, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                });
 
-                const user: User = d(req.user);
-                const userAfterSave = await this.usersManager.saveUserSettings(d(user.account), userSettings);
-                res.send(JSON.stringify({ save: true, user: userAfterSave }));
+                const result: { id: string; block_num: number; trx_num: number; } = d(resp.result);
+                res.send(result);
             })
         );
     }

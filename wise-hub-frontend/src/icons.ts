@@ -24,6 +24,8 @@ import faTrashAlt from "@fortawesome/fontawesome-free-solid/faTrashAlt";
 import faBook from "@fortawesome/fontawesome-free-solid/faBook";
 import faExternalLinkAlt from "@fortawesome/fontawesome-free-solid/faExternalLinkAlt";
 import faTimes  from "@fortawesome/fontawesome-free-solid/faTimes";
+import faCaretDown  from "@fortawesome/fontawesome-free-solid/faCaretDown";
+import faCaretUp  from "@fortawesome/fontawesome-free-solid/faCaretUp";
 
 import { Rule } from "steem-wise-core";
 
@@ -40,6 +42,8 @@ export const icons = {
     enabled: faCheck,
     disabled: faTimes,
     success: faCheck,
+    dropdown: faCaretDown,
+    dropup: faCaretUp,
 
     // brands
     github: faGithub,

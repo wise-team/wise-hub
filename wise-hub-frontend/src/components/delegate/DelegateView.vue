@@ -7,6 +7,7 @@
             <daemon-settings-component />
         </div>
 
+        <h2>Daemon log</h2>
         <realtime-log-component :delegator="username" />
     </div>
     <div v-else id="delegate-view delegate-view-logged-out">

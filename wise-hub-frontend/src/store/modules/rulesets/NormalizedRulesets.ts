@@ -5,6 +5,7 @@ import * as _ from "lodash";
 export class NormalizedRulesets {
     private idIncrementer: { n: number } = { n: 0 };
     private setRulesArraySchema: normalizr.Schema;
+    private rulesetSchema: normalizr.Schema;
 
     public constructor() {
         const giveId = (idPrepender: string) => (entity: any) => { if (!entity.id) entity.id = idPrepender + (this.idIncrementer.n++); return entity; };
@@ -12,11 +13,11 @@ export class NormalizedRulesets {
         const ruleSchema = new normalizr.schema.Entity(
             "rules", {}, { processStrategy: giveId("rule") }
         );
-        const rulesetSchema = new normalizr.schema.Entity(
+        this.rulesetSchema = new normalizr.schema.Entity(
             "rulesets", { rules: [ ruleSchema ] }, { processStrategy: giveId("ruleset") }
         );
         const setRulesSchema = new normalizr.schema.Entity(
-            "setRules", { rulesets: [ rulesetSchema ] }, { processStrategy: giveId("setRules") }
+            "setRules", { rulesets: [ this.rulesetSchema ] }, { processStrategy: giveId("setRules") }
         );
         this.setRulesArraySchema = new normalizr.schema.Array(setRulesSchema);
     }
@@ -42,6 +43,19 @@ export class NormalizedRulesets {
                 })
             };
             return res;
+        });
+    }
+
+    public denormalizeRulesets(rulesetIds: string [], normalized: NormalizedRulesets.Result): Ruleset [] {
+        const denormalized = normalizr.denormalize(
+            rulesetIds, new normalizr.schema.Array(this.rulesetSchema), normalized.entities
+        );
+
+        const clonedDenormalized: Ruleset [] = _.cloneDeep(denormalized);
+        return clonedDenormalized.map((ruleset: Ruleset) => {
+            ruleset = _.omit(ruleset, "id");
+            ruleset.rules = ruleset.rules.map(rule => _.omit(rule, "id"));
+            return ruleset;
         });
     }
 

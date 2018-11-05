@@ -1,19 +1,18 @@
 import * as BluebirdPromise from "bluebird";
+import * as _ from "lodash";
 import { Redis } from "ioredis";
 import { ApiHelper } from "../ApiHelper";
 import { common } from "../../common/common";
-import { Api, EffectuatedSetRules, SteemOperationNumber } from "steem-wise-core";
+import { Api, EffectuatedSetRules, SteemOperationNumber, RulePrototyper, Ruleset } from "steem-wise-core";
 import { StaticConfig } from "../StaticConfig";
 import { Log } from "../../lib/Log";
 
 
 export class RulesManager {
     private redis: Redis;
-    private api: Api;
 
-    public constructor(redis: Redis, api: Api) {
+    public constructor(redis: Redis) {
         this.redis = redis;
-        this.api = api;
     }
 
     public async init() {
@@ -48,7 +47,7 @@ export class RulesManager {
         }*/
 
         const redisKey = common.redis.rules + ":" + delegator + ":" + voter;
-        const rulesFromRedis: [string, string] [] = await this.redis.hgetall(redisKey);
+        const rulesFromRedis: { [x: string]: string; } = await this.redis.hgetall(redisKey);
         console.log("rulesJsonFromRedis=" + JSON.stringify(rulesFromRedis, undefined, 2));
 
         let newest: EffectuatedSetRules = {
@@ -58,14 +57,18 @@ export class RulesManager {
             moment: SteemOperationNumber.NEVER
         };
 
-        for (let i = 0; i < rulesFromRedis.length; i++) {
-            const blockNum = parseInt(rulesFromRedis[i][0]);
+        const blockNums = _.keys(rulesFromRedis);
+        for (let i = 0; i < blockNums.length; i++) {
+            const blockNum = parseInt(blockNums[i]);
+            console.log("blockNum:" + blockNum + " <= " + "moment.blockNum:" + moment.blockNum + ".... = " + (blockNum <= moment.blockNum));
             if (blockNum <= moment.blockNum) {
                 if (!newest || blockNum > newest.moment.blockNum) {
-                    newest = JSON.parse(rulesFromRedis[i][1]);
+                    newest = JSON.parse(rulesFromRedis[blockNums[i]]);
                 }
             }
         }
+
+        newest.rulesets = newest.rulesets.map((ruleset: Ruleset) => RulePrototyper.prototypeRuleset(ruleset));
 
         return newest;
     }

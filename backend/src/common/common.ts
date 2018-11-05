@@ -51,9 +51,9 @@ export const common = {
         }
     },
     socketio: {
-        namespaces: {
-            general: "/general",
-            delegatorBase: "/delegator/"
+        rooms: {
+            general: "general",
+            delegatorBase: "delegator_"
         }
     },
     daemonLog: {

@@ -30,3 +30,11 @@ h1 {
 .sup-75 {
     top: -0.75em !important;
 }
+
+.bg-e6 {
+    background-color: #e6e6e6;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

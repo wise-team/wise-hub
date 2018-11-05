@@ -6,10 +6,9 @@
             <font-awesome-icon :icon="deleteIcon" /> Confirm delete
         </b-button>
         <hr />
-        <small>
-            This change is only temporary. It will disappear when you refresh the page. 
-            To make it persistent upload rulesets for this voter (violet box).
-        </small>
+        <p>
+            This change is permanent. You will not be able to undo it after you confirm
+        </p>
     </div>
 </template>
 
@@ -28,13 +27,13 @@ export default Vue.extend({
     },
     methods: {
         deleteRuleset() {
-            s(this.$store).dispatch(
+            /*s(this.$store).dispatch(
                 RulesetsModule.Actions.deleteRuleset,
                 {
                     setRulesId: this.setRulesId, 
                     rulesetId: this.ruleset.id
                 }
-            );
+            );*/
         }
     },
     computed: {

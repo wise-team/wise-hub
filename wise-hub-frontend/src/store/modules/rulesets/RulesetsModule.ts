@@ -14,18 +14,22 @@ export namespace RulesetsModule {
         loadedFor: string;
         delegator?: string;
         voter?: string;
-        changed: boolean;
         backupNormalizedRulesets: NormalizedRulesets.Result;
         normalizedRulesets: NormalizedRulesets.Result;
-        modifiedSetRules: NormalizedRulesets.ID [];
-        operationsToBePublished: { 
+        edit: {
+            rulesetId: string;
+            backup?: Ruleset;
+            modified: boolean;
+        };
+        publish: { 
             loading: boolean;
             error: string;
-            operations: { [setRulesId: string]: { ops: steem.OperationWithDescriptor []; error: string; }; }
+            result: string;
         }
     }
 
     export class Actions {
+        public static reloadRulesets = localName("reloadRulesets");
         public static setVoterAndOrDelegator = localName("setVoterAndOrDelegator");
 
         public static addRuleToRuleset = localName("addRuleToRuleset");
@@ -34,8 +38,12 @@ export namespace RulesetsModule {
 
         public static addRulesetToSetRules = localName("addRulesetToSetRules");
         public static renameRuleset = localName("renameRuleset");
-        public static changeRulesetVoter = localName("changeRulesetVoter");
-        public static deleteRuleset = localName("deleteRuleset");
+        // public static changeRulesetVoter = localName("changeRulesetVoter");
+        // public static deleteRuleset = localName("deleteRuleset");
+
+        public static saveChanges = localName("saveChanges");
+        public static revertChanges = localName("revertChanges");
+        public static beginRulesetEdit = localName("beginRulesetEdit");
     }
 
     export class Getters {
