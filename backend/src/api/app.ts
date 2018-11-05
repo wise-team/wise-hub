@@ -108,7 +108,7 @@ export class App {
         this.app.get("/api/rules", async (req, res) => {
             const out: any = {};
 
-            const keys = await this.redis.keys(common.redis.rules + "*");
+            const keys = await this.redis.keys(common.redis.rules + ":*");
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
                 if (key.indexOf("@") !== -1) {

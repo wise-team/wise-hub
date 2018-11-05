@@ -16,7 +16,10 @@ export class RulesManager {
         this.api = api;
     }
 
-    public async loadAllRules(delegator: string, moment: SteemOperationNumber) {
+    public async init() {
+    }
+
+    /*public async loadAllRules(delegator: string, moment: SteemOperationNumber) {
         await this.redis.set(common.redis.rules + ":" + delegator + ":@loading", "yes");
         console.log("Loading rulesets for " + delegator + "...");
         const allRules: EffectuatedSetRules [] = await this.api.loadRulesets({ delegator: delegator }, moment);
@@ -26,10 +29,10 @@ export class RulesManager {
         }
         await this.redis.set(common.redis.rules + ":" + delegator + ":@ready", "yes");
         await this.redis.set(common.redis.rules + ":" + delegator + ":@loading", "no");
-    }
+    }*/
 
     public async getRules(delegator: string, voter: string, moment: SteemOperationNumber): Promise<EffectuatedSetRules> {
-        while (true) {
+        /*while (true) {
             const ready = await this.redis.get(common.redis.rules + ":" + delegator + ":@ready");
             if (ready === "yes") break;
             else {
@@ -42,7 +45,7 @@ export class RulesManager {
                     await this.loadAllRules(delegator, moment);
                 }
             }
-        }
+        }*/
 
         const redisKey = common.redis.rules + ":" + delegator + ":" + voter;
         const rulesFromRedis: [string, string] [] = await this.redis.hgetall(redisKey);
@@ -73,7 +76,7 @@ export class RulesManager {
         console.log("save: " + JSON.stringify(esr, undefined, 2));
     }
 
-    public async deleteAllRules(delegator: string) {
+    /*public async deleteAllRules(delegator: string) {
         await this.redis.set(common.redis.rules + ":" + delegator + ":@ready", "no");
         await this.redis.set(common.redis.rules + ":" + delegator + ":@loading", "no");
         const startMs = Date.now();
@@ -86,5 +89,5 @@ export class RulesManager {
             const ellapsedMs = Date.now() - startMs;
             if (ellapsedMs > 20) Log.log().warn("Deleting delegator keys from redis took " + ellapsedMs + "ms");
         }
-    }
+    }*/
 }

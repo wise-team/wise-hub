@@ -3,6 +3,8 @@ import Wise, { WiseSQLProtocol, EffectuatedWiseOperation, WiseSQLApi, DirectBloc
 import { Log } from "../lib/Log";
 import { Redis } from "ioredis";
 import { common } from "../common/common";
+import Axios from "axios";
+import { d } from "../lib/util";
 
 export class ApiHelper {
     private protocol: Protocol = Wise.constructDefaultProtocol();
@@ -46,6 +48,13 @@ export class ApiHelper {
     public constructApiForDaemon(): Api {
         const directBlockchain = new DirectBlockchainApi(this.getWiseProtocol(), undefined, { url: this.steemApis[0] });
         return directBlockchain;
+    }
+
+    public async getWiseSQLBlockNumber(): Promise<number> {
+        const resp = await Axios.get(this.wiseSQLUrl + "/properties");
+        const p =  d(resp.data)
+            .filter((prop: { key: string, value: string }) => d(prop.key) === "last_processed_block");
+        return parseInt(d(p[0].value), 10);
     }
 
     /*public constructApiForRules(): Api {

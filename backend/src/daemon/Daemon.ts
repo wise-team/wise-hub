@@ -5,10 +5,11 @@ import Wise, { UniversalSynchronizer, Api, SteemOperationNumber, SetRules, Effec
 import { DelegatorManager } from "../lib/DelegatorManager";
 import { ApiHelper } from "./ApiHelper";
 import { Log } from "../lib/Log";
-import { RulesManager } from "./lib/RulesManager";
+import { RulesManager } from "./rules/RulesManager";
 import { ValidationRunner } from "./ValidationRunner";
 import { StaticConfig } from "./StaticConfig";
 import { ToSendQueue } from "../publisher/ToSendQueue";
+import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
 
 export class Daemon {
     private api: Api;
@@ -19,20 +20,19 @@ export class Daemon {
     private validationRunner: ValidationRunner;
     private apiHelper: ApiHelper;
 
-    public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper) {
+    public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper, api: Api, rulesManager: RulesManager) {
         this.redis = redis;
         this.apiHelper = apiHelper;
         this.delegatorManager = delegatorManager;
+        this.api = api;
+        this.rulesManager = rulesManager;
 
-        this.api = this.apiHelper.constructApiForDaemon();
-
-        this.rulesManager = new RulesManager(this.redis, this.api);
-        this.delegatorManager.onDelegatorAdd(addedDelegator => {
+        /*this.delegatorManager.onDelegatorAdd(addedDelegator => {
             this.rulesManager.loadAllRules(addedDelegator, this.synchronizer.getLastProcessedOperation());
         });
         this.delegatorManager.onDelegatorDel(deletedDelegator => {
             this.rulesManager.deleteAllRules(deletedDelegator);
-        });
+        });*/
 
         this.validationRunner = new ValidationRunner(this.redis, this.api);
 
@@ -43,7 +43,7 @@ export class Daemon {
             onError:  (error: Error, proceeding: boolean) => this.onError(error, proceeding),
             onFinished: () => this.onFinished(),
             onBlockProcessingStart: (blockNum) => this.onBlockProcessingStart(blockNum),
-            onBlockProcessingFinished: (blockNum) => this.onBlockProcessingFinished(blockNum)
+            onBlockProcessingFinished: (blockNum) => this.safeAsyncCall(() => this.onBlockProcessingFinished(blockNum))
         });
     }
 
@@ -68,9 +68,10 @@ export class Daemon {
     private onBlockProcessingStart(blockNum: number) {
     }
 
-    private onBlockProcessingFinished(blockNum: number) {
+    private async onBlockProcessingFinished(blockNum: number) {
         if (blockNum % 30 == 0) Log.log().info("Finished processing block " + blockNum);
-        this.redis.hset(common.redis.daemonStatus.key, common.redis.daemonStatus.props.last_processed_block, blockNum + "");
+        await this.redis.hset(common.redis.daemonStatus.key, common.redis.daemonStatus.props.last_processed_block, blockNum + "");
+        await RulesLoadedUpToBlock.set(this.redis, blockNum);
     }
 
     private onError(error: Error, proceeding: boolean) {

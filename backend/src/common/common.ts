@@ -32,6 +32,7 @@ export const common = {
                 lag_update_time_iso: "lag_update_time_iso"
             }
         },
+        rulesLoadedUpToBlock: "hub:daemon:rules_loaded_up_to_block",
         rules: "hub:daemon:rules",
         daemonErrors: "hub:daemon:errors",
         delegators: "hub:delegators",
