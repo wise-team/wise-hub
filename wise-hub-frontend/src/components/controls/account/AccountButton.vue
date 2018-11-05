@@ -58,7 +58,7 @@ export default Vue.extend({
             return s(this.$store).getters[AuthModule.Getters.isLoggedIn];
         },
         loginUrl(): string {
-            return AuthModuleApiHelper.getLoginUrl(AuthModuleApiHelper.LoginScope_EMPTY);
+            return AuthModuleApiHelper.getLoginUrl(AuthModuleApiHelper.LoginScope_CUSTOM_JSON);
         },
         errorMessage(): string {
             return s(this.$store).state.auth.error;

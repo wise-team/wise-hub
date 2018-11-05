@@ -10,6 +10,7 @@ import { ValidationRunner } from "./ValidationRunner";
 import { StaticConfig } from "./StaticConfig";
 import { ToSendQueue } from "../publisher/ToSendQueue";
 import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
+import { DaemonLog } from "./DaemonLog";
 
 export class Daemon {
     private api: Api;
@@ -19,20 +20,22 @@ export class Daemon {
     private rulesManager: RulesManager;
     private validationRunner: ValidationRunner;
     private apiHelper: ApiHelper;
+    private daemonLog: DaemonLog;
 
-    public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper, api: Api, rulesManager: RulesManager) {
+    public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper, api: Api, rulesManager: RulesManager, daemonLog: DaemonLog) {
         this.redis = redis;
         this.apiHelper = apiHelper;
         this.delegatorManager = delegatorManager;
         this.api = api;
         this.rulesManager = rulesManager;
+        this.daemonLog = daemonLog;
 
-        /*this.delegatorManager.onDelegatorAdd(addedDelegator => {
-            this.rulesManager.loadAllRules(addedDelegator, this.synchronizer.getLastProcessedOperation());
+        this.delegatorManager.onDelegatorAdd(addedDelegator => {
+            this.daemonLog.emit({ msg: "Enable delegator @" + addedDelegator }, addedDelegator);
         });
         this.delegatorManager.onDelegatorDel(deletedDelegator => {
-            this.rulesManager.deleteAllRules(deletedDelegator);
-        });*/
+            this.daemonLog.emit({ msg: "Disable delegator @" + deletedDelegator }, deletedDelegator);
+        });
 
         this.validationRunner = new ValidationRunner(this.redis, this.api);
 
@@ -43,7 +46,7 @@ export class Daemon {
             onError:  (error: Error, proceeding: boolean) => this.onError(error, proceeding),
             onFinished: () => this.onFinished(),
             onBlockProcessingStart: (blockNum) => this.onBlockProcessingStart(blockNum),
-            onBlockProcessingFinished: (blockNum) => this.safeAsyncCall(() => this.onBlockProcessingFinished(blockNum))
+            onBlockProcessingFinished: (blockNum) => this.onBlockProcessingFinished(blockNum)
         });
     }
 
@@ -59,10 +62,12 @@ export class Daemon {
 
     private onStart() {
         Log.log().info("Synchronizer started");
+        this.daemonLog.emit({ msg: "Synchronizer started" });
     }
 
     private onFinished() {
         Log.log().info("Synchronizer stop");
+        this.daemonLog.emit({ msg: "Synchronizer stop" });
     }
 
     private onBlockProcessingStart(blockNum: number) {
@@ -70,6 +75,8 @@ export class Daemon {
 
     private async onBlockProcessingFinished(blockNum: number) {
         if (blockNum % 30 == 0) Log.log().info("Finished processing block " + blockNum);
+        this.daemonLog.emit({ msg: "Processed block " + blockNum });
+
         await this.redis.hset(common.redis.daemonStatus.key, common.redis.daemonStatus.props.last_processed_block, blockNum + "");
         await RulesLoadedUpToBlock.set(this.redis, blockNum);
     }
@@ -77,6 +84,7 @@ export class Daemon {
     private onError(error: Error, proceeding: boolean) {
         Log.log().exception(Log.level.error, error);
         if (!proceeding) Log.log().error("This is an irreversible error!");
+        this.daemonLog.emit({ msg: "Daemon error", error: error + "" });
     }
 
     private onSetRules(setRules: SetRules, op: EffectuatedWiseOperation) {
@@ -89,6 +97,7 @@ export class Daemon {
             };
             this.safeAsyncCall(() => this.rulesManager.saveRules(op.delegator, op.voter, es));
         }
+        this.daemonLog.emit({ msg: "Set rules", wiseOp: op });
     }
 
     private onVoteorder(cmd: SendVoteorder, op: EffectuatedWiseOperation, errorTimeout: number = StaticConfig.DAEMON_ON_VOTEORDER_ERROR_REPEAT_AFTER_S) {
@@ -105,6 +114,7 @@ export class Daemon {
                 }
             });
         }
+        this.daemonLog.emit({ msg: "Voteorder", wiseOp: op });
     }
 
     private async voteorderCommit(cmd: SendVoteorder, op: EffectuatedWiseOperation, verdict: ValidationRunner.Verdict) {
@@ -114,6 +124,7 @@ export class Daemon {
         else {
             Log.log().cheapDebug(() => "REJECT VOTEORDER(msg=" + verdict.msg + "): " + JSON.stringify(op, undefined, 2));
         }
+        this.daemonLog.emit({ msg: "Voteorder validated", wiseOp: op, validated: verdict });
 
         const opsToSend: steemJs.OperationWithDescriptor[] = [];
         try {
@@ -146,7 +157,8 @@ export class Daemon {
     }
 
     private async sendOps(delegator: string, ops: steemJs.OperationWithDescriptor []) {
-        ToSendQueue.addToPublishQueue(this.redis, delegator, ops);
+        await ToSendQueue.addToPublishQueue(this.redis, delegator, ops);
+        this.daemonLog.emit({ msg: "Scheduled to publish", ops: ops }, delegator);
     }
 
     private safeAsyncCall(fn: () => any) {

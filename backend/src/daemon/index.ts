@@ -7,6 +7,7 @@ import { DelegatorManager } from "../lib/DelegatorManager";
 import { AppRole } from "../lib/AppRole";
 import { DaemonManager } from "./DaemonManager";
 import { ApiHelper } from "./ApiHelper";
+import { DaemonLog } from "./DaemonLog";
 
 /******************
  ** INTIAL SETUP **
@@ -28,10 +29,11 @@ process.on("unhandledRejection", (err) => {
 const redisUrl = process.env.REDIS_URL;
 if (!redisUrl) throw new Error("Env REDIS_URL is missing.");
 const redis = new Redis(redisUrl);
+const daemonLog = new DaemonLog(redis);
 
 const delegatorManager = new DelegatorManager(redis);
 const apiHelper = new ApiHelper();
-const daemonManager = new DaemonManager(redis, delegatorManager, apiHelper);
+const daemonManager = new DaemonManager(redis, delegatorManager, apiHelper, daemonLog);
 
 process.on("SIGTERM", () => {
     daemonManager.stop();
@@ -43,11 +45,13 @@ process.on("SIGTERM", () => {
 (async () => {
     try {
         Log.log().info("Initialising daemon....");
+        daemonLog.emit({ msg: "Initialising daemon..." });
 
         await apiHelper.init();
         await delegatorManager.init(redisUrl);
 
         Log.log().info("Daemon init done.");
+        daemonLog.emit({ msg: "Daemon init done." });
 
         daemonManager.run();
     }

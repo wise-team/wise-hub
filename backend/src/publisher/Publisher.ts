@@ -8,17 +8,20 @@ import { StaticConfig } from "./StaticConfig";
 import { UsersManager } from "../lib/UsersManager";
 import * as sc2 from "steemconnect";
 import { d } from "../lib/util";
+import { DaemonLog } from "../daemon/DaemonLog";
 
 export class Publisher {
     private redis: Redis;
     private vault: Vault;
     private usersManager: UsersManager;
     private queue: ToSendQueue;
+    private daemonLog: DaemonLog;
     private requiredScope: string [] = [ "custom_json", "vote" ];
 
-    public constructor(redis: Redis, vault: Vault) {
+    public constructor(redis: Redis, vault: Vault, daemonLog: DaemonLog) {
         this.redis = redis;
         this.vault = vault;
+        this.daemonLog = daemonLog;
 
         this.usersManager = new UsersManager(this.redis, this.vault, {
             canIssueRefreshTokens: true
@@ -35,8 +38,7 @@ export class Publisher {
                 const otp: OpsToPublish | undefined = await this.queue.awaitOpsToPublish(20);
                 if (otp) {
                     this.publish(otp);
-                    Log.log().info("Throttling. Waiting " + StaticConfig.PUBLISH_THROTTLING_MS + "ms before publishing next ops");
-                    await BluebirdPromise.delay(StaticConfig.PUBLISH_THROTTLING_MS);
+                    await this.throttle();
                 }
                 else {
                     if (i % 10 == 0) Log.log().info("No ops to publish at " + (new Date().toISOString()));
@@ -54,9 +56,11 @@ export class Publisher {
         (async () => {
             try {
                 Log.log().info("Publisher => publish ops " + JSON.stringify(otp));
+                this.daemonLog.emit({ msg: "Publisher is publishing operations to blockchain via SteemConnect..." }, otp.delegator);
                 await this.doPublish(otp);
             }
             catch (error) {
+                this.daemonLog.emit({ msg: "Error when publishing ops", error: error + "" }, otp.delegator);
                 Log.log().exception(Log.level.error, error);
                 console.error(error);
             }
@@ -79,5 +83,17 @@ export class Publisher {
         await this.queue.removeFromProcessingQueue(otp);
         Log.log().info("SteemConnect broadcast result =" + JSON.stringify(result, undefined, 2));
         Log.log().info("Successfully pushed operation via steemconnect (trx_id=" + result.id + ")");
+        this.daemonLog.emit({
+            msg: "Successful publish to blockchain.",
+            transaction: { trx_id: result.id, block_num: result.block_num, trx_num: result.trx_num }
+        }, otp.delegator);
+    }
+
+    private async throttle() {
+        const time = StaticConfig.PUBLISH_THROTTLING_MS;
+        const msg = "Throttling. Waiting " + time + "ms before publishing next ops";
+        Log.log().info(msg);
+        this.daemonLog.emit({ msg: msg });
+        await BluebirdPromise.delay(StaticConfig.PUBLISH_THROTTLING_MS);
     }
 }

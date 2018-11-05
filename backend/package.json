@@ -26,6 +26,8 @@
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "passport-oauth2": "^1.4.0",
+    "socket.io": "^2.1.1",
+    "socket.io-redis": "^5.2.0",
     "steem-wise-core": "^3.0.2",
     "steemconnect": "^2.0.1"
   },
@@ -44,6 +46,8 @@
     "@types/passport": "^0.4.7",
     "@types/passport-local": "^1.0.33",
     "@types/passport-oauth2": "^1.4.7",
+    "@types/socket.io": "^2.1.0",
+    "@types/socket.io-redis": "^1.0.25",
     "ts-node": "^6.2.0",
     "tslint": "^5.11.0",
     "typescript": "^2.9.2"

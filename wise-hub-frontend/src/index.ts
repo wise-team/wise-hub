@@ -38,6 +38,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import App from "./components/App.vue";
 import { store, Actions } from "./store/store";
 import ReadView from "./components/views/read/ReadView.vue";
+import DaemonView from "./components/daemon/DaemonView.vue";
 import VoteView from "./components/views/vote/VoteView.vue";
 import DelegateView from "./components/delegate/DelegateView.vue";
 import NotFoundView from "./components/views/NotFoundView.vue";
@@ -70,6 +71,7 @@ const router = new VueRouter({
         { path: '/', component: ReadView },
         { path: '/read/:moment?', component: ReadView },
         { path: '/vote', component: VoteView },
+        { path: '/daemon', component: DaemonView },
         { path: '/delegate', component: DelegateView },
         { path: '/@:delegator/rulesets', component: RulesetsView },
         { path: '/@:delegator/rulesets/for/@:voter', component: RulesetsView },

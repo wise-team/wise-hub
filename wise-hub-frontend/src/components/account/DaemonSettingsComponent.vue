@@ -1,7 +1,6 @@
 <!-- src/components/account/DaemonSettingsComponent.vue -->
 <template>
     <span>
-        <h3>Daemon settings</h3>
         <p>
             <b-input-group size="lg">
                 <b-input-group-text slot="prepend">

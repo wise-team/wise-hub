@@ -8,6 +8,7 @@ import { Log } from "../lib/Log";
 import { RulesManager } from "./rules/RulesManager";
 import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
 import { EffectuatedWiseOperation, SetRules, EffectuatedSetRules, RulePrototyper, Api } from "steem-wise-core";
+import { DaemonLog } from "./DaemonLog";
 
 export class DaemonManager {
     private redis: Redis;
@@ -16,33 +17,39 @@ export class DaemonManager {
     private daemon: Daemon;
     private api: Api;
     private rulesManager: RulesManager;
+    private daemonLog: DaemonLog;
 
-    public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper) {
+    public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper, daemonLog: DaemonLog) {
         this.redis = redis;
         this.delegatorManager = delegatorManager;
         this.apiHelper = apiHelper;
+        this.daemonLog = daemonLog;
 
         this.api = this.apiHelper.constructApiForDaemon();
         this.rulesManager = new RulesManager(this.redis, this.api);
-        this.daemon = new Daemon(this.redis, this.delegatorManager, this.apiHelper, this.api, this.rulesManager);
+        this.daemon = new Daemon(this.redis, this.delegatorManager, this.apiHelper, this.api, this.rulesManager, this.daemonLog);
     }
 
     public async run() {
         const rulesLoadedUpToBlock = await RulesLoadedUpToBlock.get(this.redis);
         let startBlock = await this.determineStartBlock();
         Log.log().info("DaemonManager.run starting synchronization from block " + startBlock);
+        this.daemonLog.emit({ msg: "DaemonManager.run starting synchronization from block " + startBlock });
 
         if (rulesLoadedUpToBlock < startBlock) {
             const sqlLastBlock = await this.apiHelper.getWiseSQLBlockNumber();
             if (sqlLastBlock < startBlock) startBlock = sqlLastBlock;
+
+            this.daemonLog.emit({ msg: "Preloading rulesets from wiseSQL" });
 
             const setRulesArr = await this.preloadAllRulesets(startBlock);
             for (let i = 0; i < setRulesArr.length; i++) {
                 const setRules = setRulesArr[i];
                 await this.rulesManager.saveRules(setRules.delegator, setRules.voter, setRules);
             }
-            Log.log().info("DaemonManager.run rules preloading done ");
             await RulesLoadedUpToBlock.set(this.redis, startBlock);
+            this.daemonLog.emit({ msg: "Rulesets preloading done" });
+            Log.log().info("DaemonManager.run rules preloading done ");
         }
 
         await this.daemon.run(startBlock);

@@ -13,6 +13,7 @@ import { StatusRoutes } from "./routes/StatusRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
 import * as helmet from "helmet";
 import { Log } from "../lib/Log";
+import { DaemonRoutes } from "./routes/DaemonRoutes";
 
 export class App {
     public app: express.Application;
@@ -26,6 +27,7 @@ export class App {
 
     private statusRoutes: StatusRoutes;
     private userRoutes: UserRoutes;
+    private daemonRoutes: DaemonRoutes;
 
     constructor() {
         this.app = express();
@@ -51,6 +53,7 @@ export class App {
 
         this.statusRoutes = new StatusRoutes(this.redis, this.vault);
         this.userRoutes = new UserRoutes(this.redis, this.usersManager);
+        this.daemonRoutes = new DaemonRoutes(this.redis);
     }
 
     public async init() {
@@ -65,6 +68,7 @@ export class App {
 
         await this.userRoutes.init();
         await this.statusRoutes.init();
+        await this.daemonRoutes.init();
 
         await this.config();
         await this.routes();
@@ -103,7 +107,7 @@ export class App {
         this.authManager.routes(this.app);
         this.statusRoutes.routes(this.app);
         this.userRoutes.routes(this.app);
-
+        this.daemonRoutes.routes(this.app);
 
         this.app.get("/api/rules", async (req, res) => {
             const out: any = {};
@@ -120,28 +124,6 @@ export class App {
             }
 
             res.send(JSON.stringify(out, undefined, 2));
-        });
-
-        this.app.get("/api/test/delegator/add/:name", async (req, res) => {
-            if (!req.params.name) {
-                res.status(500);
-                res.send("Missing steem account name");
-                return;
-            }
-            const numChanged = await this.redis.sadd(common.redis.delegators, req.params.name);
-            if (numChanged > 0) await this.redis.publish(common.redis.channels.delegators.key, common.redis.channels.delegators.list_changed);
-            res.send("Added " + req.params.name);
-        });
-
-        this.app.get("/api/test/delegator/delete/:name", async (req, res) => {
-            if (!req.params.name) {
-                res.status(500);
-                res.send("Missing steem account name");
-                return;
-            }
-            const numChanged = await this.redis.srem(common.redis.delegators, req.params.name);
-            if (numChanged > 0) await this.redis.publish(common.redis.channels.delegators.key, common.redis.channels.delegators.list_changed);
-            res.send("Deleted " + req.params.name);
         });
 
         this.app.get("/api/test/delegator/", async (req, res) => {

@@ -40,12 +40,24 @@ export const common = {
         publishProcessingQueue: "hub:publisher:queue:publish_processing",
         daemonHartbeat: "hub:hartbeat:daemon",
         publisherHartbeat: "hub:hartbeat:publisher",
+        daemonLogGeneral: "hub:daemon:log_general",
+        daemonLogFor: "hub:daemon:log_for",
         channels: {
             delegators: {
                 key: "channel_delegators",
                 list_changed: "list_changed"
-            }
+            },
+            realtimeKey: "channel_realtime"
         }
+    },
+    socketio: {
+        namespaces: {
+            general: "/general",
+            delegatorBase: "/delegator/"
+        }
+    },
+    daemonLog: {
+        maxHistoryLength: /*§ §*/ 100 /*§ ' ' + data.config.hub.daemon.log.maxHistoryLength + ' ' §.*/,
     },
     vault: {
         secrets: {

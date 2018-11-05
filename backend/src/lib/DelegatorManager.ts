@@ -2,6 +2,8 @@ import * as Redis from "ioredis";
 import * as _ from "lodash";
 import { common } from "../common/common";
 import { Log } from "./Log";
+import { DaemonLog } from "../daemon/DaemonLog";
+import { Daemon } from "../daemon/Daemon";
 
 export class DelegatorManager {
     private redis: Redis.Redis;

@@ -73,7 +73,7 @@ export class RulesManager {
     public async saveRules(delegator: string, voter: string, esr: EffectuatedSetRules) {
         const redisKey = common.redis.rules + ":" + delegator + ":" + voter;
         await this.redis.hset(redisKey, esr.moment.blockNum + "", JSON.stringify(esr));
-        console.log("save: " + JSON.stringify(esr, undefined, 2));
+        // console.log("save: " + JSON.stringify(esr, undefined, 2));
     }
 
     /*public async deleteAllRules(delegator: string) {

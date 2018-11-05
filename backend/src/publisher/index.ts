@@ -5,6 +5,7 @@ import { common } from "../common/common";
 import { Vault } from "../lib/vault/Vault";
 import { AppRole } from "../lib/AppRole";
 import { Publisher } from "./Publisher";
+import { DaemonLog } from "../daemon/DaemonLog";
 
 /******************
  ** INTIAL SETUP **
@@ -26,6 +27,7 @@ process.on("unhandledRejection", (err) => {
 const redisUrl = process.env.REDIS_URL;
 if (!redisUrl) throw new Error("Env REDIS_URL is missing.");
 const redis = new Redis(redisUrl);
+const daemonLog = new DaemonLog(redis);
 
 const vaultAddr = process.env.WISE_VAULT_URL;
  if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
@@ -47,7 +49,7 @@ const vault = new Vault(vaultAddr);
         await vault.setSecret("/hub/public/status", { start_time: new Date().toISOString(), policies: requiredPolicies });
         Log.log().info("AppRole login successful");
 
-        const publisher = new Publisher(redis, vault);
+        const publisher = new Publisher(redis, vault, daemonLog);
         publisher.run();
     }
     catch (error) {
