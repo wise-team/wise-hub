@@ -1,4 +1,4 @@
-<!-- src/components/views/rulesets/rules/weight_for_periodRuleComponent.vue -->
+<!-- src/components/views/rulesets/rules/WeightForPeriodRuleComponent.vue -->
 <template>
     <div class="weight_for_period-rule-component">
         <b-input-group append="Unit" class="mb-1">
