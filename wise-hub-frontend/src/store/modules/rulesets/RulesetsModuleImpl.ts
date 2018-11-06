@@ -3,11 +3,10 @@ import * as _ from "lodash";
 import * as steem from "steem";
 import { RulesetsModuleApiHelper } from "./RulesetsModuleApiHelper";
 import { RulesetsModule as Me } from "./RulesetsModule";
-import { d, assertString } from "../../../util/util";
-import Wise, { EffectuatedSetRules, Rule, Ruleset, SetRulesForVoter, RulesUpdater, VotersRule } from "steem-wise-core";
+import { d, assertString, uniqueId } from "../../../util/util";
+import Wise, { EffectuatedSetRules, Rule, Ruleset, SetRulesForVoter, RulesUpdater, VotersRule, RulePrototyper } from "steem-wise-core";
 import { NormalizedRulesets } from "./NormalizedRulesets";
 import Vue from "vue";
-import { DelayedExecutor } from "../../../util/DelayedExecutor";
 
 export namespace RulesetsModuleImpl {
 
@@ -24,7 +23,8 @@ export namespace RulesetsModuleImpl {
         publish: { 
             loading: false,
             error: "",
-            result: ""
+            result: "",
+            for: ""
         },
     };
     export const persistentPaths: string [] = [
@@ -47,6 +47,7 @@ export namespace RulesetsModuleImpl {
         public static resetChanges =  Me.localName("resetChanges");
         // public static updateModifiedSetRulesArray =  Me.localName("updateModifiedSetRulesArray");
         public static updatePublishStatus =  Me.localName("updatePublishStatus");
+        public static commitChangesToBackupRulesets =  Me.localName("commitChangesToBackupRulesets");
     }
 
     const mutations: MutationTree<Me.State> = {
@@ -69,6 +70,12 @@ export namespace RulesetsModuleImpl {
             state.backupNormalizedRulesets = _.cloneDeep(payload);
         },
 
+        [Mutations.commitChangesToBackupRulesets](
+            state: Me.State
+        ) {
+            state.backupNormalizedRulesets = _.cloneDeep(state.normalizedRulesets);;
+        },
+
         [Mutations.resetChanges](
             state: Me.State
         ) {
@@ -78,12 +85,20 @@ export namespace RulesetsModuleImpl {
         [Mutations.updateRule](
             state: Me.State, payload: NormalizedRulesets.NormalizedRule,
         ) {
-            if (state.normalizedRulesets.entities.rules[payload.id]) {
+            const prototypedRule = RulePrototyper.fromUnprototypedRule(_.omit(payload, "id"));
+            prototypedRule.validateRuleObject(prototypedRule);
+            /*if (state.normalizedRulesets.entities.rules[payload.id]) {
                 state.normalizedRulesets.entities.rules[payload.id] = payload;
             }
-            else {
-                Vue.set(state.normalizedRulesets.entities.rules, payload.id, payload);
-            }
+            else {*/
+            //const out = Vue.set(state.normalizedRulesets.entities.rules, payload.id, _.cloneDeep(payload));
+            state.normalizedRulesets.entities.rules = { 
+                ...state.normalizedRulesets.entities.rules, [payload.id]: payload
+            };
+            //}
+            // console.log("Updated rule");
+            // console.log(state.normalizedRulesets.entities);
+            //console.log(out);
 
             /*if (!state.backupNormalizedRulesets.entities.rules[payload.id]
                 || !_.isEqual(state.backupNormalizedRulesets.entities.rules[payload.id], payload)) {
@@ -94,12 +109,22 @@ export namespace RulesetsModuleImpl {
         [Mutations.updateRuleset](
             state: Me.State, payload: NormalizedRulesets.NormalizedRuleset,
         ) {
-            if (state.normalizedRulesets.entities.rulesets[payload.id]) {
-                state.normalizedRulesets.entities.rulesets[payload.id] = payload;
-            }
-            else {
-                Vue.set(state.normalizedRulesets.entities.rulesets, payload.id, payload);
-            }
+            state.normalizedRulesets.entities.rulesets[payload.id] = payload;
+            
+            //if (state.normalizedRulesets.entities.rulesets[payload.id]) {
+            //    state.normalizedRulesets.entities.rulesets[payload.id] = payload;
+            //}
+            //else {
+                //const out = Vue.set(state.normalizedRulesets.entities.rulesets, payload.id, _.cloneDeep(payload));
+            //}
+
+            state.normalizedRulesets.entities.rulesets = { 
+                ...state.normalizedRulesets.entities.rulesets, [payload.id]: payload
+            };
+
+            // console.log("Updated ruleset");
+            // console.log(state.normalizedRulesets.entities);
+            //console.log(out);
 
             /*if (!state.backupNormalizedRulesets.entities.rulesets[payload.id]
                 || !_.isEqual(state.backupNormalizedRulesets.entities.rulesets[payload.id], payload)) {
@@ -110,12 +135,19 @@ export namespace RulesetsModuleImpl {
         [Mutations.updateSetRules](
             state: Me.State, payload: NormalizedRulesets.NormalizedSetRulesForVoter,
         ) {
-            if (state.normalizedRulesets.entities.setRules[payload.id]) {
-                state.normalizedRulesets.entities.setRules[payload.id] = payload;
-            }
-            else {
-                Vue.set(state.normalizedRulesets.entities.setRules, payload.id, payload);
-            }
+            //if (state.normalizedRulesets.entities.setRules[payload.id]) {
+            //    state.normalizedRulesets.entities.setRules[payload.id] = payload;
+            //}
+            //else {
+            //    Vue.set(state.normalizedRulesets.entities.setRules, payload.id, _.cloneDeep(payload));
+            //}
+
+            state.normalizedRulesets.entities.setRules = { 
+                ...state.normalizedRulesets.entities.setRules, [payload.id]: payload
+            };
+
+            // console.log("Updated setRules");
+            // console.log(state.normalizedRulesets.entities);
 
             /*if (!state.backupNormalizedRulesets.entities.setRules[payload.id]
                 || !_.isEqual(state.backupNormalizedRulesets.entities.setRules[payload.id], payload)) {
@@ -137,9 +169,9 @@ export namespace RulesetsModuleImpl {
         },
 
         [Mutations.updatePublishStatus](
-            state: Me.State, payload: { loading: boolean; error: string; result: string; }
+            state: Me.State, payload: { loading: boolean; error: string; result: string; for: string; }
         ) {
-            state.publish = payload;
+            state.publish = _.merge({}, state.publish, payload);;
         },
     };
 
@@ -161,9 +193,9 @@ export namespace RulesetsModuleImpl {
         ): void => {
             (async () => {
                 try {
-                    console.log("In module payload=" + JSON.stringify(payload) + ", payload.delegator=" + payload.delegator);
+                    // console.log("In module payload=" + JSON.stringify(payload) + ", payload.delegator=" + payload.delegator);
                     if (typeof payload.delegator === "undefined" && typeof payload.voter === "undefined") {
-                        console.log("Both type to undefined, issue error!");
+                        // console.log("Both type to undefined, issue error!");
                         throw new Error("You have to specify the voter, the delegator, or both");
                     }
                     
@@ -244,6 +276,14 @@ export namespace RulesetsModuleImpl {
         [Me.Actions.addRulesetToSetRules]: (
             { commit, dispatch, state }, payload: { ruleset: NormalizedRulesets.NormalizedRuleset, setRulesId?: string, voter?: string },
         ): void => {
+            if (payload.ruleset.rules.length === 0) {
+                const rule = {
+                    id: uniqueId(),
+                    rule: "first_post"
+                };
+                commit(Mutations.updateRule, rule);
+                payload.ruleset.rules = [ rule.id ];
+            }
             commit(Mutations.updateRuleset, payload.ruleset);
 
             let targetSetRules: NormalizedRulesets.NormalizedSetRulesForVoter | undefined = undefined;
@@ -273,6 +313,7 @@ export namespace RulesetsModuleImpl {
                 commit(Mutations.updateSetRules, targetSetRules);
             }
             dispatch(PrivateActions.checkIfModified);
+            dispatch(Me.Actions.beginRulesetEdit, { rulesetId: d(payload.ruleset.id) });
         },
 
         /*[Me.Actions.deleteRuleset]: (
@@ -292,13 +333,13 @@ export namespace RulesetsModuleImpl {
             dispatch(PrivateActions.determineChanges);
         },*/
 
-        [Me.Actions.renameRuleset]: (
+        [Me.Actions.renameRuleset]: async (
             { commit, dispatch, state }, payload: { rulesetId: NormalizedRulesets.ID, name: string },
-        ): void => {
+        ): Promise<void> => {            
             const newRuleset: NormalizedRulesets.NormalizedRuleset
                 = _.cloneDeep(state.normalizedRulesets.entities.rulesets[payload.rulesetId]);
-            const oldName = newRuleset.name;
-            newRuleset.name = payload.name;
+            const oldName = d(newRuleset.name);
+            newRuleset.name = d(payload.name);
             commit(Mutations.updateRuleset, newRuleset);
             if (payload.name !== oldName) dispatch(PrivateActions.checkIfModified);
         },
@@ -411,6 +452,7 @@ export namespace RulesetsModuleImpl {
             const denormalizedRuleset = d(normalizer.denormalizeRulesets([ rulesetId ], state.normalizedRulesets)[0]);
             const modified = !_.isEqual(backupRuleset, denormalizedRuleset);*/
             const modified = !_.isEqual(state.normalizedRulesets, state.backupNormalizedRulesets);
+            console.log("MODIFIED=" + modified);
             commit(Mutations.updateEdit, { modified: modified });
         },
 
@@ -431,16 +473,16 @@ export namespace RulesetsModuleImpl {
         },
 
         [Me.Actions.saveChanges]: (
-            { commit, dispatch, state, rootState }
+            { commit, dispatch, state, rootState }, payload: { for: string }
         ): void => {
+            commit(Mutations.updatePublishStatus, { loading: true, error: "", result : "", for: d(payload.for) });
             (async () => {
                 try {
                     if (state.edit.rulesetId.length === 0) throw new Error("Not in edit mode");
+
                     const rulesetId = state.edit.rulesetId;
                     const setRulesId = d(_.values(state.normalizedRulesets.entities.setRules)
                     .filter((sr: NormalizedRulesets.NormalizedSetRulesForVoter) => sr.rulesets.indexOf(rulesetId) !== -1)[0].id);
-
-                    commit(Mutations.updatePublishStatus, { loading: true, error: "", result : "" })
 
                     const denormalizedSRFV: SetRulesForVoter [] = normalizer.denormalizeSetRules(
                         [ setRulesId ], state.normalizedRulesets
@@ -453,14 +495,54 @@ export namespace RulesetsModuleImpl {
                         result : "Rulesets successfully published, transaction: " + result.id + " in block " + result.block_num
                     });
                     commit(Mutations.updateEdit, { modified: false, rulesetId: "" });
-                    // dispatch(Me.Actions.reloadRulesets, { voter: state.voter, delegator: state.delegator });
+                    commit(Mutations.commitChangesToBackupRulesets);
                 }
                 catch(error) {
-                    commit(Mutations.updatePublishStatus, { loading: false, error: error + "", result : "" })
+                    commit(Mutations.updatePublishStatus, { loading: false, error: error + "", result : "", for: d(payload.for) })
                     console.error(error);
                 }
             })();
-        }
+        },
+
+        [Me.Actions.deleteRuleset]: (
+            { commit, dispatch, state, rootState }, payload: { rulesetId: string }
+        ): void => {
+            commit(Mutations.updatePublishStatus, { loading: true, error: "", result : "", for: "delete" });
+            (async () => {
+                try {
+                    if (state.edit.rulesetId.length > 0) throw new Error("Cannot delete in edit mode");
+                    const rulesetId = d(payload.rulesetId);
+                    const setRulesId = d(_.values(state.normalizedRulesets.entities.setRules)
+                    .filter((sr: NormalizedRulesets.NormalizedSetRulesForVoter) => sr.rulesets.indexOf(rulesetId) !== -1)[0].id);
+                    const newSetRules: NormalizedRulesets.NormalizedSetRulesForVoter
+                        = _.cloneDeep(state.normalizedRulesets.entities.setRules[setRulesId]);
+
+                    const rulesetIndex = newSetRules.rulesets.indexOf(payload.rulesetId);
+                    if (rulesetIndex < 0) {
+                        throw new Error("Ruleset with id " + payload.rulesetId + " does not belong to set rules with id " + setRulesId);
+                    }
+                    newSetRules.rulesets.splice(rulesetIndex, 1);
+                    commit(Mutations.updateSetRules, newSetRules);
+
+                    const denormalizedSRFV: SetRulesForVoter [] = normalizer.denormalizeSetRules(
+                        [ setRulesId ], state.normalizedRulesets
+                    );
+                    if (denormalizedSRFV.length !== 1) throw new Error("Incorrect number of elements returned after denormalization");
+                    const srfv = denormalizedSRFV[0];
+                    const result = await RulesetsModuleApiHelper.saveSetRules(srfv);
+                    commit(Mutations.updatePublishStatus, { 
+                        loading: false, error: "",
+                        result : "SetRules for @" + srfv.voter + " successfully published, transaction: " + result.id + " in block " + result.block_num
+                    });
+                    commit(Mutations.updateEdit, { modified: false, rulesetId: "" });
+                    commit(Mutations.commitChangesToBackupRulesets);
+                }
+                catch(error) {
+                    commit(Mutations.updatePublishStatus, { loading: false, error: error + "", result : "", for: "delete" })
+                    console.error(error);
+                }
+            })();
+        },
     };
 
 

@@ -15,10 +15,25 @@
         </div>
 
         <loading-control :error="error" :loading="loading" loadingText="Loading rulesets..." />
+
+        <!-- Display proggress of delete -->
+        <publish-rulesets-component for="delete" />
         
         <span v-for="setRulesId in setRulesItems" :key="setRulesId">
             <set-rules-component :set-rules-id="setRulesId" />
         </span>
+
+        <add-ruleset-action-component v-if="setRulesItems.length > 0 && canEdit && !editMode" class="add-rules-component p-2 rounded border bg-light" />
+
+        <b-modal ref="unsavedModalRef" hide-footer title="Unsaved changes">
+            <div class="d-block text-center">
+                <p>
+                    Warning: you are in edit mode. There may be unsaved changes. Please save or reset changes first.
+                    Then you will be able to move on.
+                </p>
+            </div>
+            <b-btn class="mt-3" variant="danger" block @click="hideUnsavedModal() && revertChanges()">Reset changes</b-btn>
+        </b-modal>
     </div>
 </template>
 
@@ -34,7 +49,8 @@ import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 
 import SetRulesComponent from "../rulesets/SetRulesComponent.vue";
 import LoadingControl from "../controls/LoadingControl.vue";
-
+import AddRulesetActionComponent from "./actions/AddRulesetActionComponent.vue";
+import PublishRulesetsComponent from "./PublishRulesetsComponent.vue";
 
 export default Vue.extend({
     props: [],
@@ -53,11 +69,27 @@ export default Vue.extend({
     },
     mounted() {
         this.loadRulesetsIfRequired();
+        this.$on("hook:beforeRouteLeave", (to: any, from: any, next: any) => {
+            if (this.editMode) {
+                next(false);
+                this.showUnsavedModal();
+            }
+            else next();
+        });
     },
     methods: {
         loadRulesetsIfRequired() {
             console.log("loadRulesetsIfRequired.for=" + JSON.stringify({ delegator: this.delegator, voter: this.voter }));
             s(this.$store).dispatch(RulesetsModule.Actions.setVoterAndOrDelegator, { delegator: this.delegator, voter: this.voter });
+        },
+        revertChanges() {
+            s(this.$store).dispatch(RulesetsModule.Actions.revertChanges);
+        },
+        showUnsavedModal () {
+            (this.$refs.unsavedModalRef as any).show();
+        },
+        hideUnsavedModal () {
+            (this.$refs.unsavedModalRef as any).hide();
         }
     },
     computed: {
@@ -66,6 +98,15 @@ export default Vue.extend({
         },
         error(): string {
             return s(this.$store).state.rulesets.error;
+        },
+        editMode(): boolean {
+            return s(this.$store).state.rulesets.edit.rulesetId.length > 0;
+        },
+        canEdit(): boolean {
+            return !!this.delegator
+                && (s(this.$store).state.auth.username === this.delegator
+                || window.location.search.indexOf("forceEdit") !== -1)
+                && !this.editMode;
         },
         setRulesItems(): string [] {
             const listOfIds = _.keys(s(this.$store).state.rulesets.normalizedRulesets.entities.setRules);
@@ -80,7 +121,9 @@ export default Vue.extend({
     },
     components: {
         SetRulesComponent,
-        LoadingControl
+        LoadingControl,
+        AddRulesetActionComponent,
+        PublishRulesetsComponent
     },
     filters: {
         ucfirst: ucfirst
@@ -89,5 +132,8 @@ export default Vue.extend({
 </script>
 
 <style>
-
+.add-rules-component {
+    max-width: 30rem;
+    margin: 1rem auto;
+}
 </style>

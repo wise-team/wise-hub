@@ -27,7 +27,7 @@
             </div>
         </b-collapse>
 
-        <b-collapse :id="unique + '-collapse-edit'" v-model="opened">
+        <b-collapse :id="unique + '-collapse-edit'" v-model="openedModel">
             <div class="ml-md-3 pb-3">
                 <ruleset-editor-component
                     :set-rules="setRules"
@@ -44,7 +44,7 @@
                     </b-button>
                 </p>
                 
-                <publish-rulesets-component />
+                <publish-rulesets-component :for="unique" />
             </div>
         </b-collapse>
     </div>
@@ -68,16 +68,16 @@ export default Vue.extend({
     props: [ "setRules", "rulesetId" ],
     data() {
         return {
-            opened: false as boolean,
+            wishOpened: false as boolean,
             deleteOpened: false as boolean,
             unique: uniqueId(),
         };
     },
     methods: {
         toggleOpen() {
-            if (this.edit) this.opened = true;
-            else if (this.editingOther) this.opened = false;
-            else this.opened = !this.opened;
+            if (this.edit) this.wishOpened = true;
+            else if (this.editingOther) this.wishOpened = false;
+            else this.wishOpened = !this.wishOpened;
         },
         initiateEdit() {
             if (this.edit) {
@@ -91,7 +91,7 @@ export default Vue.extend({
             this.deleteOpened = !this.deleteOpened;
         },
         saveChanges() {
-            s(this.$store).dispatch(RulesetsModule.Actions.saveChanges);
+            s(this.$store).dispatch(RulesetsModule.Actions.saveChanges, { for: this.unique });
         },
         revertChanges() {
             s(this.$store).dispatch(RulesetsModule.Actions.revertChanges);
@@ -115,9 +115,20 @@ export default Vue.extend({
         },
         modified(): boolean { return d(s(this.$store).state.rulesets.edit.modified); },
         edit(): boolean { return d(s(this.$store).state.rulesets.edit.rulesetId) === this.rulesetId; },
+        opened(): boolean {
+            return this.edit || this.wishOpened;  
+        },
         editingOther(): boolean {
             return s(this.$store).state.rulesets.edit.rulesetId.length > 0 
             && d(s(this.$store).state.rulesets.edit.rulesetId) !== this.rulesetId;
+        },
+        openedModel: {
+            get(): boolean {
+                return this.wishOpened || this.edit;
+            },
+            set(value: boolean): void {
+                this.wishOpened = value;
+            }
         },
         successIcon() { return icons.success; },
         loadingIcon() { return icons.loading; },

@@ -43,8 +43,8 @@ import VoteView from "./components/views/vote/VoteView.vue";
 import DelegateView from "./components/delegate/DelegateView.vue";
 import NotFoundView from "./components/views/NotFoundView.vue";
 import RulesetsView from "./components/rulesets/RulesetsView.vue";
-import RulesetsEditorView from "./components/views/rulesets-editor/RulesetsEditorView.vue";
 import AccountView from "./components/account/AccountView.vue";
+import PeopleView from "./components/people/PeopleView.vue";
 import TransactionDetailsView from "./components/views/transaction-details/TransactionDetailsView.vue";
 
 /**
@@ -68,18 +68,19 @@ Vue.component("font-awesome-icon", FontAwesomeIcon);
 const router = new VueRouter({
     mode: (window.location.hostname === "localhost" ? "hash" : "history"),
     routes: [
+        // history
         { path: '/', component: ReadView },
-        { path: '/read/:moment?', component: ReadView },
-        { path: '/vote', component: VoteView },
+        { path: '/history/:moment?', component: ReadView },
         { path: '/daemon', component: DaemonView },
-        { path: '/delegate', component: DelegateView },
+        //account views
+        { path: '/@:account', component: AccountView }, // => account history, and links to daemon and rulesets
+        { path: '/@:account/daemon', component: DelegateView }, // => account daemon
+
+        // { path: '/delegate', component: DelegateView }
         { path: '/@:delegator/rulesets', component: RulesetsView },
         { path: '/@:delegator/rulesets/for/@:voter', component: RulesetsView },
         { path: '/rulesets/for/@:voter', component: RulesetsView },
-        { path: '/rulesets/for/@:voter/edit', component: RulesetsEditorView },
-        { path: '/@:account', component: AccountView },
-        { path: '/@:account/read/:moment?', component: AccountView },
-        { path: '/tx/:transaction_id', component: TransactionDetailsView },
+        { path: '/people', component: PeopleView }, // => list of wise users
         
         { path: '*', component: NotFoundView }
     ]

@@ -4,13 +4,18 @@
         <span :style="'color: ' + ruleColor + ';'" class="d-flex w-100 justify-content-between">
             <span>
                 <font-awesome-icon :icon="ruleIcon" />
-                {{ rule.rule }}
+                {{ ruleName | ucfirst }}
             </span>
             <small v-if="edit" class="delete-btn" @click="deleteRule()">
                 <font-awesome-icon :icon="deleteIcon" /> delete
             </small>
         </span>
-        <unknown-rule-component :ruleId="ruleId" :enabled="edit"  />
+
+        <authors-rule-component v-if="rule.rule === 'authors'" :ruleId="ruleId" :enabled="edit"  />
+        <tags-rule-component v-else-if="rule.rule === 'tags'" :ruleId="ruleId" :enabled="edit"  />
+        <voters-rule-component v-else-if="rule.rule === 'voters'" :ruleId="ruleId" :enabled="edit"  />
+        <weight-rule-component v-else-if="rule.rule === 'weight'" :ruleId="ruleId" :enabled="edit"  />
+        <unknown-rule-component v-else :ruleId="ruleId" :enabled="edit"  />
     </div>
 </template>
 
@@ -20,29 +25,16 @@ import { icons } from "../../icons";
 import { s } from "../../store/store";
 import { d, ucfirst, uniqueId } from "../../util/util";
 import { Rule } from "steem-wise-core";
-
-const colors = {
-    [Rule.Type.AgeOfPost]: "#007bff",
-    [Rule.Type.Authors]: "#28a745",
-    [Rule.Type.CustomRPC]: "#17a2b8",
-    [Rule.Type.ExpirationDate]: "#dc3545",
-    [Rule.Type.FirstPost]: "#ffc107",
-    [Rule.Type.Payout]: "#28a745",
-    [Rule.Type.Tags]: "#dc3545",
-    [Rule.Type.Voters]: "#ffc107",
-    [Rule.Type.VotesCount]: "#dc3545",
-    [Rule.Type.VotingPower]: "#dc3545",
-    [Rule.Type.Weight]: "#007bff",
-    [Rule.Type.WeightForPeriod]: "#ffc107"
-} as { [x: string]: any; };
-
-const editors = {
-
-};
-
-import UnknownRuleComponent from "./rules/UnknownRuleComponent.vue";
+import * as rules from "./rules.const";
 import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
 import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
+
+import UnknownRuleComponent from "./rules/UnknownRuleComponent.vue";
+import AuthorsRuleComponent from "./rules/AuthorsRuleComponent.vue";
+import TagsRuleComponent from "./rules/TagsRuleComponent.vue";
+import VotersRuleComponent from "./rules/VotersRuleComponent.vue";
+import WeightRuleComponent from "./rules/WeightRuleComponent.vue";
+
 
 export default Vue.extend({
     props: [ "rulesetId", "ruleId", "edit" ],
@@ -66,12 +58,20 @@ export default Vue.extend({
         },
         ruleColor(): string {
             const ruleType: string = this.rule.rule;
-            return colors[ruleType] || "black";
+            return rules.colors[ruleType] || "black";
+        },
+        ruleName(): string {
+            const ruleType: string = this.rule.rule;
+            return rules.names[ruleType] || ruleType;
         },
         deleteIcon() { return icons.delete },
     },
     components: {
-        UnknownRuleComponent
+        UnknownRuleComponent,
+        AuthorsRuleComponent,
+        TagsRuleComponent,
+        VotersRuleComponent,
+        WeightRuleComponent,
     },
     filters: {
         ucfirst: ucfirst,

@@ -1,18 +1,18 @@
 <!-- src/components/views/delegate/DelegateView.vue -->
 <template>
-    <div v-if="isLoggedIn" id="delegate-view delegate-view-logged-in">
-        <h1>{{ username | ucfirst }}, the delegator <font-awesome-icon :icon="delegatorIcon" /></h1>
-        <div class="border rounded p-2">
+    <div v-if="account" id="delegate-view delegate-view-logged-in">
+        <h1>{{ account | ucfirst }}, the delegator <font-awesome-icon :icon="delegatorIcon" /></h1>
+        
+        <div v-if="isItMe" class="border rounded p-2 mb-4">
             <h2>Daemon settings</h2>
             <daemon-settings-component />
         </div>
 
         <h2>Daemon log</h2>
-        <realtime-log-component :delegator="username" />
+        <realtime-log-component :delegator="account" />
     </div>
     <div v-else id="delegate-view delegate-view-logged-out">
-        <h1>Log in to became a delegator</h1>
-        <p>Please log in</p>
+        <h1>Undefined account</h1>
     </div>
 </template>
 
@@ -30,7 +30,13 @@ export default Vue.extend({
     props: [],
     data() {
         return {
+            account: this.$route.params.account ? this.$route.params.account : undefined,
         };
+    },
+    watch: {
+        "$route" (to, from) {
+            this.account = to.params.account ? to.params.account : undefined;
+        }
     },
     methods: {
     },
@@ -38,9 +44,12 @@ export default Vue.extend({
         isLoggedIn(): boolean {
             return s(this.$store).getters[AuthModule.Getters.isLoggedIn];
         },
-        username(): string {
-            return d(s(this.$store).state.auth.username);
+        isItMe(): boolean {
+            return !!(s(this.$store).state.auth.user) && d(s(this.$store).state.auth.user).account === this.account;
         },
+        /*username(): string {
+            return d(s(this.$store).state.auth.username);
+        },*/
         delegatorIcon() { return icons.delegator; },
     },
     components: {

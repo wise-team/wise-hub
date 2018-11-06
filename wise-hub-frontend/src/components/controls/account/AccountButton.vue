@@ -16,7 +16,7 @@
             <template slot="button-content">
                 <em class="username">@{{ username }}</em>
             </template>
-            <b-dropdown-item :to="'/@' + username">Settings</b-dropdown-item>
+            <b-dropdown-item :to="'/@' + username">Account</b-dropdown-item>
             <b-dropdown-item @click="logout">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
     </b-navbar-nav>

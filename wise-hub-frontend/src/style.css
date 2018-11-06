@@ -10,6 +10,10 @@
     background-color: #6b11ff;
 }
 
+.avatar {
+    border-radius: 50%;
+}
+
 .avatar-in-text {
     height: 1.4rem;
     vertical-align: -0.25rem;

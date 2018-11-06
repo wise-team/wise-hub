@@ -36,8 +36,8 @@ export class StatusApiHelper {
         }
     }
 
-    public static async loadLatestOperations(): Promise<StatusModule.WiseOperation []> {
-        const query = "/operations?order=moment.desc&limit=50";
+    public static async loadLatestOperations(limit: number = 50): Promise<StatusModule.WiseOperation []> {
+        const query = "/operations?order=moment.desc&limit=" + limit;
         const result = await Axios.get(StatusApiHelper.ENDPOINT_URL + query);
 
         const operations: StatusModule.WiseOperation [] = [];

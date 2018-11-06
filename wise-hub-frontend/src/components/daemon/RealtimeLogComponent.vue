@@ -7,13 +7,14 @@
         <div v-if="error.length > 0" class="alert alert-danger" role="alert">
             <font-awesome-icon :icon="errorIcon" /> {{ error }}
         </div>
-        <ul class="list-group">
-            <li v-for="entry in log" :key="entry.id"
-                class="list-group-item"
-            >
-                {{ entry.msg }}
-            </li>
-        </ul>
+        
+        <div class="realtime-log-list">
+            <log-entry v-for="entry in log" :key="entry.id" :entry="entry" />
+        </div>
+
+        <p class="text-right">
+            <small> Daemon log for /@{{ delegator }} </small>
+        </p>
     </div>
 </template>
 
@@ -24,6 +25,8 @@ import * as socketio from "socket.io-client";
 import { d, assertString, formatBigInt, timeDifferenceStr, uniqueId } from "../../util/util";
 import { DaemonLogEntry } from "../../api/DaemonLogEntry";
 import { WiseApiHelper } from "../../api/WiseApiHelper";
+
+import LogEntry from "./LogEntry.vue";
 
 const realtimePort = /*§ data.config.hub.docker.services.realtime.port §*/8099/*§ §.*/;
 let io: SocketIOClient.Socket | undefined;
@@ -37,52 +40,61 @@ export default Vue.extend({
             error: ""
         };
     },
-    mounted() {
-        const delegatorParam = this.delegator ? this.delegator.length > 0 ? this.delegator : undefined : undefined;
-        // const room = delegatorParam ? "delegator_" + delegatorParam : "general";
-        const socketIoUrl = window.location.protocol + "//" + window.location.hostname + ":" + realtimePort;
-        console.log("socketIoUrl = '" + socketIoUrl + "'");
-        io = socketio(socketIoUrl, {
-            query: {
-                delegator: delegatorParam
-            },
-        });
-        io.on("msg", (data: string) => {
-            console.log(data);
-            const entry = JSON.parse(data);
-            entry.id = uniqueId();
-            this.log.unshift(entry);
-            if(this.log.length > 100) this.log.pop();
-        });
-
-        this.loading = true;
-        this.error = "";
-        (async () => {
-            try {
-                const entries: DaemonLogEntry [] = await WiseApiHelper.getLog(delegatorParam);
-                this.log = entries.map((entry: DaemonLogEntry) => { entry.id = uniqueId(); return entry as DaemonLogEntry; });
-                this.error = "";
-                this.loading = false;
-            }
-            catch (error) {
-                this.error = error + "";
-                this.loading = false;
-            }
-        })();
-    },
-    beforeDestroy() {
-        if (io) {
-            io.close();
-            io = undefined;
+    watch: {
+        delegator: function (delegator: string, oldDelegator: string) {
+            console.log("Reload on delegator change to \"" + delegator + "\"");
+            this.reload();
         }
     },
+    created: function () {
+        this.reload()
+    },
     methods: {
+        reload() {
+            const delegatorParam = this.delegator ? this.delegator.length > 0 ? this.delegator : undefined : undefined;
+            // const room = delegatorParam ? "delegator_" + delegatorParam : "general";
+            const socketIoUrl = window.location.protocol + "//" + window.location.hostname + ":" + realtimePort;
+            console.log("socketIoUrl = '" + socketIoUrl + "' for delegatorParam=" + delegatorParam);
+            if (io) {
+                io.close();
+                io = undefined;
+            }
+            io = socketio(socketIoUrl, {
+                query: {
+                    delegator: delegatorParam || ""
+                },
+            });
+            io.on("msg", (data: string) => {
+                console.log(data);
+                const entry = JSON.parse(data);
+                entry.id = uniqueId();
+                this.log.unshift(entry);
+                if(this.log.length > 100) this.log.pop();
+            });
+
+            this.loading = true;
+            this.error = "";
+            (async () => {
+                try {
+                    const entries: DaemonLogEntry [] = await WiseApiHelper.getLog(delegatorParam);
+                    this.log = entries.map((entry: DaemonLogEntry) => { entry.id = uniqueId(); return entry as DaemonLogEntry; });
+                    this.error = "";
+                    this.loading = false;
+                }
+                catch (error) {
+                    this.error = error + "";
+                    this.loading = false;
+                }
+            })();
+        }
     },
     computed: {
         loadingIcon() { return icons.loading; },
         errorIcon() { return icons.error; },
     },
-    components: {},
+    components: {
+        LogEntry
+    },
 });
 </script>
 

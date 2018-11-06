@@ -12,15 +12,20 @@
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link class="nav-link" to="/">
+                    <router-link class="nav-link" to="/" exact>
                         <font-awesome-icon :icon="trendingIcon" /> History
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link class="nav-link" to="/delegate">
-                        <font-awesome-icon :icon="delegateIcon" /> Delegate
+                    <router-link class="nav-link" to="/people">
+                        <font-awesome-icon :icon="peopleIcon" /> People
                     </router-link>
                 </li>
+                <!--<li class="nav-item">
+                    <router-link class="nav-link" :to="'/@' + username + '/daemon'">
+                        <font-awesome-icon :icon="delegateIcon" /> Delegate
+                    </router-link>
+                </li>-->
                 <li class="nav-item">
                     <a class="nav-link" :href="votingpageUrl" target="_blank" rel="nofollow noopener">
                         <font-awesome-icon :icon="voteIcon" /> Vote
@@ -70,6 +75,7 @@ export default Vue.extend({
         voteIcon() { return icons.voter; },
         trendingIcon() { return icons.read; },
         manualIcon() { return icons.manual; },
+        peopleIcon() { return icons.people; },
         externalLinkIcon() { return icons.externalLink; },
     },
     components: {

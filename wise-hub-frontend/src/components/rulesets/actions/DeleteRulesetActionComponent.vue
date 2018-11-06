@@ -23,17 +23,17 @@ export default Vue.extend({
     props: [ "setRulesId", "ruleset" ],
     data() {
         return {
+            unique: uniqueId()
         };
     },
     methods: {
         deleteRuleset() {
-            /*s(this.$store).dispatch(
+            s(this.$store).dispatch(
                 RulesetsModule.Actions.deleteRuleset,
                 {
-                    setRulesId: this.setRulesId, 
                     rulesetId: this.ruleset.id
                 }
-            );*/
+            );
         }
     },
     computed: {

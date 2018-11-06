@@ -19,7 +19,7 @@
              <!--<sup v-if="modified" class="sup-75 text-very-small text-danger">*to be saved</sup>-->
         </h4>
 
-        <p v-if="rulesetsToBeDeleted.length > 0" class="text-muted">
+        <!--<p v-if="rulesetsToBeDeleted.length > 0" class="text-muted">
             <strong>The following rulesets will be deleted from blockchain:</strong>
             <ul>
                 <li v-for="ruleset in rulesetsToBeDeleted" :key="ruleset.id">
@@ -27,7 +27,7 @@
                     <b-link @click="revertRulesetDeletion(ruleset)" style="display: inline-block;">Revert deletion</b-link>
                 </li>
             </ul>
-        </p>
+        </p>-->
             
         <ruleset-collapse-component
             v-for="rulesetId in setRules.rulesets" :key="rulesetId"
@@ -64,7 +64,7 @@ export default Vue.extend({
         };
     },
     methods: {
-        revertRulesetDeletion(ruleset: NormalizedRulesets.NormalizedRuleset) {
+        /*revertRulesetDeletion(ruleset: NormalizedRulesets.NormalizedRuleset) {
             s(this.$store).dispatch(
                 RulesetsModule.Actions.addRulesetToSetRules,
                 {
@@ -72,7 +72,7 @@ export default Vue.extend({
                     setRulesId: this.setRulesId
                 }
             );
-        }
+        }*/
     },
     computed: {
         setRulesValid(): boolean {
@@ -82,14 +82,14 @@ export default Vue.extend({
         setRules(): NormalizedRulesets.NormalizedSetRulesForVoter {
             return s(this.$store).state.rulesets.normalizedRulesets.entities.setRules[this.setRulesId];
         },
-        setRulesBackup(): NormalizedRulesets.NormalizedSetRulesForVoter | undefined {
+        /*setRulesBackup(): NormalizedRulesets.NormalizedSetRulesForVoter | undefined {
             return s(this.$store).state.rulesets.backupNormalizedRulesets.entities.setRules[this.setRulesId];
         },
         rulesetsToBeDeleted(): NormalizedRulesets.NormalizedRuleset [] {
             if (!this.setRulesBackup) return [];
             return this.setRulesBackup.rulesets.filter(rulesetId => this.setRules.rulesets.indexOf(rulesetId) < 0)
             .map(rulesetId => s(this.$store).state.rulesets.backupNormalizedRulesets.entities.rulesets[rulesetId]);
-        },
+        },*/
         delegatorIcon() { return icons.delegator },
         voterIcon() { return icons.voter },
     },

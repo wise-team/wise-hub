@@ -1,6 +1,6 @@
 <!-- src/components/views/rulesets/PublishRulesetsComponent.vue -->
 <template>
-    <div class="publish-rulesets-component">
+    <div v-if="forMe" class="publish-rulesets-component">
         <b-alert variant="primary" :show="loading">
             <font-awesome-icon :icon="loadingIcon" spin /> Saving...
         </b-alert>
@@ -11,6 +11,7 @@
             <font-awesome-icon :icon="successIcon" /> {{ result }}
         </b-alert>
     </div>
+    <div v-else></div>
 </template>
 
 <script lang="ts">
@@ -29,7 +30,7 @@ import { Wise, RulesUpdater, SetRulesForVoter } from "steem-wise-core";
 const generateOpsExecutor = new DelayedExecutor(1200);
 
 export default Vue.extend({
-    props: [],
+    props: [ "for" ],
     data() {
         return {
         };
@@ -45,6 +46,9 @@ export default Vue.extend({
         },
         result(): string {
             return s(this.$store).state.rulesets.publish.result;
+        },
+        forMe(): boolean {
+            return s(this.$store).state.rulesets.publish.for === this.for;
         },
         successIcon() { return icons.success; },
         loadingIcon() { return icons.loading; },

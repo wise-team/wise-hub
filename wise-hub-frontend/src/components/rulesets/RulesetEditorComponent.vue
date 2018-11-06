@@ -17,17 +17,18 @@
         </b-input-group>
 
         <horizontal-rule-component
-            v-for="ruleId in ruleset.rules" :key="ruleId"
+            v-for="ruleId in rules" :key="ruleId"
             :ruleId="ruleId"
             :rulesetId="rulesetId"
             :edit="edit"
             class="mb-4 mb-md-2"
         />
         <p class="text-center" v-if="edit">
-            <b-btn @click="addRule()" variant="outline-secondary"
+            <!--<b-btn @click="addRule()" variant="outline-secondary"
             size="sm" class="mt-1">
                 <font-awesome-icon :icon="addIcon" /> Add rule
-            </b-btn>
+            </b-btn>-->
+            <add-rule-action-component :rulesetId="rulesetId" />
         </p>
         <p v-if="rulesToBeDeleted.length > 0" class="text-muted">
             <strong>The following rules will be deleted from blockchain:</strong>
@@ -110,6 +111,7 @@ import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 import * as _ from "lodash";
 
 import HorizontalRuleComponent from "./HorizontalRuleComponent.vue";
+import AddRuleActionComponent from "./actions/AddRuleActionComponent.vue";
 
 export default Vue.extend({
     props: [ "setRules", "rulesetId", "modified", "edit" ],
@@ -120,19 +122,6 @@ export default Vue.extend({
         };
     },
     methods: {
-        addRule() {
-            console.log("addRule");
-            s(this.$store).dispatch(
-                RulesetsModule.Actions.addRuleToRuleset,
-                {
-                    rulesetId: this.rulesetId, 
-                    rule: {
-                        id: "rule-" + uniqueId(),
-                        rule: Rule.Type.FirstPost
-                    }
-                }
-            );
-        },
         revertRuleDeletion(rule: NormalizedRulesets.NormalizedRule) {
             s(this.$store).dispatch(
                 RulesetsModule.Actions.addRuleToRuleset,
@@ -145,7 +134,14 @@ export default Vue.extend({
     },
     computed: {
         ruleset(): NormalizedRulesets.NormalizedRuleset {
-            return s(this.$store).state.rulesets.normalizedRulesets.entities.rulesets[this.rulesetId];
+            const ruleset = s(this.$store).state.rulesets.normalizedRulesets.entities.rulesets[this.rulesetId];
+            // console.log("Seems like ruleset has changed: ");
+            // console.log(ruleset);
+            return ruleset;
+        },
+        rules(): string [] {
+            // console.log("Seems like rules has changed");
+            return s(this.$store).state.rulesets.normalizedRulesets.entities.rulesets[this.rulesetId].rules;
         },
         rulesetBackup(): NormalizedRulesets.NormalizedRuleset | undefined {
             return s(this.$store).state.rulesets.backupNormalizedRulesets.entities.rulesets[this.rulesetId];
@@ -177,6 +173,7 @@ export default Vue.extend({
     },
     components: {
         HorizontalRuleComponent,
+        AddRuleActionComponent,
     },
     filters: {
         ucfirst: ucfirst,
