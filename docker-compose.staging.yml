@@ -9,8 +9,8 @@ networks:
 services:
   #§ data.config.hub.docker.services.nginx.name + ':'
   nginx:
-    ports:
-      - "8080:80"
+    expose:
+      - 80
     environment:
       WISE_ENVIRONMENT_TYPE: development
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
@@ -19,6 +19,13 @@ services:
       STEEMD_ENDPOINT_URL: https://api.steemit.com
       #§ 'STEEMCONNECT_REDIRECT_URI: ' + data.config.environments.staging.host + '"://' + data.config.environments.staging.host + '"'
       STEEMCONNECT_REDIRECT_URI: dev.wise.jblew.pl"://dev.wise.jblew.pl"
+      #§ "VIRTUAL_HOST: \"" + url(data.config.hub.url.staging).hostname + "\""
+      VIRTUAL_HOST: "hub.dev.wise.jblew.pl"
+      VIRTUAL_NETWORK: "caddy-proxy"
+      VIRTUAL_PORT: 80
+      #§ 'CADDY_TLS: ' + ( url(data.config.hub.url.staging).protocol === "https:" ? '"yes"' : '"no"')
+      CADDY_TLS: "yes"
+      CADDY_TIMEOUTS: "read 5m, write 2m"
     restart: always
 
   #§ data.config.hub.docker.services.redis.name + ':'
