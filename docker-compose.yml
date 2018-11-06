@@ -1,8 +1,4 @@
 version: "3.7"
-networks:
-  vault-net:
-    external:
-      name: vault-net
 
 services:
   #§ data.config.hub.docker.services.nginx.name + ':'
@@ -13,15 +9,7 @@ services:
     volumes:
       - ./nginx/site.template.conf:/etc/nginx/conf.d/mysite.template:ro
       - .:/srv:ro
-    ports:
-      - "8080:80"
     environment:
-      WISE_ENVIRONMENT_TYPE: development
-      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
-      WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
-      #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
-      STEEMD_ENDPOINT_URL: https://api.steemit.com
-      STEEMCONNECT_REDIRECT_URI: "https://localhost:8080/"
       DOLLAR: '$$' #enables use of dollar sign in template.conf
     # for debug add: cat /etc/nginx/conf.d/default.conf &&
     command: /bin/bash -c "envsubst < /etc/nginx/conf.d/mysite.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
@@ -49,32 +37,9 @@ services:
       - IPC_LOCK
     expose:
       - 3000
-    volumes:
-      - "./vault-dev/vault-dev-config.json:/vault-dev/vault-dev-config.json:ro"
-    secrets:
-      #§ '- ' + data.config.hub.docker.services.api.secrets.appRoleId
-      - hub-api-approle-id
-      #§ '- ' + data.config.hub.docker.services.api.secrets.appRoleSecret
-      - hub-api-approle-secret
     environment:
-      #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.api.appRole.role
-      VAULT_APPROLE_NAME: wise-hub-api
-      #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.api.secrets.appRoleId
-      VAULT_APPROLE_ID_FILE: /run/secrets/hub-api-approle-id
-      #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.api.secrets.appRoleSecret
-      VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-api-approle-secret
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.container + ':6379/'
       REDIS_URL: redis://wise-hub-redis:6379/
-      WISE_LOG_LEVEL: debug
-      WISE_VAULT_URL: "http://vault-dev:8200"
-      # refer this guide for session options: https://github.com/expressjs/session
-      SESSION_OPTIONS: '{ "cookie": { "secure": false }, "resave": false, "saveUninitialized": false }'
-      #§ 'STEEMCONNECT_CALLBACK_URL: "http://localhost:8080' + data.config.hub.urls.api.auth.callback + '"'
-      STEEMCONNECT_CALLBACK_URL: "http://localhost:8080/api/auth/callback"
-      LOGIN_REDIRECT_URL: "/"
-    networks:
-      - default
-      - vault-net
 
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
@@ -84,17 +49,9 @@ services:
     #§ 'container_name: ' + d(data.config.hub.docker.services.daemon.container)
     container_name: wise-hub-daemon
     environment:
-      START_FROM_BLOCK: HEAD_RESET
-      RULESETS_LOADING_STRATEGY: "wisesql-preload"
-      #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
-      STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io"
-      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
-      WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.container + ':6379/'
       REDIS_URL: redis://wise-hub-redis:6379/
       WISE_LOG_LEVEL: debug
-    networks:
-      - default
 
   #§ d(data.config.hub.docker.services.publisher.name) + ':'
   publisher:
@@ -111,19 +68,8 @@ services:
       #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
       - hub-publisher-approle-secret
     environment:
-      #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.publisher.appRole.role
-      VAULT_APPROLE_NAME: wise-hub-daemon
-      #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId
-      VAULT_APPROLE_ID_FILE: /run/secrets/hub-publisher-approle-id
-      #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
-      VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-publisher-approle-secret
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.container + ':6379/'
       REDIS_URL: redis://wise-hub-redis:6379/
-      WISE_LOG_LEVEL: debug
-      WISE_VAULT_URL: "http://vault-dev:8200"
-    networks:
-      - default
-      - vault-net
 
   #§ d(data.config.hub.docker.services.realtime.name) + ':'
   realtime:
@@ -139,24 +85,6 @@ services:
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.container + ':6379/'
       REDIS_URL: redis://wise-hub-redis:6379/
 
-
-secrets:
-  #§ data.config.hub.docker.services.api.secrets.appRoleId + ':'
-  hub-api-approle-id:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.api.secrets.appRoleId
-    file: ./secrets/hub-api-approle-id
-  #§ data.config.hub.docker.services.api.secrets.appRoleSecret + ':'
-  hub-api-approle-secret:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.api.secrets.appRoleSecret
-    file: ./secrets/hub-api-approle-secret
-  #§ data.config.hub.docker.services.publisher.secrets.appRoleId + ':'
-  hub-publisher-approle-id:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId
-    file: ./secrets/hub-publisher-approle-id
-  #§ data.config.hub.docker.services.publisher.secrets.appRoleSecret + ':'
-  hub-publisher-approle-secret:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
-    file: ./secrets/hub-publisher-approle-secret
 
 volumes:
   #§ data.config.hub.docker.services.redis.volume + ':'
