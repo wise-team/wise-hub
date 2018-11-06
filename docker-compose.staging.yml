@@ -55,7 +55,7 @@ services:
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
     environment:
-      START_FROM_BLOCK: HEAD_RESET
+      START_FROM_BLOCK: HEAD
       RULESETS_LOADING_STRATEGY: "wisesql-preload"
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
       STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io"
