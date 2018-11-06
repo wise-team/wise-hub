@@ -452,7 +452,7 @@ export namespace RulesetsModuleImpl {
             const denormalizedRuleset = d(normalizer.denormalizeRulesets([ rulesetId ], state.normalizedRulesets)[0]);
             const modified = !_.isEqual(backupRuleset, denormalizedRuleset);*/
             const modified = !_.isEqual(state.normalizedRulesets, state.backupNormalizedRulesets);
-            console.log("MODIFIED=" + modified);
+            // console.log("MODIFIED=" + modified);
             commit(Mutations.updateEdit, { modified: modified });
         },
 

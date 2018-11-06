@@ -2,10 +2,10 @@
 <template>
     <div class="weight-rule-component">
         <b-input-group prepend="Minimal weight" append="%" class="mb-1">
-            <b-form-input type="number" :disabled="!enabled" v-model="min"></b-form-input>
+            <b-form-input type="number" :disabled="!enabled" min="-100" max="100" step="0.1" v-model="min"></b-form-input>
         </b-input-group>
         <b-input-group prepend="Maximal weight" append="%">
-            <b-form-input type="number" :disabled="!enabled" v-model="max"></b-form-input>
+            <b-form-input type="number" :disabled="!enabled" min="-100" max="100" step="0.1" v-model="max"></b-form-input>
         </b-input-group>
         <small class="text-danger">{{ error }}</small>
     </div>
@@ -45,16 +45,16 @@ export default Vue.extend({
             return s(this.$store).state.rulesets.normalizedRulesets.entities.rules[this.ruleId];
         },
         min: {
-            get(): string { return (this.rule.min / 10) + ""; },
+            get(): string { return (this.rule.min / 100) + ""; },
             set(minStr: string): void {
-                const min: number = Math.round(parseFloat(minStr) * 10);
+                const min: number = Math.round(parseFloat(minStr) * 100);
                 this.saveRule(_.set(_.cloneDeep(this.rule), "min", min));
             }
         },
-         max: {
-            get(): string { return (this.rule.max / 10) + ""; },
+        max: {
+            get(): string { return (this.rule.max / 100) + ""; },
             set(maxStr: string): void {
-                const max: number = Math.round(parseFloat(maxStr) * 10);
+                const max: number = Math.round(parseFloat(maxStr) * 100);
                 this.saveRule(_.set(_.cloneDeep(this.rule), "max", max));
             }
         },

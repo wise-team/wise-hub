@@ -6,11 +6,12 @@
         >
             <b-dropdown-item-button
                 v-for="rule in rules" :key="rule.name"
-                :style="'color: ' + rule.color + ';'"
                 @click="addRule(rule.defaultRule)"
             >
-                <font-awesome-icon :icon="rule.icon" />
-                {{ rule.name }}
+                <span :style="'background-color: ' + rule.color + ';'">
+                    <font-awesome-icon :icon="rule.icon" />
+                    {{ rule.name | ucfirst }}
+                </span>
             </b-dropdown-item-button>
         </b-dropdown>
     </div>

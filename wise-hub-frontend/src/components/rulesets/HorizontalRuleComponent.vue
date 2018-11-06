@@ -15,6 +15,13 @@
         <tags-rule-component v-else-if="rule.rule === 'tags'" :ruleId="ruleId" :enabled="edit"  />
         <voters-rule-component v-else-if="rule.rule === 'voters'" :ruleId="ruleId" :enabled="edit"  />
         <weight-rule-component v-else-if="rule.rule === 'weight'" :ruleId="ruleId" :enabled="edit"  />
+        <first-post-rule-component v-else-if="rule.rule === 'first_post'" :ruleId="ruleId" :enabled="edit"  />
+        <expiration-date-rule-component v-else-if="rule.rule === 'expiration_date'" :ruleId="ruleId" :enabled="edit"  />
+        <voting-power-rule-component v-else-if="rule.rule === 'voting_power'" :ruleId="ruleId" :enabled="edit"  />
+        <payout-rule-component v-else-if="rule.rule === 'payout'" :ruleId="ruleId" :enabled="edit"  />
+        <votes-count-rule-component v-else-if="rule.rule === 'votes_count'" :ruleId="ruleId" :enabled="edit"  />
+        <weight-for-period-rule-component v-else-if="rule.rule === 'weight_for_period'" :ruleId="ruleId" :enabled="edit"  />
+        <age-of-post-rule-component v-else-if="rule.rule === 'age_of_post'" :ruleId="ruleId" :enabled="edit"  />
         <unknown-rule-component v-else :ruleId="ruleId" :enabled="edit"  />
     </div>
 </template>
@@ -34,6 +41,13 @@ import AuthorsRuleComponent from "./rules/AuthorsRuleComponent.vue";
 import TagsRuleComponent from "./rules/TagsRuleComponent.vue";
 import VotersRuleComponent from "./rules/VotersRuleComponent.vue";
 import WeightRuleComponent from "./rules/WeightRuleComponent.vue";
+import FirstPostRuleComponent from "./rules/FirstPostRuleComponent.vue";
+import ExpirationDateRuleComponent from "./rules/ExpirationDateRuleComponent.vue";
+import VotingPowerRuleComponent from "./rules/VotingPowerRuleComponent.vue";
+import VotesCountRuleComponent from "./rules/VotesCountRuleComponent.vue";
+import PayoutRuleComponent from "./rules/PayoutRuleComponent.vue";
+import WeightForPeriodRuleComponent from "./rules/WeightForPeriodRuleComponent.vue";
+import AgeOfPostRuleComponent from "./rules/AgeOfPostRuleComponent.vue";
 
 
 export default Vue.extend({
@@ -72,6 +86,13 @@ export default Vue.extend({
         TagsRuleComponent,
         VotersRuleComponent,
         WeightRuleComponent,
+        FirstPostRuleComponent,
+        ExpirationDateRuleComponent,
+        VotingPowerRuleComponent,
+        VotesCountRuleComponent,
+        PayoutRuleComponent,
+        WeightForPeriodRuleComponent,
+        AgeOfPostRuleComponent,
     },
     filters: {
         ucfirst: ucfirst,
