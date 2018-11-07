@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.3"
 
 networks:
   vault-net:
@@ -17,8 +17,8 @@ services:
       WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.jblew.pl/
       #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
       STEEMD_ENDPOINT_URL: https://api.steemit.com
-      #§ 'STEEMCONNECT_REDIRECT_URI: ' + data.config.environments.staging.host + '"://' + data.config.environments.staging.host + '"'
-      STEEMCONNECT_REDIRECT_URI: dev.wise.jblew.pl"://dev.wise.jblew.pl"
+      #§ 'STEEMCONNECT_REDIRECT_URI: "' + data.config.environments.staging.protocol + '://' + data.config.environments.staging.host + data.config.hub.urls.api.auth.callback + '"'
+      STEEMCONNECT_REDIRECT_URI: "https://dev.wise.jblew.pl/api/auth/callback"
       #§ "VIRTUAL_HOST: \"" + url(data.config.hub.url.staging).hostname + "\""
       VIRTUAL_HOST: "hub.dev.wise.jblew.pl"
       VIRTUAL_NETWORK: "caddy-proxy"
@@ -39,6 +39,7 @@ services:
       #§ '- ' + data.config.hub.docker.services.api.secrets.appRoleSecret
       - hub-api-approle-secret
     environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
       #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.api.appRole.role
       VAULT_APPROLE_NAME: wise-hub-api
       #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.api.secrets.appRoleId
@@ -50,8 +51,8 @@ services:
       WISE_VAULT_URL: "https://wise-vault:8200"
       # refer this guide for session options: https://github.com/expressjs/session
       SESSION_OPTIONS: '{ "cookie": { "secure": true }, "resave": false, "saveUninitialized": false }'
-      #§ 'STEEMCONNECT_REDIRECT_URI: ' + data.config.environments.staging.host + '"://' + data.config.environments.staging.host + data.config.hub.urls.api.auth.callback + '"'
-      STEEMCONNECT_REDIRECT_URI: dev.wise.jblew.pl"://dev.wise.jblew.pl/api/auth/callback"
+      #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.environments.staging.protocol + '://' + data.config.environments.staging.host + data.config.hub.urls.api.auth.callback + '"'
+      STEEMCONNECT_CALLBACK_URL: "https://dev.wise.jblew.pl/api/auth/callback"
       LOGIN_REDIRECT_URL: "/"
     networks:
       - default
@@ -81,6 +82,7 @@ services:
       #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
       - hub-publisher-approle-secret
     environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
       #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.publisher.appRole.role
       VAULT_APPROLE_NAME: wise-hub-daemon
       #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId

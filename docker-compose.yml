@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.3"
 
 services:
   #§ data.config.hub.docker.services.nginx.name + ':'
@@ -30,7 +30,7 @@ services:
   api:
     #§ 'image: ' + data.config.hub.docker.images.backend.name
     image: wise/hub-backend
-    command: sh -c "node dist/api/index.js"
+    command: sh -c "sleep 9 && node dist/api/index.js"
     #§ 'container_name: ' + d(data.config.hub.docker.services.api.container)
     container_name: wise-hub-api
     cap_add:
@@ -45,7 +45,7 @@ services:
   daemon:
     #§ 'image: ' + data.config.hub.docker.images.backend.name
     image: wise/hub-backend
-    command: sh -c "node dist/daemon/index.js"
+    command: sh -c "sleep 5 && node dist/daemon/index.js"
     #§ 'container_name: ' + d(data.config.hub.docker.services.daemon.container)
     container_name: wise-hub-daemon
     environment:
@@ -57,7 +57,7 @@ services:
   publisher:
     #§ 'image: ' + data.config.hub.docker.images.backend.name
     image: wise/hub-backend
-    command: sh -c "node dist/publisher/index.js"
+    command: sh -c "sleep 9 && node dist/publisher/index.js"
     #§ 'container_name: ' + d(data.config.hub.docker.services.publisher.container)
     container_name: wise-hub-publisher
     cap_add:
