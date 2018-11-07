@@ -53,7 +53,7 @@ export default Vue.extend({
         reload() {
             const delegatorParam = this.delegator ? this.delegator.length > 0 ? this.delegator : undefined : undefined;
             // const room = delegatorParam ? "delegator_" + delegatorParam : "general";
-            const socketIoUrl = window.location.protocol + "//" + window.location.hostname + ":" + realtimePort;
+            const socketIoUrl = "http://" + window.location.hostname + ":" + realtimePort;
             console.log("socketIoUrl = '" + socketIoUrl + "' for delegatorParam=" + delegatorParam);
             if (io) {
                 io.close();
