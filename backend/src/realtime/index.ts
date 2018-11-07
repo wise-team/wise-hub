@@ -35,7 +35,9 @@ const server = new http.Server(app);
 /*****************
  **   CONNECT   **
  *****************/
-const io: socket_io.Server = socket_io(server);
+const io: socket_io.Server = socket_io(server, {
+    path: "/realtime/socket.io"
+});
 
 console.log("Redis subscribe to " + common.redis.channels.realtimeKey);
 redis.subscribe(common.redis.channels.realtimeKey, (error: any, count: number) => {

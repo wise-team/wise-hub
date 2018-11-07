@@ -53,16 +53,19 @@ export default Vue.extend({
         reload() {
             const delegatorParam = this.delegator ? this.delegator.length > 0 ? this.delegator : undefined : undefined;
             // const room = delegatorParam ? "delegator_" + delegatorParam : "general";
-            const socketIoUrl = "http://" + window.location.hostname + ":" + realtimePort;
-            console.log("socketIoUrl = '" + socketIoUrl + "' for delegatorParam=" + delegatorParam);
+            // const socketIoUrl = "http://" + window.location.hostname + "/realtime/socket.io";
+            // console.log("socketIoUrl = '" + socketIoUrl + "' for delegatorParam=" + delegatorParam);
+            console.log("Initiate socket.io");
             if (io) {
                 io.close();
                 io = undefined;
             }
-            io = socketio(socketIoUrl, {
+            io = socketio("/", {
                 query: {
-                    delegator: delegatorParam || ""
+                    delegator: delegatorParam || "",
                 },
+                rejectUnauthorized: false,
+                path: "/realtime/socket.io"
             });
             io.on("msg", (data: string) => {
                 console.log(data);
