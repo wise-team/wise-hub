@@ -5,6 +5,11 @@ networks:
     external:
       #§ 'name: ' + data.config.vault.docker.network
       name: vault-net
+  proxy-tier:
+    external:
+      name: caddy-proxy
+  default:
+    driver: bridge
 
 services:
   #§ data.config.hub.docker.services.nginx.name + ':'
@@ -26,6 +31,9 @@ services:
       #§ 'CADDY_TLS: ' + ( url(data.config.hub.url.staging).protocol === "https:" ? '"yes"' : '"no"')
       CADDY_TLS: "yes"
       CADDY_TIMEOUTS: "read 5m, write 2m"
+    networks:
+      - default
+      - proxy-tier
     restart: always
 
   #§ data.config.hub.docker.services.redis.name + ':'
