@@ -37,15 +37,13 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
  */
 import App from "./components/App.vue";
 import { store, Actions } from "./store/store";
-import ReadView from "./components/views/read/ReadView.vue";
+import HistoryView from "./components/history/HistoryView.vue";
 import DaemonView from "./components/daemon/DaemonView.vue";
-import VoteView from "./components/views/vote/VoteView.vue";
 import DelegateView from "./components/delegate/DelegateView.vue";
 import NotFoundView from "./components/views/NotFoundView.vue";
 import RulesetsView from "./components/rulesets/RulesetsView.vue";
 import AccountView from "./components/account/AccountView.vue";
 import PeopleView from "./components/people/PeopleView.vue";
-import TransactionDetailsView from "./components/views/transaction-details/TransactionDetailsView.vue";
 
 /**
  * Import global css
@@ -69,8 +67,8 @@ const router = new VueRouter({
     mode: (window.location.hostname === "localhost" ? "hash" : "history"),
     routes: [
         // history
-        { path: '/', component: ReadView },
-        { path: '/history/:moment?', component: ReadView },
+        { path: '/', component: HistoryView },
+        // { path: '/history/:moment?', component: ReadView },
         { path: '/daemon', component: DaemonView },
         //account views
         { path: '/@:account', component: AccountView }, // => account history, and links to daemon and rulesets
@@ -83,7 +81,10 @@ const router = new VueRouter({
         { path: '/people', component: PeopleView }, // => list of wise users
         
         { path: '*', component: NotFoundView }
-    ]
+    ],
+    scrollBehavior (to, from, savedPosition) {
+        return { x: 0, y: 0 }
+    }
 });
 
 const v = new Vue({

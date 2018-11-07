@@ -8,7 +8,7 @@
                 v-for="rule in rules" :key="rule.name"
                 @click="addRule(rule.defaultRule)"
             >
-                <span :style="'background-color: ' + rule.color + ';'">
+                <span :style="'color: ' + rule.color + ';'">
                     <font-awesome-icon :icon="rule.icon" />
                     {{ rule.name | ucfirst }}
                 </span>

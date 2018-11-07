@@ -5,6 +5,7 @@ import { Redis } from "ioredis";
 import { common } from "../common/common";
 import Axios from "axios";
 import { d } from "../lib/util";
+import { BlockLoadingApi } from "./BlockLoadingApi";
 
 export class ApiHelper {
     private protocol: Protocol = Wise.constructDefaultProtocol();
@@ -48,6 +49,10 @@ export class ApiHelper {
     public constructApiForDaemon(): Api {
         const directBlockchain = new DirectBlockchainApi(this.getWiseProtocol(), undefined, { url: this.steemApis[0] });
         return directBlockchain;
+    }
+
+    public constructBlockLoadingApi(): BlockLoadingApi {
+        return new BlockLoadingApi(this.getSteem());
     }
 
     public async getWiseSQLBlockNumber(): Promise<number> {

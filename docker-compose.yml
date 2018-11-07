@@ -75,7 +75,7 @@ services:
   realtime:
     #§ 'image: ' + data.config.hub.docker.images.backend.name
     image: wise/hub-backend
-    command: sh -c "node dist/realtime/index.js"
+    command: sh -c "sleep 9 && node dist/realtime/index.js"
     #§ 'container_name: ' + d(data.config.hub.docker.services.realtime.container)
     container_name: wise-hub-realtime
     ports:

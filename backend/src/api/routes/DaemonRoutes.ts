@@ -19,10 +19,13 @@ export class DaemonRoutes {
 
     public routes(app: express.Application) {
         app.get("/api/daemon/log", (req, res) => asyncReq(res, async () => {
-            const respObj: any = {};
-
             const items = await this.redis.lrange(common.redis.daemonLogGeneral, 0, 99999);
 
+            res.send(JSON.stringify(items));
+        }));
+
+        app.get("/api/daemon/operations/log", (req, res) => asyncReq(res, async () => {
+            const items = await this.redis.lrange(common.redis.wiseOperationsLog, 0, 99999);
             res.send(JSON.stringify(items));
         }));
 

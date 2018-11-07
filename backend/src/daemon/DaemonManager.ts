@@ -5,10 +5,13 @@ import { Daemon } from "./Daemon";
 import { ApiHelper } from "./ApiHelper";
 import { DynamicGlobalProperties } from "steem";
 import { Log } from "../lib/Log";
+import { d } from "../lib/util";
 import { RulesManager } from "./rules/RulesManager";
 import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
 import { EffectuatedWiseOperation, SetRules, EffectuatedSetRules, RulePrototyper, Api } from "steem-wise-core";
 import { DaemonLog } from "./DaemonLog";
+import { BlockLoadingApi } from "./BlockLoadingApi";
+import * as BluebirdPromise from "bluebird";
 
 export class DaemonManager {
     private redis: Redis;
@@ -18,6 +21,7 @@ export class DaemonManager {
     private api: Api;
     private rulesManager: RulesManager;
     private daemonLog: DaemonLog;
+    private blockLoadingApi: BlockLoadingApi;
 
     public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper, daemonLog: DaemonLog) {
         this.redis = redis;
@@ -26,8 +30,9 @@ export class DaemonManager {
         this.daemonLog = daemonLog;
 
         this.api = this.apiHelper.constructApiForDaemon();
+        this.blockLoadingApi = this.apiHelper.constructBlockLoadingApi();
         this.rulesManager = new RulesManager(this.redis);
-        this.daemon = new Daemon(this.redis, this.delegatorManager, this.apiHelper, this.api, this.rulesManager, this.daemonLog);
+        this.daemon = new Daemon(this.redis, this.delegatorManager, this.apiHelper, this.blockLoadingApi, this.rulesManager, this.daemonLog);
     }
 
     public async run() {
@@ -65,8 +70,18 @@ export class DaemonManager {
 
         if (startBlockFromEnv.toLocaleLowerCase() === "head_reset") {
             Log.log().warn("DaemonManager SKIPPING BLOCKS (mode=HEAD_RESET)");
-            const dgp: DynamicGlobalProperties = await this.apiHelper.getSteem().getDynamicGlobalPropertiesAsync();
-            return parseInt(dgp.head_block_number + "", 10);
+            let dgp: DynamicGlobalProperties | undefined = undefined;
+            while (!dgp) {
+                try {
+                   dgp = await this.apiHelper.getSteem().getDynamicGlobalPropertiesAsync();
+                }
+                catch (error) {
+                    Log.log().warn("Error while getting DynamicGlobalProperties, Retrying in 5 seconds");
+                    Log.log().exception(Log.level.warn, error);
+                    await BluebirdPromise.delay(5000);
+                }
+            }
+            return parseInt(d(dgp).head_block_number + "", 10);
         }
 
         const lastProcessedBlockFromRedis = await this.redis.hget(common.redis.daemonStatus.key, common.redis.daemonStatus.props.last_processed_block);

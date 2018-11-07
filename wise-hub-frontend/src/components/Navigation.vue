@@ -6,11 +6,20 @@
         <b-collapse is-nav :id="uuid + '-main_nav_collapse'" class="main-nav-collapser">
 
             <b-navbar-nav>
-                <li class="nav-item" v-if="username.length > 0">
+                <b-nav-item-dropdown v-if="username.length > 0">
+                    <template slot="button-content">
+                        <em><span class="d-inline-block">@</span>{{ username }}</em>
+                    </template>
+                    <b-dropdown-item :to="'/@' + username" exact>History</b-dropdown-item>
+                    <b-dropdown-item :to="'/@' + username + '/rulesets'" exact>Rulesets by you</b-dropdown-item>
+                    <b-dropdown-item :to="'/rulesets/for/@' + username" exact>Rulesets for you</b-dropdown-item>
+                    <b-dropdown-item :to="'/@' + username + '/daemon'" exact>Daemon</b-dropdown-item>
+                </b-nav-item-dropdown>
+               <!--<li class="nav-item" v-if="username.length > 0">
                     <router-link class="nav-link" :to="'/@' + username">
                         <em><span class="d-inline-block">@</span>{{ username }}</em>
                     </router-link>
-                </li>
+                </li>-->
                 <li class="nav-item">
                     <router-link class="nav-link" to="/" exact>
                         <font-awesome-icon :icon="trendingIcon" /> History

@@ -40,8 +40,10 @@ export const common = {
         publishProcessingQueue: "hub:publisher:queue:publish_processing",
         daemonHartbeat: "hub:hartbeat:daemon",
         publisherHartbeat: "hub:hartbeat:publisher",
+        realtimeHartbeat: "hub:hartbeat:realtime",
         daemonLogGeneral: "hub:daemon:log_general",
         daemonLogFor: "hub:daemon:log_for",
+        wiseOperationsLog: "hub:daemon:wise_ops_log",
         channels: {
             delegators: {
                 key: "channel_delegators",

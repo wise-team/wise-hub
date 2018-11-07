@@ -19,4 +19,21 @@ export class WiseApiHelper {
             else throw error;
         }
     }
+
+    public static async getOperationsLog(account?: string): Promise<EffectuatedWiseOperation []> {
+        try {
+            const resp = await Axios.get("/api/daemon/operations/log");
+            if (account && account.length > 0) {
+                return resp.data.map((entry: string) => JSON.parse(entry) as EffectuatedWiseOperation)
+                .filter((op: EffectuatedWiseOperation) => op.delegator === account || op.voter === account);
+            }
+            else {
+                return resp.data.map((entry: string) => JSON.parse(entry));
+            }
+        }
+        catch (error) {
+            if (error.response.status === 404) return [];
+            else throw error;
+        }
+    }
 }

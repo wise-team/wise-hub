@@ -4,6 +4,7 @@ import { AuthModule as Me } from "./AuthModule";
 import { User, UserSettings } from "./User";
 import { AuthModuleApiHelper } from "./AuthModuleApiHelper";
 import { d, assertString } from "../../../util/util";
+import { StatusModule } from "../status/StatusModule";
 
 export namespace AuthModuleImpl {
     /**
@@ -72,6 +73,7 @@ export namespace AuthModuleImpl {
                         commit(Mutations.setUser, { user: user });
                         commit(Mutations.setLoading, { loading: false });
                         commit(Mutations.setUsername, { username: user.account });
+                        dispatch(StatusModule.Actions.setAccountName, { accountName: user.account });
                     }
                     else {
                         commit(Mutations.setUser, { user: undefined });

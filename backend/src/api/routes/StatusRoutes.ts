@@ -20,22 +20,42 @@ export class StatusRoutes {
 
     public routes(app: express.Application) {
         app.get("/api/status", (req, res) => asyncReq(res, async () => {
-            const respObj: any = {};
+            const sTime = Date.now();
+            let publicSecret: any = undefined;
+            const vaultStatus: { initialized?: boolean; sealed?: boolean; error?: string; } = {};
+            try {
+                const vaultStatusResp = await this.vault.getStatus();
+                vaultStatus.initialized = vaultStatusResp.initialized;
+                vaultStatus.sealed = vaultStatusResp.sealed;
 
-            const vaultStatus = await this.vault.getStatus();
-            respObj.vault = {
-                initialized: vaultStatus.initialized,
-                sealed: vaultStatus.sealed
+                publicSecret = await this.vault.getSecret("/hub/public/status");
+            }
+            catch (error) { vaultStatus.error = error + ""; }
+
+            const daemon = await this.redis.hgetall(common.redis.daemonStatus.key);
+            const alive = {
+                publisher: await this.redis.exists(common.redis.publisherHartbeat) > 0,
+                daemon: await this.redis.exists(common.redis.daemonHartbeat) > 0,
+                realtime: await this.redis.exists(common.redis.realtimeHartbeat) > 0,
             };
 
-            respObj.publicSecret = await this.vault.getSecret("/hub/public/status");
-            respObj.daemon = await this.redis.hgetall(common.redis.daemonStatus.key);
-            respObj.alive = {
-                publisher: await this.redis.exists(common.redis.publisherHartbeat),
-                daemon: await this.redis.exists(common.redis.daemonHartbeat)
+            const publisher = {
+                queueLen: await this.redis.llen(common.redis.toPublishQueue),
+                processingLen: await this.redis.llen(common.redis.publishProcessingQueue)
             };
 
-            res.send(JSON.stringify(respObj));
+            const took = Date.now() - sTime;
+
+            const payload: StatusResponsePayload = {
+                vault: vaultStatus,
+                alive: alive,
+                publicSecret: publicSecret,
+                daemon: daemon,
+                publisher: publisher,
+                took: took
+            };
+
+            res.send(JSON.stringify(payload));
         }));
 
         app.get("/api/publisher/queue", (req, res) => asyncReq(res, async () => {
@@ -48,4 +68,24 @@ export class StatusRoutes {
             }));
         }));
     }
+}
+
+export interface StatusResponsePayload {
+    vault: {
+        initialized?: boolean,
+        sealed?: boolean,
+        error?: string;
+    };
+    alive: {
+        publisher: boolean;
+        daemon: boolean;
+        realtime: boolean;
+    };
+    publisher: {
+        queueLen: number;
+        processingLen: number;
+    };
+    daemon: any;
+    publicSecret: any;
+    took: number;
 }

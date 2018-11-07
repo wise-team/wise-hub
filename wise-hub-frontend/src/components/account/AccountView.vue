@@ -26,6 +26,9 @@
                 </b-col>
             </b-row>
         </b-container>
+        <hr />
+        <h2>History</h2>
+        <realtime-history-component :account="account" />
     </div>
     <div v-else class="account-view account-view-not-found">
         <h1>Not found</h1>
@@ -37,7 +40,9 @@ import Vue from "vue";
 import { s } from "../../store/store";
 import { d, ucfirst } from "../../util/util";
 import { icons } from "../../icons";
+
 // import DaemonSettingsComponent from "./DaemonSettingsComponent.vue";
+import RealtimeHistoryComponent from "../history/RealtimeHistoryComponent.vue";
 
 export default Vue.extend({
     props: [],
@@ -68,6 +73,7 @@ export default Vue.extend({
     },
     components: {
         // DaemonSettingsComponent,
+        RealtimeHistoryComponent,
     },
     filters: {
         ucfirst: ucfirst

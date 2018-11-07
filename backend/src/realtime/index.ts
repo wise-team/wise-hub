@@ -26,6 +26,7 @@ process.on("unhandledRejection", (err) => {
 
 const redisUrl = process.env.REDIS_URL;
 if (!redisUrl) throw new Error("Env REDIS_URL is missing.");
+const subRedis = new Redis(redisUrl);
 const redis = new Redis(redisUrl);
 
 const app = express();
@@ -40,14 +41,14 @@ const io: socket_io.Server = socket_io(server, {
 });
 
 console.log("Redis subscribe to " + common.redis.channels.realtimeKey);
-redis.subscribe(common.redis.channels.realtimeKey, (error: any, count: number) => {
+subRedis.subscribe(common.redis.channels.realtimeKey, (error: any, count: number) => {
     if (error) {
         Log.log().exception(Log.level.error, error);
         process.exit(1);
     }
     else Log.log().info("Subscribe successful, count=" + count);
 });
-redis.on("message", function (channel: string, message: string) {
+subRedis.on("message", function (channel: string, message: string) {
     try {
         io.to(common.socketio.rooms.general).emit("msg", message);
         Log.log().debug("io.to(" + common.socketio.rooms.general + ").emit(msg, " + message + ")");
@@ -107,3 +108,20 @@ process.on("SIGTERM", function () {
         process.exit(0);
     });
 });
+
+// hartbeat
+
+function hartbeat() {
+    (async () => {
+        try {
+            await redis.set(common.redis.realtimeHartbeat, "ALIVE", "EX", 10);
+        }
+        catch (error) {
+            Log.log().warn("Error during hartbeat: " + error);
+            Log.log().exception(Log.level.warn, error);
+        }
+    })();
+
+    setTimeout(() => hartbeat(), 5000);
+}
+hartbeat();

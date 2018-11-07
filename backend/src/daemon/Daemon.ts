@@ -42,6 +42,7 @@ export class Daemon {
         this.synchronizer = new UniversalSynchronizer(this.api, Wise.constructDefaultProtocol(), {
             onSetRules: (setRules, wiseOp) => this.onSetRules(setRules, wiseOp),
             onVoteorder: (voteorder, wiseOp) => this.onVoteorder(voteorder, wiseOp),
+            onConfirmVote: (confirmVote, wiseOp) => this.onConfirmVote(confirmVote, wiseOp),
             onStart: () => this.onStart(),
             onError:  (error: Error, proceeding: boolean) => this.onError(error, proceeding),
             onFinished: () => this.onFinished(),
@@ -71,11 +72,14 @@ export class Daemon {
     }
 
     private onBlockProcessingStart(blockNum: number) {
+        this.safeAsyncCall(async () => await this.hartbeat());
     }
 
     private async onBlockProcessingFinished(blockNum: number) {
         if (blockNum % 30 == 0) Log.log().info("Finished processing block " + blockNum);
-        this.daemonLog.emit({ msg: "Processed block " + blockNum });
+        this.daemonLog.emit(
+            { msg: "Processed block " + blockNum, key: "block_processing_finished",
+            transaction: { block_num: blockNum, trx_num: -1, trx_id: "" } });
 
         await this.redis.hset(common.redis.daemonStatus.key, common.redis.daemonStatus.props.last_processed_block, blockNum + "");
         await RulesLoadedUpToBlock.set(this.redis, blockNum);
@@ -89,15 +93,20 @@ export class Daemon {
 
     private onSetRules(setRules: SetRules, op: EffectuatedWiseOperation) {
         // if (this.delegatorManager.hasDelegator(op.delegator)) {
-            const es: EffectuatedSetRules = {
-                moment: op.moment,
-                voter: op.voter,
-                delegator: op.delegator,
-                rulesets: setRules.rulesets
-            };
-            this.safeAsyncCall(() => this.rulesManager.saveRules(op.delegator, op.voter, es));
+        const es: EffectuatedSetRules = {
+            moment: op.moment,
+            voter: op.voter,
+            delegator: op.delegator,
+            rulesets: setRules.rulesets
+        };
+        this.safeAsyncCall(() => this.rulesManager.saveRules(op.delegator, op.voter, es));
         // }
-        // this.daemonLog.emit({ msg: "Set rules", wiseOp: op });
+        this.daemonLog.emit({ msg: "Set rules", wiseOp: op });
+        Log.log().info("@" + op.delegator + " set rules for @" + op.voter);
+    }
+
+    private onConfirmVote(confirmVote: ConfirmVote, op: EffectuatedWiseOperation) {
+        this.daemonLog.emit({ msg: "Confirm vote", wiseOp: op });
     }
 
     private onVoteorder(cmd: SendVoteorder, op: EffectuatedWiseOperation, errorTimeout: number = StaticConfig.DAEMON_ON_VOTEORDER_ERROR_REPEAT_AFTER_S) {
@@ -124,7 +133,7 @@ export class Daemon {
         else {
             Log.log().cheapDebug(() => "REJECT VOTEORDER(msg=" + verdict.msg + "): " + JSON.stringify(op, undefined, 2));
         }
-        this.daemonLog.emit({ msg: "Voteorder validated", wiseOp: op, validated: verdict });
+        this.daemonLog.emit({ msg: "Voteorder validated", validated: verdict });
 
         const opsToSend: steemJs.OperationWithDescriptor[] = [];
         try {
@@ -159,6 +168,10 @@ export class Daemon {
     private async sendOps(delegator: string, ops: steemJs.OperationWithDescriptor []) {
         await ToSendQueue.addToPublishQueue(this.redis, delegator, ops);
         this.daemonLog.emit({ msg: "Scheduled to publish", ops: ops }, delegator);
+    }
+
+    private async hartbeat() {
+        await this.redis.set(common.redis.daemonHartbeat, "ALIVE", "EX", 40);
     }
 
     private safeAsyncCall(fn: () => any) {
