@@ -88,7 +88,7 @@ export class Daemon {
     }
 
     private onSetRules(setRules: SetRules, op: EffectuatedWiseOperation) {
-        if (this.delegatorManager.hasDelegator(op.delegator)) {
+        // if (this.delegatorManager.hasDelegator(op.delegator)) {
             const es: EffectuatedSetRules = {
                 moment: op.moment,
                 voter: op.voter,
@@ -96,8 +96,8 @@ export class Daemon {
                 rulesets: setRules.rulesets
             };
             this.safeAsyncCall(() => this.rulesManager.saveRules(op.delegator, op.voter, es));
-        }
-        this.daemonLog.emit({ msg: "Set rules", wiseOp: op });
+        // }
+        // this.daemonLog.emit({ msg: "Set rules", wiseOp: op });
     }
 
     private onVoteorder(cmd: SendVoteorder, op: EffectuatedWiseOperation, errorTimeout: number = StaticConfig.DAEMON_ON_VOTEORDER_ERROR_REPEAT_AFTER_S) {
