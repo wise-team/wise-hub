@@ -17,7 +17,7 @@ services:
     expose:
       - 80
     environment:
-      WISE_ENVIRONMENT_TYPE: development
+      WISE_ENVIRONMENT_TYPE: staging
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
       WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.jblew.pl/
       #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
