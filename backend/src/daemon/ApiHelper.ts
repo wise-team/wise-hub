@@ -36,6 +36,10 @@ export class ApiHelper {
         return this.protocol;
     }
 
+    public getWiseSQLUrl(): string {
+        return this.wiseSQLUrl;
+    }
+
     public async getWiseSQL(path: string, params: any, limit: number): Promise<EffectuatedWiseOperation []> {
         return WiseSQLProtocol.Handler.query({
             endpointUrl: this.wiseSQLUrl,

@@ -8,6 +8,7 @@ import { AppRole } from "../lib/AppRole";
 import { DaemonManager } from "./DaemonManager";
 import { ApiHelper } from "./ApiHelper";
 import { DaemonLog } from "./DaemonLog";
+import { WiseOperationsLog } from "./WiseOperationsLog";
 
 /******************
  ** INTIAL SETUP **
@@ -35,6 +36,7 @@ const delegatorManager = new DelegatorManager(redis);
 const apiHelper = new ApiHelper();
 const daemonManager = new DaemonManager(redis, delegatorManager, apiHelper, daemonLog);
 
+
 process.on("SIGTERM", () => {
     daemonManager.stop();
 });
@@ -49,6 +51,8 @@ process.on("SIGTERM", () => {
 
         await apiHelper.init();
         await delegatorManager.init(redisUrl);
+
+        await WiseOperationsLog.preload(redis, apiHelper);
 
         Log.log().info("Daemon init done.");
         daemonLog.emit({ msg: "Daemon init done." });
