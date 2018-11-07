@@ -22,8 +22,8 @@ services:
       WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.jblew.pl/
       #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
       STEEMD_ENDPOINT_URL: https://api.steemit.com
-      #§ 'STEEMCONNECT_REDIRECT_URI: "' + data.config.environments.staging.protocol + '://' + data.config.environments.staging.host + data.config.hub.urls.api.auth.callback + '"'
-      STEEMCONNECT_REDIRECT_URI: "https://dev.wise.jblew.pl/api/auth/callback"
+      #§ 'STEEMCONNECT_REDIRECT_URI: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
+      STEEMCONNECT_REDIRECT_URI: "https://hub.dev.wise.jblew.pl/api/auth/callback"
       #§ "VIRTUAL_HOST: \"" + url(data.config.hub.url.staging).hostname + "\""
       VIRTUAL_HOST: "hub.dev.wise.jblew.pl"
       VIRTUAL_NETWORK: "caddy-proxy"
@@ -59,8 +59,8 @@ services:
       WISE_VAULT_URL: "https://wise-vault:8200"
       # refer this guide for session options: https://github.com/expressjs/session
       SESSION_OPTIONS: '{ "cookie": { "secure": true }, "resave": false, "saveUninitialized": false }'
-      #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.environments.staging.protocol + '://' + data.config.environments.staging.host + data.config.hub.urls.api.auth.callback + '"'
-      STEEMCONNECT_CALLBACK_URL: "https://dev.wise.jblew.pl/api/auth/callback"
+      #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
+      STEEMCONNECT_CALLBACK_URL: "https://hub.dev.wise.jblew.pl/api/auth/callback"
       LOGIN_REDIRECT_URL: "/"
     networks:
       - default
