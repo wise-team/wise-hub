@@ -14,12 +14,17 @@ mkdir -p ${SECRETS_PATH}
 echo "Vault status:"
 curl -k https://127.0.0.1:8200/v1/sys/health
 
+
 echo "Getting token"
-TOKEN=$(curl -k -s \
+TOKEN=$(curl -k -s --fail \
     --request POST \
     --data "{\"password\":\"${USERPASS_PASS}\"}" \
     https://127.0.0.1:8200/v1/auth/userpass/login/${USERPASS_USERNAME} | ${JQ} --raw-output .auth.client_token)
 
+if [ "$TOKEN" = "null" ]; then
+  echo "Login failed"
+  exit 1
+fi
 
 #§ 'API_ROLE_NAME="' + data.config.hub.docker.services.api.appRole.role + '"'
 API_ROLE_NAME="wise-hub-api"
