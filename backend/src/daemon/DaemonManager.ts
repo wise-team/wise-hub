@@ -21,7 +21,7 @@ export class DaemonManager {
     private api: Api;
     private rulesManager: RulesManager;
     private daemonLog: DaemonLog;
-    private blockLoadingApi: BlockLoadingApi;
+    private blockLoadingApi: Api;
 
     public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper, daemonLog: DaemonLog) {
         this.redis = redis;
@@ -30,7 +30,7 @@ export class DaemonManager {
         this.daemonLog = daemonLog;
 
         this.api = this.apiHelper.constructApiForDaemon();
-        this.blockLoadingApi = this.apiHelper.constructBlockLoadingApi();
+        this.blockLoadingApi = this.apiHelper.constructApiForDaemon();
         this.rulesManager = new RulesManager(this.redis);
         this.daemon = new Daemon(this.redis, this.delegatorManager, this.apiHelper, this.blockLoadingApi, this.rulesManager, this.daemonLog);
     }
