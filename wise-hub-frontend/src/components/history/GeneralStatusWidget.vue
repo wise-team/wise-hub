@@ -27,7 +27,7 @@
                 <br />
                 Join the community:
             </p>
-            <b-button :href="loginUrl" variant="primary">Login with Steemconnect</b-button>
+            <b-button :href="loginUrl" variant="primary">with SteemConnect</b-button>
         </b-card>
     </span>
 </template>

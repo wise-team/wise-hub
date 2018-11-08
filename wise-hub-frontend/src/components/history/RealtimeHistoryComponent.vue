@@ -9,7 +9,7 @@
         </div>
         
         <b-container fluid class="realtime-history-list">
-            <history-entry-component v-for="op in log" :key="op.id" :op="op" class="p-2 rounded border mb-2" />
+            <history-entry-component v-for="op in log" :key="op.id" :op="op" class="py-2 rounded border mb-2" />
         </b-container>
 
         <p class="text-right">

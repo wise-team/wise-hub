@@ -1,7 +1,7 @@
 <!-- src/components/people/HistoryEntryComponent.vue -->
 <template>
     <b-row class="history-entry">
-        <b-col cols="2" md="4">
+        <b-col cols="3" md="2" lg="4" class="p-1 text-center">
             <div class="role-elem p-1">
                 <font-awesome-icon :icon="delegateIcon" />
                 <img class="avatar history-avatar" :src="'https://steemitimages.com/u/' + op.delegator + '/avatar'"
@@ -13,27 +13,27 @@
                     :alt="'@' + op.voter + ' avatar'" />
             </div>
         </b-col>
-        <b-col>
+        <b-col class="p-1">
             <em class="text-muted history-log-time">{{ timeText }}</em><br />
             <span v-if="isSetRules">
-                <h5>
+                <h4>
                     <router-link :to="'/@' + op.delegator">@{{ op.delegator }}</router-link>
                     set rules for
                     <router-link :to="'/@' + op.voter">@{{ op.voter }}</router-link>
-                </h5>
-                <p class="my-0">@{{ op.voter }} can now vote with following rulesets:</p>
+                </h4>
+                <p class="my-0">He can now vote with following rulesets:</p>
                 <ul>
                     <li v-for="ruleset in op.command.rulesets" :key="ruleset.name">{{ ruleset.name }}</li>
                 </ul>
                 <router-link :to="'/@' + op.delegator + '/rulesets/for/@' + op.voter">View the rulesets</router-link>
             </span>
             <span v-else-if="isSendVoteorder">            
-                <h5>
+                <h4>
                     <router-link :to="'/@' + op.voter">@{{ op.voter }}</router-link>
                     asked
                     <router-link :to="'/@' + op.delegator">@{{ op.delegator }}</router-link>
                     to vote
-                </h5>
+                </h4>
 
                 <p class="my-0">
                     Author: {{ op.command.author }}<br />
@@ -42,18 +42,18 @@
                 </p>
             </span>
             <span v-else>
-                <h5 v-if="op.command.accepted">
+                <h4 v-if="op.command.accepted">
                     <router-link :to="'/@' + op.delegator">@{{ op.delegator }}</router-link>
                     confirmed 
                     <router-link :to="'/@' + op.voter">@{{ op.voter }}</router-link>'s
                     vote
-                </h5>
-                <h5 v-else>
+                </h4>
+                <h4 v-else>
                     <router-link :to="'/@' + op.delegator">@{{ op.delegator }}</router-link>
                     rejected 
                     <router-link :to="'/@' + op.voter">@{{ op.voter }}</router-link>'s
                     vote order
-                </h5>
+                </h4>
 
                 <p v-if="!op.command.accepted" class="text-danger">Reject reason: {{ op.command.msg }}</p>
                 <a :href="'https://steemd.com/tx/' + op.command.voteorderTxId">See the voteorder transaction</a>
@@ -125,7 +125,7 @@ export default Vue.extend({
 
 .history-entry .role-elem {
     position: relative;
-    width: 4.7rem;
+    max-width: 4.7rem;
     display: inline-block;
 }
 
