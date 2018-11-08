@@ -38,7 +38,7 @@
                 <p class="my-0">
                     Author: {{ op.command.author }}<br />
                     Permlink: {{ op.command.permlink }}<br />
-                    <a :href="'https://steemit.com/' + op.command.author + '/' + op.command.permlink">See the post</a>
+                    <a :href="'https://steemit.com/@' + op.command.author + '/' + op.command.permlink">See the post</a>
                 </p>
             </span>
             <span v-else>
