@@ -131,6 +131,7 @@ export class AuthManager {
 
     public static isUserAuthenticated(req: express.Request, res: express.Response, next: express.NextFunction) {
         if (req.user) {
+            console.log("Authenticated as " + req.user.account);
             next();
         } else {
             res.status(401);
@@ -149,8 +150,8 @@ export class AuthManager {
                 });
             });
         const user: User = await this.usersManager.login({
-            scope: [],
-            account: "jblew",
+            scope: me.scope,
+            account: me.name,
             profile: me,
             settings: defaultUserSettings
         }, accessToken, refreshToken);
