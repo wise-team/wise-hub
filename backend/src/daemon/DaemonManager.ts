@@ -30,7 +30,7 @@ export class DaemonManager {
         this.daemonLog = daemonLog;
 
         this.api = this.apiHelper.constructApiForDaemon();
-        this.blockLoadingApi = this.apiHelper.constructApiForDaemon();
+        this.blockLoadingApi = this.apiHelper.constructApiForDaemon(); // disable temp BlockLoadingApi (not supported by validator)
         this.rulesManager = new RulesManager(this.redis);
         this.daemon = new Daemon(this.redis, this.delegatorManager, this.apiHelper, this.blockLoadingApi, this.rulesManager, this.daemonLog);
     }
