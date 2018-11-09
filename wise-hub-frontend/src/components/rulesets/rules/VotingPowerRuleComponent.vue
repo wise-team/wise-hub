@@ -45,9 +45,9 @@ export default Vue.extend({
             return s(this.$store).state.rulesets.normalizedRulesets.entities.rules[this.ruleId];
         },
         voting_power: {
-            get(): string { return (this.rule.value / 10) + ""; },
+            get(): string { return (this.rule.value / 100) + ""; },
             set(valueStr: string): void {
-                const value: number = Math.round(parseFloat(valueStr) * 10);
+                const value: number = Math.round(parseFloat(valueStr) * 100);
                 this.saveRule(_.set(_.cloneDeep(this.rule), "value", value));
             }
         },
