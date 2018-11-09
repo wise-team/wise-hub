@@ -6,7 +6,7 @@ import * as sc2 from "steemconnect";
 import { d } from "../lib/util";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as OAuth2Strategy } from "passport-oauth2";
-import { User, defaultUserSettings } from "../../common/model/User";
+import { User, defaultUserSettings, UserSettings } from "../../common/model/User";
 import { Vault } from "../../lib/vault/Vault";
 import { common } from "../../common/common";
 import { asyncReq } from "../lib/util";
@@ -153,8 +153,9 @@ export class AuthManager {
             scope: me.scope,
             account: me.name,
             profile: me,
-            settings: defaultUserSettings
         }, accessToken, refreshToken);
+
+        Log.log().info("Logged in @" + me.name + " with retrived scope = " + me.scope + ", and escalated scope = " + user.scope);
         return user;
     }
 

@@ -5,6 +5,7 @@ import { common } from "../common/common";
 import { d } from "./util";
 import * as jwt_decode from "jwt-decode";
 import * as sc2 from "steemconnect";
+import * as _ from "lodash";
 import { DelegatorManager } from "./DelegatorManager";
 import Axios from "axios";
 import { Log } from "./Log";
@@ -39,7 +40,6 @@ export class UsersManager {
             account: username,
             profile: user_.profile,
             scope: user_.scope || [],
-            settings: user_.settings || defaultUserSettings
         };
 
         const getUser: User | undefined = await this.getUser(username);
@@ -47,18 +47,29 @@ export class UsersManager {
             user = {
                 account: username,
                 profile: user.profile || getUser.profile,
-                scope: user.scope || getUser.scope,
-                settings: user.settings || getUser.settings || defaultUserSettings
+                scope: _.merge(user.scope || [], getUser.scope),
+                settings: _.merge({}, defaultUserSettings, getUser.settings || {}, user.settings || {})
             };
         }
 
         if (accessToken) {
             const tokenPayload = await this.setAccessToken(username, accessToken);
-            user.scope = tokenPayload.scope;
+            user.scope = _.merge(user.scope || [], tokenPayload.scope);
         }
+
         if (refreshToken) {
             const tokenPayload = await this.setRefreshToken(username, refreshToken);
-            user.scope = tokenPayload.scope;
+            user.scope = _.merge(user.scope || [], tokenPayload.scope);
+        }
+        else {
+            // do not let narrower scoped access token override previous wide scope access token
+            // instead, we get wider scoped access token by refreshing old access token
+            const gotRefreshToken = await this.getRefreshToken(username);
+            if (gotRefreshToken && this.options.canIssueRefreshTokens) {
+                const betterAccessToken = await this.refreshAccessToken(username, gotRefreshToken.payload.scope);
+                await this.setAccessToken(username, betterAccessToken.token);
+                user.scope = _.merge(user.scope || [], gotRefreshToken.payload.scope);
+            }
         }
 
         await this.setUser(username, user);
@@ -152,9 +163,14 @@ export class UsersManager {
     private async setUser(username: string, user: User) {
         // TODO user object can be a huge object. Check if encryption time in vault isnt issue
         const secretKey = common.vault.secrets.hub.userProfiles + "/" + username;
+
+        // const prevUserObject = await this.vault.getSecret(secretKey);
+        // if (prevUserObject) console.log("prevUserObject=" + JSON.stringify(prevUserObject, undefined, 2));
+        // const newUser = prevUserObject ? _.merge(prevUserObject.v, user) : user;
+        // console.log("newUser=" + JSON.stringify(newUser, undefined, 2));
         await this.vault.setSecret(secretKey, { v: user });
 
-        if (user.settings.daemonEnabled) {
+        if (user.settings && user.settings.daemonEnabled) {
             await DelegatorManager.addDelegator(this.redis, username);
         }
         else {

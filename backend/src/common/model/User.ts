@@ -10,7 +10,7 @@ export interface User {
         user_metadata: any;
     };
     scope: string [];
-    settings: UserSettings;
+    settings?: UserSettings;
 }
 
 export interface UserSettings {
