@@ -39,7 +39,7 @@ export class DaemonManager {
         const rulesLoadedUpToBlock = await RulesLoadedUpToBlock.get(this.redis);
         let startBlock = await this.determineStartBlock();
         Log.log().info("DaemonManager.run starting synchronization from block " + startBlock);
-        this.daemonLog.emit({ msg: "DaemonManager.run starting synchronization from block " + startBlock });
+        this.daemonLog.emit({ msg: "DaemonManager.run daemon. Starting synchronization from block " + startBlock });
 
         if (rulesLoadedUpToBlock < startBlock) {
             const sqlLastBlock = await this.apiHelper.getWiseSQLBlockNumber();

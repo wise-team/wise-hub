@@ -56,11 +56,12 @@ export class Publisher {
         (async () => {
             try {
                 Log.log().info("Publisher => publish ops " + JSON.stringify(otp));
-                this.daemonLog.emit({ msg: "Publisher is publishing operations to blockchain via SteemConnect..." }, otp.delegator);
+                this.daemonLog.emit({ msg: "Publisher is publishing operations to blockchain via SteemConnect... Account: @"
+                    + otp.delegator + ". Operations: " + otp.ops.map(op => op[0]).join(", ") }, otp.delegator);
                 await this.doPublish(otp);
             }
             catch (error) {
-                this.daemonLog.emit({ msg: "Error when publishing ops", error: error + "" }, otp.delegator);
+                this.daemonLog.emit({ msg: "Error when publishing ops to account @" + otp.delegator + " via SteemConnect: " + error, error: error + "" }, otp.delegator);
                 Log.log().exception(Log.level.error, error);
                 console.error(error);
             }
@@ -84,14 +85,14 @@ export class Publisher {
         Log.log().info("SteemConnect broadcast result =" + JSON.stringify(result, undefined, 2));
         Log.log().info("Successfully pushed operation via steemconnect (trx_id=" + result.id + ")");
         this.daemonLog.emit({
-            msg: "Successful publish to blockchain.",
+            msg: "Successful publish to blockchain via SteemConnect to account @" + otp.delegator,
             transaction: { trx_id: result.id, block_num: result.block_num, trx_num: result.trx_num }
         }, otp.delegator);
     }
 
     private async throttle() {
         const time = StaticConfig.PUBLISH_THROTTLING_MS;
-        const msg = "Throttling. Waiting " + time + "ms before publishing next ops";
+        const msg = "Throttling send. Waiting " + time + "ms before publishing next ops";
         Log.log().info(msg);
         this.daemonLog.emit({ msg: msg });
         await BluebirdPromise.delay(StaticConfig.PUBLISH_THROTTLING_MS);

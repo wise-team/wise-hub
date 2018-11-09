@@ -31,10 +31,10 @@ export class Daemon {
         this.daemonLog = daemonLog;
 
         this.delegatorManager.onDelegatorAdd(addedDelegator => {
-            this.daemonLog.emit({ msg: "Enable delegator @" + addedDelegator }, addedDelegator);
+            this.daemonLog.emit({ msg: "Enable wiseHUB daemon for delegator @" + addedDelegator }, addedDelegator);
         });
         this.delegatorManager.onDelegatorDel(deletedDelegator => {
-            this.daemonLog.emit({ msg: "Disable delegator @" + deletedDelegator }, deletedDelegator);
+            this.daemonLog.emit({ msg: "Disable wiseHUB daemon for delegator @" + deletedDelegator }, deletedDelegator);
         });
 
         this.validationRunner = new ValidationRunner(this.redis, this.api);
@@ -101,12 +101,17 @@ export class Daemon {
         };
         this.safeAsyncCall(() => this.rulesManager.saveRules(op.delegator, op.voter, es));
         // }
-        this.daemonLog.emit({ msg: "Set rules", wiseOp: op });
+        const setRulesMsg = "Delegator @" + op.delegator + " set rules for voter @" + op.voter
+            + ". Rulesets: [" + setRules.rulesets.join(", ") + "]";
+        this.daemonLog.emit({ msg: setRulesMsg, wiseOp: op });
         Log.log().info("@" + op.delegator + " set rules for @" + op.voter);
     }
 
     private onConfirmVote(confirmVote: ConfirmVote, op: EffectuatedWiseOperation) {
-        this.daemonLog.emit({ msg: "Confirm vote", wiseOp: op });
+        const confirmVoteMsg = "Delegator @" + op.delegator + " confirmed voteorder by @" + op.voter
+        + ". Post: {voteorderTxId= " + confirmVote.voteorderTxId + ", accepted="
+         + confirmVote.accepted + ", msg=" + confirmVote.msg + "]";
+        this.daemonLog.emit({ msg: confirmVoteMsg, wiseOp: op });
     }
 
     private onVoteorder(cmd: SendVoteorder, op: EffectuatedWiseOperation, errorTimeout: number = StaticConfig.DAEMON_ON_VOTEORDER_ERROR_REPEAT_AFTER_S) {
@@ -123,7 +128,11 @@ export class Daemon {
                 }
             });
         }
-        this.daemonLog.emit({ msg: "Voteorder", wiseOp: op });
+
+        const voteorderMsg = "Voter @" + op.voter + " asked delegator @" + op.delegator
+             + " to vote for post [@" + cmd.author + "/" + cmd.permlink + "] with weight "
+             + cmd.weight + ", based on ruleset named \"" + cmd.rulesetName + "\".";
+        this.daemonLog.emit({ msg: voteorderMsg, wiseOp: op });
     }
 
     private async voteorderCommit(cmd: SendVoteorder, op: EffectuatedWiseOperation, verdict: ValidationRunner.Verdict) {
@@ -133,7 +142,8 @@ export class Daemon {
         else {
             Log.log().cheapDebug(() => "REJECT VOTEORDER(msg=" + verdict.msg + "): " + JSON.stringify(op, undefined, 2));
         }
-        this.daemonLog.emit({ msg: "Voteorder validated", validated: verdict });
+        this.daemonLog.emit({ msg: "Voteorder by @" + op.voter + " validated by wiseHUB daemon of @"
+         + op.delegator + ". Verdict: " + JSON.stringify(verdict), validated: verdict });
 
         const opsToSend: steemJs.OperationWithDescriptor[] = [];
         try {
@@ -167,7 +177,8 @@ export class Daemon {
 
     private async sendOps(delegator: string, ops: steemJs.OperationWithDescriptor []) {
         await ToSendQueue.addToPublishQueue(this.redis, delegator, ops);
-        this.daemonLog.emit({ msg: "Scheduled to publish", ops: ops }, delegator);
+        this.daemonLog.emit({ msg: ops.length + " operations scheduled to be sent to @" + delegator + " account: "
+                + ops.map(op => op[0]).join(", "), ops: ops }, delegator);
     }
 
     private async hartbeat() {
