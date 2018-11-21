@@ -59,7 +59,7 @@ export const common = {
         }
     },
     daemonLog: {
-        maxHistoryLength: /*§ §*/ 100 /*§ ' ' + data.config.hub.daemon.log.maxHistoryLength + ' ' §.*/,
+        maxHistoryLength: /*§ §*/ 1000 /*§ ' ' + data.config.hub.daemon.log.maxHistoryLength + ' ' §.*/,
     },
     vault: {
         secrets: {
