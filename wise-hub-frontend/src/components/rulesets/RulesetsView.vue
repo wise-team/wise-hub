@@ -23,7 +23,7 @@
             <set-rules-component :set-rules-id="setRulesId" />
         </span>
 
-        <span v-if="setRulesItems.length === 0 && !loading" class="p-5 m-5">
+        <div v-if="setRulesItems.length === 0 && !loading" class="p-2 p-sm-5 m-2 m-sm-5">
             <div v-if="canEdit" class="alert alert-primary">
                 Looks like you have not created a ruleset yet.
                 Use the below form to create new ruleset for someone.
@@ -42,7 +42,7 @@
                     and create one for @{{ voter }}
                  </span>
             </div>
-        </span>
+        </div>
 
         <add-ruleset-action-component v-if="canEdit && !editMode" class="add-rules-component p-2 rounded border bg-light" />
 
