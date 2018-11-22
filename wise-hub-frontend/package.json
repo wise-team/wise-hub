@@ -7,6 +7,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && webpack",
+    "build-production": "NODE_ENV=production npm run build",
     "serve": "http-server ./",
     "build-and-serve": "npm run build && npm run serve",
     "test": "TS_NODE_FILES=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc mocha -r ts-node/register --require source-map-support/register --recursive src/**/*.spec.ts"
