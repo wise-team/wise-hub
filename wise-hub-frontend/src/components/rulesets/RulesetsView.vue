@@ -23,7 +23,28 @@
             <set-rules-component :set-rules-id="setRulesId" />
         </span>
 
-        <add-ruleset-action-component v-if="setRulesItems.length > 0 && canEdit && !editMode" class="add-rules-component p-2 rounded border bg-light" />
+        <div v-if="setRulesItems.length === 0 && !loading" class="p-2 p-sm-5 m-2 m-sm-5">
+            <div v-if="canEdit" class="alert alert-primary">
+                Looks like you have not created a ruleset yet.
+                Use the below form to create new ruleset for someone.
+                <br />
+                <small>Don't know how to set the rules? <a :href="manualUrl">Read the manual</a></small>.
+            </div>
+            <div v-else-if="!!delegator" class="alert alert-primary">
+                @{{ delegator }} has no rulesets yet.
+            </div>
+            <div v-else class="alert alert-primary">
+                No one created rulesets for @{{ voter }} yet. 
+                <span v-if="loggedIn">
+                    <router-link :to="'/@' + account + '/rulesets'">
+                        Go to your rulesets
+                    </router-link>
+                    and create one for @{{ voter }}
+                 </span>
+            </div>
+        </div>
+
+        <add-ruleset-action-component v-if="canEdit && !editMode" class="add-rules-component p-2 rounded border bg-light" />
 
         <b-modal ref="unsavedModalRef" hide-footer title="Unsaved changes">
             <div class="d-block text-center">
@@ -42,6 +63,7 @@ import Vue from "vue";
 import * as _ from "lodash";
 import { s } from "../../store/store";
 import { d, ucfirst } from "../../util/util";
+import { urls } from "../../urls";
 import { EffectuatedSetRules } from "steem-wise-core";
 import { WiseApiHelper } from "../../api/WiseApiHelper";
 import { Log } from "../../Log";
@@ -58,6 +80,7 @@ export default Vue.extend({
         return {
             delegator: this.$route.params.delegator ? this.$route.params.delegator : undefined,
             voter: this.$route.params.voter ? this.$route.params.voter : undefined,
+            manualUrl: urls.manual
         };
     },
     watch: {
@@ -101,6 +124,9 @@ export default Vue.extend({
         },
         editMode(): boolean {
             return s(this.$store).state.rulesets.edit.rulesetId.length > 0;
+        },
+        loggedIn(): boolean {
+            return s(this.$store).state.auth.username.length > 0;
         },
         canEdit(): boolean {
             return !!this.delegator
