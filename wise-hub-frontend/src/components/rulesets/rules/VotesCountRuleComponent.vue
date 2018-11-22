@@ -1,7 +1,7 @@
 <!-- src/components/views/rulesets/rules/VotesCountRuleComponent.vue -->
 <template>
     <div class="votes_count-rule-component">
-        <b-input-group prepend="Mode" append="SBD">
+        <b-input-group prepend="Mode">
             <b-input-group-prepend>
                 <b-form-select v-model="mode" :options="modes" :disabled="!enabled" class="votes_count-mode-select" />
             </b-input-group-prepend>

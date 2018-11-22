@@ -1,7 +1,7 @@
 <!-- src/components/views/rulesets/rules/age_of_postRuleComponent.vue -->
 <template>
     <div class="age_of_post-rule-component">
-        <b-input-group append="Unit">
+        <b-input-group>
             <b-input-group-prepend>
                 <b-form-select v-model="mode" :options="modes" :disabled="!enabled" class="age_of_post-mode-select" />
             </b-input-group-prepend>
