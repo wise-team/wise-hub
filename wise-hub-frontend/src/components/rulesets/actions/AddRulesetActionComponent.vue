@@ -70,6 +70,7 @@ export default Vue.extend({
                 this.loading = false;
             }
             catch (error) {
+                console.error(error);
                 this.error = error + "";
                 this.loading = false;
             }

@@ -70,6 +70,9 @@ export default Vue.extend({
     },
     components: {
     },
+    filters: {
+        ucfirst: ucfirst
+    }
 });
 </script>
 

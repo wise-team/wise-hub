@@ -8,14 +8,19 @@ import { EffectuatedSetRules } from "steem-wise-core";
 
 
 describe("#normalize", function() {
-    const normalizedRulesets = new NormalizedRulesets();
-
     it("Throws on undefined param", () => {
+        const normalizedRulesets = new NormalizedRulesets();
         expect(() => normalizedRulesets.normalize(undefined as any)).to.throw();
     });
 
     it("Returns object with all entities on empty array input", () => {
-        const result = normalizedRulesets.normalize([]);
+        const normalizedRulesets = new NormalizedRulesets();
+        const input = [{
+          "voter": "amalinavia",
+          "delegator": "noisy",
+          "rulesets": []
+        }];
+        const result = normalizedRulesets.normalize(input);
         expect(result).to.have.property("entities").that.is.an("object");
         expect(result).to.have.property("result").that.is.an("array");
 
@@ -24,7 +29,19 @@ describe("#normalize", function() {
         expect(result.entities).to.have.property("setRules").that.is.an("object");
     });
 
+    it("Returns object with objects for every entity type even if the entity is not present", () => {
+      const normalizedRulesets = new NormalizedRulesets();
+      const result = normalizedRulesets.normalize([]);
+      expect(result).to.have.property("entities").that.is.an("object");
+      expect(result).to.have.property("result").that.is.an("array");
+
+      expect(result.entities).to.have.property("rules").that.is.an("object");
+      expect(result.entities).to.have.property("rulesets").that.is.an("object");
+      expect(result.entities).to.have.property("setRules").that.is.an("object");
+  });
+
     it("Properly dispatches entities", async () => {
+        const normalizedRulesets = new NormalizedRulesets();
         const unnormalizedRulesets: EffectuatedSetRules [] = [
             {
               "moment": {
