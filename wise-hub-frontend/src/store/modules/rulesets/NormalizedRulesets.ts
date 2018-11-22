@@ -24,7 +24,17 @@ export class NormalizedRulesets {
 
     public normalize(setrArray: SetRules []): NormalizedRulesets.Result  {
         const normalizedData = normalizr.normalize(setrArray, this.setRulesArraySchema);
-        return normalizedData;
+
+        if(!!normalizedData && !!normalizedData.result && normalizedData.result.length > 0) {
+            return normalizedData;
+        }
+        else {
+            return {
+                entities: { rules: {}, rulesets: {}, setRules: {} },
+                result: []
+            };
+        }
+        
     }
 
     public denormalizeSetRules(setRulesIds: string [], normalized: NormalizedRulesets.Result): SetRulesForVoter [] {
