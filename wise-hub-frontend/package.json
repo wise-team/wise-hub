@@ -9,7 +9,7 @@
     "build": "rm -rf dist && webpack",
     "serve": "http-server ./",
     "build-and-serve": "npm run build && npm run serve",
-    "test": "TS_NODE_FILES=true nyc mocha -r ts-node/register --require source-map-support/register --recursive src/**/*.spec.ts"
+    "test": "TS_NODE_FILES=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc mocha -r ts-node/register --require source-map-support/register --recursive src/**/*.spec.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
