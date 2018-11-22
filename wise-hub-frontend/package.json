@@ -9,26 +9,8 @@
     "build": "rm -rf dist && webpack",
     "serve": "http-server ./",
     "build-and-serve": "npm run build && npm run serve",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "TS_NODE_FILES=true nyc mocha -r ts-node/register --require source-map-support/register --recursive src/**/*.spec.ts"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/wise-team/wise-hub.git"
-  },
-  "keywords": [
-    "steem",
-    "blockchain",
-    "wise"
-  ],
-  "author": "The Wise Team (https://wise-team.io/)",
-  "contributors": [
-    "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/wise-team/wise-hub/issues"
-  },
-  "homepage": "https://wise.vote/",
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-brands": "^5.0.13",
@@ -61,7 +43,7 @@
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/bluebird": "^3.5.24",
-    "@types/chai": "^4.1.6",
+    "@types/chai": "^4.1.7",
     "@types/lodash": "^4.14.116",
     "@types/mocha": "^5.2.5",
     "@types/socket.io-client": "^1.4.32",
@@ -70,10 +52,13 @@
     "css-loader": "^1.0.0",
     "html-webpack-plugin": "^3.2.0",
     "http-server": "^0.11.1",
+    "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
     "node-sass": "^4.9.3",
+    "nyc": "^13.1.0",
     "sass-loader": "^7.1.0",
     "ts-loader": "^5.2.1",
+    "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "typescript": "^3.1.1",
     "vue-loader": "^15.4.2",
@@ -81,5 +66,39 @@
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
     "webpack-visualizer-plugin": "^0.1.11"
-  }
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "**/*.spec.ts"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wise-team/wise-hub.git"
+  },
+  "keywords": [
+    "steem",
+    "blockchain",
+    "wise"
+  ],
+  "author": "The Wise Team (https://wise-team.io/)",
+  "contributors": [
+    "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wise-team/wise-hub/issues"
+  },
+  "homepage": "https://wise.vote/"
 }
