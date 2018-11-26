@@ -3,10 +3,13 @@ set -e # fail on first error
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # parent dir of scripts dir
 cd "${DIR}"
 
-docker network rm vault-net | echo ""
-docker network create vault-net
-
 docker-compose down
+
+docker network rm vault-net || echo "Not removed previous vault-net network"
+docker network create \
+    --scope=swarm --driver=bridge --internal --attachable \
+    vault-net
+
 docker-compose up -d
 
 echo "Sleep 5 for the server to start up"
@@ -43,24 +46,45 @@ curl \
     --data "{ \"key\":\"${UNSEAL_KEY_2}\" }" \
     ${VAULT_ADDR}/v1/sys/unseal
 
-#docker secret rm ${SECRETNAME_API_ROLE_ID} ; echo ""
-#docker secret rm ${SECRETNAME_API_ROLE_SECRET} ; echo ""
-#docker secret rm ${SECRETNAME_PUBLISHER_ROLE_ID} ; echo ""
-#docker secret rm ${SECRETNAME_PUBLISHER_ROLE_SECRET} ; echo ""
-
-#echo "${API_ROLE_ID}" | docker secret create ${SECRETNAME_API_ROLE_ID} -
-#echo "${API_ROLE_SECRET}" | docker secret create ${SECRETNAME_API_ROLE_SECRET} -
-#echo "${PUBLISHER_ROLE_ID}" | docker secret create ${SECRETNAME_PUBLISHER_ROLE_ID} -
-#echo "${PUBLISHER_ROLE_SECRET}" | docker secret create ${SECRETNAME_PUBLISHER_ROLE_SECRET} -
-
-SECRETS_DIR="${DIR}/../secrets"
-mkdir -p "${SECRETS_DIR}"
-printf "${API_ROLE_ID}" > "${SECRETS_DIR}/${SECRETNAME_API_ROLE_ID}"
-printf "${API_ROLE_SECRET}" > "${SECRETS_DIR}/${SECRETNAME_API_ROLE_SECRET}"
-printf "${PUBLISHER_ROLE_ID}" > "${SECRETS_DIR}/${SECRETNAME_PUBLISHER_ROLE_ID}"
-printf "${PUBLISHER_ROLE_SECRET}" > "${SECRETS_DIR}/${SECRETNAME_PUBLISHER_ROLE_SECRET}"
-
-
 echo "Unseal done"
+echo "Provisioning docker swarm secrets"
+
+docker secret rm ${SECRETNAME_API_ROLE_ID} || echo "Tried to rm previous secret. The above error is all ok."
+docker secret rm ${SECRETNAME_API_ROLE_SECRET} || echo "Tried to rm previous secret. The above error is all ok."
+docker secret rm ${SECRETNAME_PUBLISHER_ROLE_ID} || echo "Tried to rm previous secret. The above error is all ok."
+docker secret rm ${SECRETNAME_PUBLISHER_ROLE_SECRET} || echo "Tried to rm previous secret. The above error is all ok."
+
+printf "${API_ROLE_ID}" | docker secret create ${SECRETNAME_API_ROLE_ID} -
+printf "${API_ROLE_SECRET}" | docker secret create ${SECRETNAME_API_ROLE_SECRET} -
+printf "${PUBLISHER_ROLE_ID}" | docker secret create ${SECRETNAME_PUBLISHER_ROLE_ID} -
+printf "${PUBLISHER_ROLE_SECRET}" | docker secret create ${SECRETNAME_PUBLISHER_ROLE_SECRET} -
+
+echo "Secret provisioning done"
+
+echo "Testing appRole login as Publisher"
+
+curl \
+    --request POST \
+    --data "{ \"role_id\":\"${PUBLISHER_ROLE_ID}\",\"secret_id\":\"${PUBLISHER_ROLE_SECRET}\" }" \
+    ${VAULT_ADDR}/v1/auth/approle/login
+
+echo "Testing appRole login as API"
+
+curl \
+    --request POST \
+    --data "{ \"role_id\":\"${API_ROLE_ID}\",\"secret_id\":\"${API_ROLE_SECRET}\" }" \
+    ${VAULT_ADDR}/v1/auth/approle/login
+
+echo "Testing done"
+
+#SECRETS_DIR="${DIR}/../secrets"
+#mkdir -p "${SECRETS_DIR}"
+#printf "${API_ROLE_ID}" > "${SECRETS_DIR}/${SECRETNAME_API_ROLE_ID}"
+#printf "${API_ROLE_SECRET}" > "${SECRETS_DIR}/${SECRETNAME_API_ROLE_SECRET}"
+#printf "${PUBLISHER_ROLE_ID}" > "${SECRETS_DIR}/${SECRETNAME_PUBLISHER_ROLE_ID}"
+#printf "${PUBLISHER_ROLE_SECRET}" > "${SECRETS_DIR}/${SECRETNAME_PUBLISHER_ROLE_SECRET}"
+
+
+
 
 docker attach vault-dev
