@@ -19,8 +19,6 @@ services:
       STEEMD_ENDPOINT_URL: https://api.steemit.com
       STEEMCONNECT_REDIRECT_URI: "https://localhost:8080/"
 
-  #§ data.config.hub.docker.services.redis.name + ':'
-  redis:
 
   #§ d(data.config.hub.docker.services.api.name) + ':'
   api:
@@ -82,27 +80,20 @@ services:
       #§ '- ' + data.config.vault.docker.network
       - vault-net
 
-  #§ d(data.config.hub.docker.services.realtime.name) + ':'
-  realtime:
-
 
 secrets:
   #§ data.config.hub.docker.services.api.secrets.appRoleId + ':'
   hub-api-approle-id:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.api.secrets.appRoleId
-    file: ./secrets/hub-api-approle-id
+    external: true
   #§ data.config.hub.docker.services.api.secrets.appRoleSecret + ':'
   hub-api-approle-secret:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.api.secrets.appRoleSecret
-    file: ./secrets/hub-api-approle-secret
+    external: true
   #§ data.config.hub.docker.services.publisher.secrets.appRoleId + ':'
   hub-publisher-approle-id:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId
-    file: ./secrets/hub-publisher-approle-id
+    external: true
   #§ data.config.hub.docker.services.publisher.secrets.appRoleSecret + ':'
   hub-publisher-approle-secret:
-    #§ 'file: ./secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
-    file: ./secrets/hub-publisher-approle-secret
+    external: true
 
 volumes:
   #§ data.config.hub.docker.services.redis.volume + ':'
