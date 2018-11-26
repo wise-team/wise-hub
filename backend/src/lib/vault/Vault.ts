@@ -1,4 +1,5 @@
 import Axios, { AxiosResponse, AxiosRequestConfig } from "axios";
+import { Log } from "../Log";
 
 export function d <T> (input: T | undefined): T {
     if (typeof input !== "undefined") return input;
@@ -16,23 +17,39 @@ export class Vault {
     }
 
     public async init() {
+        try {
+            const status = await this.getStatus();
+            if (!status.initialized) Log.log().warn("Warning: vault is not initialized. Login will fail");
+            if (!!status.sealed) Log.log().warn("Warning: vault is sealed. Login will fail");
+        }
+        catch (error) {
+            throw new Error("Vault.init(): Could not get health status of the vault. Please check the connecrtion. Error: " + error);
+        }
+    }
+
+    public isLoggedIn(): boolean {
+        return this.token.length > 0;
     }
 
     public async call(method: "GET" | "POST" | "PUT" | "DELETE", path: string, data: any, token: string = this.token): Promise<AxiosResponse> {
         if (!token) throw new Error("Token is not set. Vault client is unauthorized.");
-        return await Axios({
-            method: method,
-            url: this.vaultAddr + path,
-            data: data,
-            headers: {
-                "X-Vault-Token": token
-            }
+        return this.errorTransformer(async () => {
+            return await Axios({
+                method: method,
+                url: this.vaultAddr + path,
+                data: data,
+                headers: {
+                    "X-Vault-Token": token
+                }
+            });
         });
     }
 
     public async userPassLogin(username: string, password: string, requiredPolicies: string []) {
-        const loginResp = await Axios.post(this.vaultAddr + "/v1/auth/userpass/login/" + username,
-        { password: password });
+        const loginResp = await this.errorTransformer(async () => {
+            return await Axios.post(this.vaultAddr + "/v1/auth/userpass/login/" + username,
+            { password: password });
+        });
 
         requiredPolicies.forEach(requiredPolicy => {
             if (loginResp.data.auth.policies.indexOf(requiredPolicy) < 0)
@@ -47,8 +64,10 @@ export class Vault {
     }
 
     public async appRoleLogin(roleName: string, requiredPolicies: string [], roleId: string, roleSecret: string) {
-        const loginResp = await Axios.post(this.vaultAddr + "/v1/auth/approle/login",
-        { role_id: roleId, secret_id: roleSecret });
+        const loginResp = await this.errorTransformer(async () => {
+            return await Axios.post(this.vaultAddr + "/v1/auth/approle/login",
+            { role_id: roleId, secret_id: roleSecret });
+        });
 
         if (loginResp.data.auth.metadata.role_name !== roleName)
             throw new Error("This AppRole is not " + roleName + ", instead logged in as "
@@ -69,7 +88,7 @@ export class Vault {
     public async getStatus(): Promise<any> {
         let resp;
         try {
-            resp =  await Axios.get(this.vaultAddr + "/v1/sys/health");
+            resp =  await this.errorTransformer(async () => await Axios.get(this.vaultAddr + "/v1/sys/health"));
         }
         catch (error) {
             resp = error.response;
@@ -150,5 +169,17 @@ export class Vault {
 
     public async revokeToken(token: string) {
         await this.call("POST", "/v1/auth/token/revoke", { token: token });
+    }
+
+    private async errorTransformer<T>(fn: () => Promise<T>): Promise<T> {
+        try {
+            return await fn();
+        }
+        catch (error) {
+            if (error.response && error.response.data) {
+                throw new Error("Vault error: " + error + ", response: " + JSON.stringify(error.response.data));
+            }
+            else throw error;
+        }
     }
 }
