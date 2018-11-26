@@ -1,0 +1,114 @@
+version: "3.3"
+
+networks:
+  vault-net:
+    external:
+      #§ 'name: ' + data.config.vault.docker.network
+      name: vault-net
+
+services:
+  #§ data.config.hub.docker.services.nginx.name + ':'
+  nginx:
+    ports:
+      #§ '- ' + data.config.hub.docker.services.nginx.port + ':80'
+      - 9510:80
+    environment:
+      WISE_ENVIRONMENT_TYPE: staging
+      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
+      WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.jblew.pl/
+      #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
+      STEEMD_ENDPOINT_URL: https://api.steemit.com
+      #§ 'STEEMCONNECT_REDIRECT_URI: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
+      STEEMCONNECT_REDIRECT_URI: "https://hub.dev.wise.jblew.pl/api/auth/callback"
+    restart: always
+
+  #§ d(data.config.hub.docker.services.api.name) + ':'
+  api:
+    secrets:
+      #§ '- ' + data.config.hub.docker.services.api.secrets.appRoleId
+      - hub-api-approle-id
+      #§ '- ' + data.config.hub.docker.services.api.secrets.appRoleSecret
+      - hub-api-approle-secret
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.api.appRole.role
+      VAULT_APPROLE_NAME: wise-hub-api
+      #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.api.secrets.appRoleId
+      VAULT_APPROLE_ID_FILE: /run/secrets/hub-api-approle-id
+      #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.api.secrets.appRoleSecret
+      VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-api-approle-secret
+      WISE_LOG_LEVEL: debug
+      #§ 'WISE_VAULT_URL: "https://' + data.config.vault.docker.services.vault.container + ':8200"'
+      WISE_VAULT_URL: "https://wise-vault:8200"
+      # refer this guide for session options: https://github.com/expressjs/session
+      SESSION_OPTIONS: '{ "cookie": { "secure": false }, "resave": false, "saveUninitialized": false }'
+      #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
+      STEEMCONNECT_CALLBACK_URL: "https://hub.dev.wise.jblew.pl/api/auth/callback"
+      LOGIN_REDIRECT_URL: "/"
+    networks:
+      - default
+      #§ '- ' + data.config.vault.docker.network
+      - vault-net
+    restart: always
+
+  #§ d(data.config.hub.docker.services.daemon.name) + ':'
+  daemon:
+    environment:
+      START_FROM_BLOCK: HEAD
+      RULESETS_LOADING_STRATEGY: "wisesql-preload"
+      #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
+      STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io"
+      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
+      WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.jblew.pl/
+      WISE_LOG_LEVEL: debug
+    networks:
+      - default
+    restart: always
+
+  #§ d(data.config.hub.docker.services.publisher.name) + ':'
+  publisher:
+    secrets:
+      #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleId
+      - hub-publisher-approle-id
+      #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
+      - hub-publisher-approle-secret
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.publisher.appRole.role
+      VAULT_APPROLE_NAME: wise-hub-daemon
+      #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId
+      VAULT_APPROLE_ID_FILE: /run/secrets/hub-publisher-approle-id
+      #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
+      VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-publisher-approle-secret
+      WISE_LOG_LEVEL: debug
+      #§ 'WISE_VAULT_URL: "https://' + data.config.vault.docker.services.vault.container + ':8200"'
+      WISE_VAULT_URL: "https://wise-vault:8200"
+    networks:
+      - default
+      #§ '- ' + data.config.vault.docker.network
+      - vault-net
+    restart: always
+
+  #§ d(data.config.hub.docker.services.realtime.name) + ':'
+  realtime:
+    restart: always
+
+
+secrets:
+  #§ data.config.hub.docker.services.api.secrets.appRoleId + ':'
+  hub-api-approle-id:
+    external: true
+  #§ data.config.hub.docker.services.api.secrets.appRoleSecret + ':'
+  hub-api-approle-secret:
+    external: true
+  #§ data.config.hub.docker.services.publisher.secrets.appRoleId + ':'
+  hub-publisher-approle-id:
+    external: true
+  #§ data.config.hub.docker.services.publisher.secrets.appRoleSecret + ':'
+  hub-publisher-approle-secret:
+    external: true
+
+volumes:
+  #§ data.config.hub.docker.services.redis.volume + ':'
+  wise_hub_redis:
+
