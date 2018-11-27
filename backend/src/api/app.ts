@@ -60,12 +60,9 @@ export class App {
     }
 
     public async init() {
-        await this.vault.init();
-
-        Log.log().debug("AppRole login...");
+        Log.log().debug("Initialising vault connection");
         const policies = /*§ §*/["wise-hub-api"]/*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
-        await AppRole.login(this.vault, policies);
-        Log.log().info("AppRole login success");
+        await this.vault.init(vault => AppRole.login(vault, policies));
 
         await this.usersManager.init();
 
