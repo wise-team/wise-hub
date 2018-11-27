@@ -11,7 +11,7 @@ services:
   nginx:
     ports:
       #§ '- ' + data.config.hub.docker.services.nginx.port + ':80'
-      - 9510:80
+      - 8095:80
     environment:
       WISE_ENVIRONMENT_TYPE: staging
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
