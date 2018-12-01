@@ -36,21 +36,25 @@ export class UsersManager {
         if (!accessToken) throw new Error("Access token is missing");
 
         const username = d(user_.account);
-        let user: User = {
-            account: username,
-            profile: user_.profile,
-            scope: user_.scope || [],
-        };
 
         const getUser: User | undefined = await this.getUser(username);
-        if (getUser) {
-            user = {
-                account: username,
-                profile: user.profile || getUser.profile,
-                scope: _.merge(user.scope || [], getUser.scope),
-                settings: _.merge({}, defaultUserSettings, getUser.settings || {}, user.settings || {})
-            };
-        }
+        const user: User = {
+            account: username,
+            profile:
+                   user_.profile
+                || (getUser ? getUser.profile : {} as any),
+            scope: _.union(
+                [],
+                user_.scope || [],
+                (getUser ? getUser.scope : [])
+            ),
+            settings: _.merge(
+                {},
+                defaultUserSettings,
+                (getUser ? getUser.settings : {}),
+                user_.settings || {}
+            )
+        };
 
         if (accessToken) {
             const tokenPayload = await this.setAccessToken(username, accessToken);
