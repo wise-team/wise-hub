@@ -131,7 +131,6 @@ export class AuthManager {
 
     public static isUserAuthenticated(req: express.Request, res: express.Response, next: express.NextFunction) {
         if (req.user) {
-            console.log("Authenticated as " + req.user.account);
             next();
         } else {
             res.status(401);
