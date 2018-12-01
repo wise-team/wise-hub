@@ -13,6 +13,7 @@ export class RulesetsModuleApiHelper {
 
     public static async saveSetRules(srfv: SetRulesForVoter): Promise<{ id: string; block_num: number; trx_num: number; }> {
         const resp = await Axios.post("/api/rulesets/publish", srfv);
+        if (!resp.data.id) throw new Error("Invalid response on save rules: " + JSON.stringify(resp.data));
         return resp.data;
     }
 }
