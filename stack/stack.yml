@@ -5,12 +5,12 @@ services:
   nginx:
     image: nginx
     volumes:
-      - ./nginx/site.template.conf:/etc/nginx/conf.d/mysite.template:ro
-      - .:/srv:ro
+      - ../nginx/site.template.conf:/etc/nginx/conf.d/mysite.template:ro
+      - ..:/srv:ro
     environment:
       DOLLAR: '$$' #enables use of dollar sign in template.conf
     # for debug add: cat /etc/nginx/conf.d/default.conf &&
-    command: /bin/bash -c "envsubst < /etc/nginx/conf.d/mysite.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
+    command: /bin/bash -c "sleep 9 && envsubst < /etc/nginx/conf.d/mysite.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
   
   #§ data.config.hub.docker.services.redis.name + ':'
   redis:
@@ -26,7 +26,8 @@ services:
   api:
     #§ 'image: ' + data.config.hub.docker.images.backend.name
     image: wise/hub-backend
-    command: sh -c "sleep 9 && node dist/api/index.js"
+    #command: sh -c "sleep 5 && node dist/api/index.js"
+    command: ping 8.8.8.8
     # expose: # this is stack, but leaving expose to give information on ports
     #  - 3000
     environment:
@@ -37,7 +38,7 @@ services:
   daemon:
     #§ 'image: ' + data.config.hub.docker.images.backend.name
     image: wise/hub-backend
-    command: sh -c "sleep 5 && node dist/daemon/index.js"
+    command: sh -c "sleep 4 && node dist/daemon/index.js"
     environment:
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.name + ':6379/'
       REDIS_URL: redis://redis:6379/
@@ -47,12 +48,7 @@ services:
   publisher:
     #§ 'image: ' + data.config.hub.docker.images.backend.name
     image: wise/hub-backend
-    command: sh -c "sleep 9 && node dist/publisher/index.js"
-    secrets:
-      #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleId
-      - hub-publisher-approle-id
-      #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
-      - hub-publisher-approle-secret
+    command: sh -c "sleep 4 && node dist/publisher/index.js"
     environment:
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.name + ':6379/'
       REDIS_URL: redis://redis:6379/
@@ -61,7 +57,7 @@ services:
   realtime:
     #§ 'image: ' + data.config.hub.docker.images.backend.name
     image: wise/hub-backend
-    command: sh -c "sleep 9 && node dist/realtime/index.js"
+    command: sh -c "sleep 4 && node dist/realtime/index.js"
     ports:
       #§ '- ' + data.config.hub.docker.services.realtime.port + ':' + data.config.hub.docker.services.realtime.port
       - 8099:8099

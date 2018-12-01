@@ -5,8 +5,19 @@ networks:
     external:
       #§ 'name: ' + data.config.vault.docker.network
       name: vault-net
+  default_and_external:
+    driver: overlay
+    # internal: false
+    
 
 services:
+  net_test:
+    image: alpine
+    command: ping 8.8.8.8
+    networks:
+      - vault-net
+      - default_and_external
+
   #§ data.config.hub.docker.services.nginx.name + ':'
   nginx:
     ports:
@@ -18,7 +29,12 @@ services:
       #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
       STEEMD_ENDPOINT_URL: https://api.steemit.com
       STEEMCONNECT_REDIRECT_URI: "https://localhost:8080/"
+    networks:
+      - default_and_external
 
+  realtime:
+    networks:
+      - default_and_external
 
   #§ d(data.config.hub.docker.services.api.name) + ':'
   api:
@@ -42,9 +58,10 @@ services:
       STEEMCONNECT_CALLBACK_URL: "http://localhost:8080/api/auth/callback"
       LOGIN_REDIRECT_URL: "/"
     networks:
-      - default
       #§ '- ' + data.config.vault.docker.network
       - vault-net
+      - default_and_external
+      
 
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
@@ -52,12 +69,12 @@ services:
       START_FROM_BLOCK: HEAD_RESET
       RULESETS_LOADING_STRATEGY: "wisesql-preload"
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
-      STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io"
+      STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io,https://anyx.io"
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
       WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
       WISE_LOG_LEVEL: debug
     networks:
-      - default
+      - default_and_external
 
   #§ d(data.config.hub.docker.services.publisher.name) + ':'
   publisher:
@@ -76,7 +93,7 @@ services:
       WISE_LOG_LEVEL: debug
       WISE_VAULT_URL: "http://vault-dev:8200"
     networks:
-      - default
+      - default_and_external
       #§ '- ' + data.config.vault.docker.network
       - vault-net
 
