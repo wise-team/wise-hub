@@ -6,8 +6,7 @@ import { Log } from "./Log";
 export class AppRole {
     public static async login(vault: Vault, requiredPolicies: string []) {
         try {
-            await vault.init();
-            Log.log().debug("Vault init done. Vault status= " + JSON.stringify(await vault.getStatus()));
+            Log.log().debug("Performing Vault login. Vault status=" + JSON.stringify(await vault.getStatus()));
 
             const roleName = process.env.VAULT_APPROLE_NAME;
             if (!roleName) throw new Error("/lib/AppRole: Env VAULT_APPROLE_NAME is missing");

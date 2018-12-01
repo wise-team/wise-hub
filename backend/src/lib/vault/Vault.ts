@@ -11,16 +11,21 @@ export class Vault {
     // TODO protect token variable (ensure this in only in-memory, no swap)
     private token: string = "";
     private tokenLeaseUntil: number = 0;
+    private loginCallback: (vault: Vault) => Promise<any> = async () => {};
 
     public constructor(vaultAddr: string) {
         this.vaultAddr = vaultAddr;
     }
 
-    public async init() {
+    public async init(loginCallback: (vault: Vault) => Promise<any>) {
+        this.loginCallback = loginCallback;
+
         try {
             const status = await this.getStatus();
             if (!status.initialized) Log.log().warn("Warning: vault is not initialized. Login will fail");
             if (!!status.sealed) Log.log().warn("Warning: vault is sealed. Login will fail");
+
+            await this.loginCallback(this);
         }
         catch (error) {
             throw new Error("Vault.init(): Could not get health status of the vault. Please check the connecrtion. Error: " + error);
@@ -59,8 +64,11 @@ export class Vault {
         if (!loginResp.data.auth.renewable)
             throw new Error("Got token that is not renewable!");
 
+        const leaseDurationS = d(loginResp.data.auth.lease_duration);
+        this.renewTokenIn(Math.round(leaseDurationS * 1000 * 2 / 3), leaseDurationS);
+
         this.token = d(loginResp.data.auth.client_token);
-        this.tokenLeaseUntil = Date.now() / 1000 + d(loginResp.data.auth.lease_duration);
+        this.tokenLeaseUntil = Date.now() / 1000 + leaseDurationS;
     }
 
     public async appRoleLogin(roleName: string, requiredPolicies: string [], roleId: string, roleSecret: string) {
@@ -81,8 +89,11 @@ export class Vault {
         if (!loginResp.data.auth.renewable)
             throw new Error("Got token that is not renewable!");
 
+        const leaseDurationS = d(loginResp.data.auth.lease_duration);
+        this.renewTokenIn(Math.round(leaseDurationS * 1000 * 2 / 3), leaseDurationS);
+
         this.token = d(loginResp.data.auth.client_token);
-        this.tokenLeaseUntil = Date.now() / 1000 + d(loginResp.data.auth.lease_duration);
+        this.tokenLeaseUntil = Date.now() / 1000 + leaseDurationS;
     }
 
     public async getStatus(): Promise<any> {
@@ -169,6 +180,36 @@ export class Vault {
 
     public async revokeToken(token: string) {
         await this.call("POST", "/v1/auth/token/revoke", { token: token });
+    }
+
+    private renewTokenIn(waitTimeMs: number, incrementS: number) {
+        Log.log().info("Renewing vault token in " + (waitTimeMs / 1000) + "s");
+        setTimeout(() => {
+            (async () => {
+                try {
+                    const resp = await this.call("POST", "/v1/auth/token/renew-self", { increment: incrementS });
+                    this.token = d(resp.data.auth.client_token);
+                    console.log(JSON.stringify(resp.data));
+                    const leaseDurationS = d(resp.data.auth.lease_duration);
+
+                    if (leaseDurationS > 60) {
+                        const nextRenewAfterMs = Math.round(leaseDurationS * 1000 * 2 / 3);
+                        Log.log().info("Vault token renewed. Valid for " + leaseDurationS + " seconds (until: "
+                                + (new Date(Date.now() + leaseDurationS * 1000).toISOString()) + " Next renew after " + nextRenewAfterMs + "ms");
+                        this.renewTokenIn(nextRenewAfterMs, incrementS);
+                    }
+                    else {
+                        Log.log().info("Vault token renewed. Valid for " + leaseDurationS + " seconds (until: "
+                                + (new Date(Date.now() + leaseDurationS * 1000).toISOString()) + " Lease duration is below the threshold. Performing login.");
+                        await this.loginCallback(this);
+                    }
+                }
+                catch (error) {
+                    Log.log().error("Vault: Error while trying to renew token: " + error + ". Trying to renew in 30 seconds.");
+                    this.renewTokenIn(30 * 1000, incrementS);
+                }
+            })();
+        }, waitTimeMs);
     }
 
     private async errorTransformer<T>(fn: () => Promise<T>): Promise<T> {
