@@ -148,11 +148,12 @@ export class AuthManager {
                     else resolve(result);
                 });
             });
-        const user: User = await this.usersManager.login({
+        const userObjBeforeLogin: User = {
             scope: me.scope,
             account: me.name,
             profile: me,
-        }, accessToken, refreshToken);
+        };
+        const user: User = await this.usersManager.login(userObjBeforeLogin, accessToken, refreshToken);
 
         Log.log().info("Logged in @" + me.name + " with retrived scope = " + me.scope + ", and escalated scope = " + user.scope);
         return user;
