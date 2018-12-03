@@ -307,6 +307,35 @@ describe ("#denormalizeSetRules", () => {
     });
 });
 
+describe ("#denormalizeSetRules", () => {
+    it("Returns empty array on empty input", () => {
+        const normalizedRulesets = new NormalizedRulesets();
+        const denormalized_ = normalizedRulesets.denormalizeSetRules([], expectedNormalizedOutput as any);
+        expect (denormalized_).to.be.an("array").with.length(0);
+    });
+
+    it("Omits nonexistent SetRules", () => {
+        const normalizedRulesets = new NormalizedRulesets();
+        const denormalized_ = normalizedRulesets.denormalizeSetRules([ "nonexistent" ], expectedNormalizedOutput as any);
+        expect (denormalized_).to.be.an("array").with.length(0);
+    });
+
+    it("Returns only chosen elements", () => {
+        const normalizedRulesets = new NormalizedRulesets();
+        const denormalized_ = normalizedRulesets.denormalizeSetRules([ "setRules5" ], expectedNormalizedOutput as any);
+        expect (denormalized_).to.be.an("array").with.length(1);
+        expect (denormalized_[0].voter).to.be.equal("andrejcibik");
+    });
+
+    it("Normalize-denormalize returns primary input data", () => {
+        const normalizedRulesets = new NormalizedRulesets();
+        const normalizedResult = normalizedRulesets.normalize(denormalizedInput as any);
+        expect(normalizedResult).to.deep.equal(expectedNormalizedOutput);
+        const denormalized_ = normalizedRulesets.denormalizeSetRules(expectedNormalizedOutput.result, normalizedResult as any);
+        expect (denormalized_).to.deep.equal(denormalizedInput.map((el: any) => ({ voter: el.voter, rulesets: el.rulesets })));
+    });
+});
+
 describe ("#denormalizeRulesets", () => {
     it("Returns empty array on empty input", () => {
         const normalizedRulesets = new NormalizedRulesets();
