@@ -18,6 +18,9 @@ export const consts = {
     "user": {
       "base": "/api/user",
       "settings": "/api/user/settings"
+    },
+    "accounts": {
+      "base": "/api/accounts"
     }
   }
 }/*§ §.*/,

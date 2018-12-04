@@ -19,6 +19,9 @@ export const common = {
     "user": {
       "base": "/api/user",
       "settings": "/api/user/settings"
+    },
+    "accounts": {
+      "base": "/api/accounts"
     }
   }
 }/*§ JSON.stringify(d(data.config.hub.urls), undefined, 2) §.*/,
