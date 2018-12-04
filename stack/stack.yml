@@ -8,7 +8,7 @@ services:
       - ../nginx/site.template.conf:/etc/nginx/conf.d/mysite.template:ro
       - ..:/srv:ro
     ports:
-      #§ '- ' + data.config.hub.docker.services.nginx.port + ':80'
+      #§ '- ' + data.config.hub.port + ':80'
       - 8095:80
     environment:
       DOLLAR: '$$' #enables use of dollar sign in template.conf
