@@ -5,11 +5,6 @@ cd "${DIR}"
 
 docker-compose down
 
-docker network rm vault-net || echo "Not removed previous vault-net network"
-docker network create \
-    --scope=swarm --driver=bridge --internal --attachable \
-    vault-net
-
 docker-compose up -d
 
 echo "Sleep 5 for the server to start up"
