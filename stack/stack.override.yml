@@ -9,7 +9,7 @@ services:
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
       WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
       #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
-      STEEMD_ENDPOINT_URL: https://api.steemit.com
+      STEEMD_ENDPOINT_URL: https://anyx.io
       STEEMCONNECT_REDIRECT_URI: "https://localhost:8080/"
 
   #§ d(data.config.hub.docker.services.api.name) + ':'
