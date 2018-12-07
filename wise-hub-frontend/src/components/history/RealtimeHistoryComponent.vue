@@ -42,7 +42,6 @@ export default Vue.extend({
     },
     watch: {
         account: function (account: string, oldAccount: string) {
-            console.log("Reload on account change to \"" + account + "\"");
             this.reload();
         },
     },
@@ -52,7 +51,7 @@ export default Vue.extend({
     methods: {
         reload() {
             const realtimeParams: RealtimeModule.Params = {
-                socketIoURI: "https://wise.vote",
+                socketIoURI: "/",
                 socketIoOpts: {
                     query: {
                         delegator: "",
