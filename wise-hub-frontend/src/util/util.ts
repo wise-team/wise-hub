@@ -1,4 +1,5 @@
 import * as uuid from "uuid";
+import * as _ from "lodash";
 
 export function d <T> (input: T | undefined): T {
     if (typeof input !== "undefined") return input;
@@ -58,4 +59,13 @@ export function ucfirst(text: string): string {
 
 export function uniqueId(): string {
     return uuid.v4();
+}
+
+export function isEqualWithFunctions(o1: any, o2: any): boolean {
+    return _.isEqualWith(o1, o2, (val1, val2) => {
+        if(_.isFunction(val1) && _.isFunction(val2)) {
+            return val1.toString() === val2.toString();
+        }
+        return undefined;
+    });
 }

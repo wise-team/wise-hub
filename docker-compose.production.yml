@@ -21,11 +21,11 @@ services:
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
       WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
       #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
-      STEEMD_ENDPOINT_URL: https://api.steemit.com
+      STEEMD_ENDPOINT_URL: https://anyx.io
       #§ 'STEEMCONNECT_REDIRECT_URI: "' + data.config.hub.url.production + data.config.hub.urls.api.auth.callback.substring(1) + '"'
-      STEEMCONNECT_REDIRECT_URI: "https://hub.wise.vote/api/auth/callback"
+      STEEMCONNECT_REDIRECT_URI: "https://wise.vote/api/auth/callback"
       #§ "VIRTUAL_HOST: \"" + url(data.config.hub.url.production).hostname + "\""
-      VIRTUAL_HOST: "hub.wise.vote"
+      VIRTUAL_HOST: "wise.vote"
       VIRTUAL_NETWORK: "caddy-proxy"
       VIRTUAL_PORT: 80
       #§ 'CADDY_TLS: ' + ( url(data.config.hub.url.production).protocol === "https:" ? '"yes"' : '"no"')
@@ -60,7 +60,7 @@ services:
       # refer this guide for session options: https://github.com/expressjs/session
       SESSION_OPTIONS: '{ "cookie": { "secure": false }, "resave": false, "saveUninitialized": false }'
       #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.hub.url.production + data.config.hub.urls.api.auth.callback.substring(1) + '"'
-      STEEMCONNECT_CALLBACK_URL: "https://hub.wise.vote/api/auth/callback"
+      STEEMCONNECT_CALLBACK_URL: "https://wise.vote/api/auth/callback"
       LOGIN_REDIRECT_URL: "/"
     networks:
       - default

@@ -38,6 +38,7 @@ export default Vue.extend({
     },
     data() {
         return {
+            now: new Date
         };
     },
     methods: {

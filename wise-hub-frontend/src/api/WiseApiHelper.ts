@@ -8,6 +8,7 @@ import { WindowContext } from "../WindowContext";
 
 export class WiseApiHelper {
     private static ENDPOINT_URL = WindowContext.WISE_SQL_ENDPOINT_URL;
+    public static SQL_API: WiseSQLApi = new WiseSQLApi(WiseApiHelper.ENDPOINT_URL, Wise.constructDefaultProtocol());
 
     public static async getLog(delegator?: string): Promise<DaemonLogEntry []> {
         try {
