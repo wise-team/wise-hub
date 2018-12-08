@@ -43,7 +43,7 @@ const vault = new Vault(vaultAddr);
         Log.log().info("Initialising publisher....");
 
         Log.log().debug("Initialising vault connection");
-        const requiredPolicies = /*§ §*/["wise-hub-daemon"]/*§ JSON.stringify(data.config.hub.docker.services.publisher.appRole.policies(data.config)) §.*/;
+        const requiredPolicies = /*§ §*/["wise-hub-publisher"]/*§ JSON.stringify(data.config.hub.docker.services.publisher.appRole.policies(data.config)) §.*/;
         await vault.init(vault => AppRole.login(vault, requiredPolicies));
         Log.log().debug("Vault init successful...");
 

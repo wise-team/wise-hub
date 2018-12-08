@@ -92,7 +92,7 @@ services:
     environment:
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.publisher.appRole.role
-      VAULT_APPROLE_NAME: wise-hub-daemon
+      VAULT_APPROLE_NAME: wise-hub-publisher
       #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId
       VAULT_APPROLE_ID_FILE: /run/secrets/hub-publisher-approle-id
       #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
