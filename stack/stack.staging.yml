@@ -35,8 +35,7 @@ services:
       #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.api.secrets.appRoleSecret
       VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-api-approle-secret
       WISE_LOG_LEVEL: debug
-      #§ 'WISE_VAULT_URL: "https://' + data.config.vault.docker.services.vault.container + ':8200"'
-      WISE_VAULT_URL: "https://wise-vault:8200"
+      WISE_VAULT_URL: "https://vault.wise.vote:8200"
       # refer this guide for session options: https://github.com/expressjs/session
       SESSION_OPTIONS: '{ "cookie": { "secure": false }, "resave": false, "saveUninitialized": false }'
       #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
