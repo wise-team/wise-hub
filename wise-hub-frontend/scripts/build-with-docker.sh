@@ -6,7 +6,7 @@ cd "${DIR}"
 #§ 'IMAGE="node:' + data.config.npm.node.version + '-slim"'
 IMAGE="node:10.12-slim"
 
-docker run -it \
+docker run \
   -w "/app" \
   -v "${PWD}:/app" \
   "${IMAGE}" sh -c "npm install && npm run build-production"
