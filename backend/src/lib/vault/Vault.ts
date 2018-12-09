@@ -38,7 +38,7 @@ export class Vault {
 
     public async call(method: "GET" | "POST" | "PUT" | "DELETE", path: string, data: any, token: string = this.token): Promise<AxiosResponse> {
         if (!token) throw new Error("Token is not set. Vault client is unauthorized.");
-        return this.errorTransformer(async () => {
+        return this.errorTransformer("call " + path, async () => {
             return await Axios({
                 method: method,
                 url: this.vaultAddr + path,
@@ -51,7 +51,7 @@ export class Vault {
     }
 
     public async userPassLogin(username: string, password: string, requiredPolicies: string []) {
-        const loginResp = await this.errorTransformer(async () => {
+        const loginResp = await this.errorTransformer("userPassLogin", async () => {
             return await Axios.post(this.vaultAddr + "/v1/auth/userpass/login/" + username,
             { password: password });
         });
@@ -72,7 +72,7 @@ export class Vault {
     }
 
     public async appRoleLogin(roleName: string, requiredPolicies: string [], roleId: string, roleSecret: string) {
-        const loginResp = await this.errorTransformer(async () => {
+        const loginResp = await this.errorTransformer("appRoleLogin", async () => {
             return await Axios.post(this.vaultAddr + "/v1/auth/approle/login",
             { role_id: roleId, secret_id: roleSecret });
         });
@@ -99,7 +99,7 @@ export class Vault {
     public async getStatus(): Promise<any> {
         let resp;
         try {
-            resp =  await this.errorTransformer(async () => await Axios.get(this.vaultAddr + "/v1/sys/health"));
+            resp =  await this.errorTransformer("getStatus", async () => await Axios.get(this.vaultAddr + "/v1/sys/health"));
         }
         catch (error) {
             resp = error.response;
@@ -212,13 +212,17 @@ export class Vault {
         }, waitTimeMs);
     }
 
-    private async errorTransformer<T>(fn: () => Promise<T>): Promise<T> {
+    private async errorTransformer<T>(where: string, fn: () => Promise<T>): Promise<T> {
         try {
             return await fn();
         }
         catch (error) {
             if (error.response && error.response.data) {
-                throw new Error("Vault error: " + error + ", response: " + JSON.stringify(error.response.data));
+                console.error("Vault error (where=" + where + ")", error);
+                const errObject = new Error("Vault error: " + error + ", response: " + JSON.stringify(error.response.data));
+                (errObject as any).data = error.response.data;
+                if (error.response.status) (errObject as any).response = { status: error.response.status };
+                throw errObject;
             }
             else throw error;
         }
