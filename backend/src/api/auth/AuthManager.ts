@@ -51,7 +51,8 @@ export class AuthManager {
                 clientSecret: steemConnectSecret.v,
                 callbackURL: this.steemconnectCallbackUrl,
                 scope: [],
-                scopeSeparator: ","
+                scopeSeparator: ",",
+                state: true,
             } as any,
             (accessToken: string, refreshToken: string, profile: any,  cb: (error: any, user: any) => void) => {
                 (async () => {
