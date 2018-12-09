@@ -103,7 +103,7 @@ export class Vault {
         }
         catch (error) {
             resp = error.response;
-            if (![200, 429, 472, 473, 501, 503].indexOf(error.response.status)) {
+            if (!error.response || !error.response.status || ![200, 429, 472, 473, 501, 503].indexOf(error.response.status)) {
                 throw error;
             }
         }
@@ -117,7 +117,7 @@ export class Vault {
             return d(resp.data.data);
         }
         catch (error) {
-            if (error.response.status === 404) return undefined;
+            if (error.response && error.response.status && error.response.status === 404) return undefined;
             else throw error;
         }
     }
@@ -125,13 +125,13 @@ export class Vault {
     public async setSecret(secretPath: string, secret: any) {
         if (secretPath.substring(0, 1) !== "/") throw new Error("Secret path must start with \"/\"");
         const resp =  await this.call("PUT", "/v1/secret" + secretPath, secret);
-        if (resp.status !== 204) throw new Error("Error while setting the secret. Status is not 204");
+        if (!resp || !resp.status || resp.status !== 204) throw new Error("Error while setting the secret. Status is not 204");
     }
 
     public async deleteSecret(secretPath: string) {
         if (secretPath.substring(0, 1) !== "/") throw new Error("Secret path must start with \"/\"");
         const resp =  await this.call("DELETE", "/v1/secret" + secretPath, undefined);
-        if (resp.status !== 204) throw new Error("Error while deleting the secret. Status is not 204");
+        if (!resp || !resp.status || resp.status !== 204) throw new Error("Error while deleting the secret. Status is not 204");
     }
 
     public async initVault(opts: { secret_shares: number, secret_threshold: number }): Promise<{ root_token: string, keys: string [], keys_base64: string [] }> {
