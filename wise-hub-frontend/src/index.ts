@@ -3,6 +3,8 @@ import Wise, { EffectuatedSetRules } from "steem-wise-core";
 import { d } from "./util/util";
 import { Log } from "./Log";
 import { BuildContext } from "./BuildContext";
+import { WindowContext } from "./WindowContext";
+import { SessionRedirect } from "./api/SessionRedirect";
 
 
 /**
@@ -19,8 +21,9 @@ console.log("Hosted in environment type: " + WindowContext.ENVIRONMENT_TYPE);
 if (window.location.hostname === "localhost") {
     (window as any).WISE_LOG_LEVEL = "debug";
     console.log("Localhost detected. Setting window.WISE_LOG_LEVEL=" + (window as any).WISE_LOG_LEVEL);
-    Log.log().init();
 }
+Log.log().init();
+
 
 
 
@@ -51,7 +54,6 @@ import PeopleView from "./components/people/PeopleView.vue";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 import "./style.css";
-import { WindowContext } from "./WindowContext";
 
 /**
  * Initialize dependencies
@@ -92,9 +94,14 @@ const v = new Vue({
     store: store,
     router: router,
     render: h => h(App),
+    mounted: function () {
+        this.$nextTick(() => {
+            const redirect = SessionRedirect.getCurrentRedirect();
+            if (redirect) router.push({ path: redirect.path, query: redirect.query });
+        });
+    }
 });
 
-Log.log().init();
 
 // initialize steemconnect & eventually login automatically
 v.$store.dispatch(Actions.initialize);

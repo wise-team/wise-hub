@@ -50,11 +50,11 @@
                     <li><strong>custom_json</strong> — to reject vote orders and change the rules</li>
                     <li><strong>offline</strong> — allows the daemon to work in the background when your browser is closed</li>
                 </ul>
-                Click the below button to grant this three permissions to wiseHUB.
+                Click the below button to grant this three permissions to wiseHUB and enable the daemon.
             </p>
             <p v-if="!hasCorrectScope">
                 <b-button size="lg" variant="success" 
-                :href="scopeEscalationLoginUrl">Grant 3 permissions</b-button>
+                @click="grantPermissions">Grant 3 permissions</b-button>
             </p>
             <p>
                 <b-button size="lg" variant="success" 
@@ -80,6 +80,7 @@ import { icons } from "../../icons";
 import * as _ from "lodash";
 import { AuthModule } from "../../store/modules/auth/AuthModule";
 import { AuthModuleApiHelper } from "../../store/modules/auth/AuthModuleApiHelper";
+import { SessionRedirect } from "../../api/SessionRedirect";
 
 export default Vue.extend({
     props: [],
@@ -92,7 +93,22 @@ export default Vue.extend({
             showEnableDaemonAlert: false
         };
     },
+    mounted: function () {
+        this.$nextTick( () => {
+            if (this.$route.query.enable_daemon
+                && this.hasCorrectScope
+                && s(this.$store).getters.isLoggedIn
+               ) {
+                console.log("Enabling daemon based on query params");
+                this.enableDaemon();
+            }
+        })
+    },
     methods: {
+        grantPermissions() {
+            SessionRedirect.redirectOnNextReturn("/@" + this.username + "/daemon", { enable_daemon: "1" });
+            window.location.href = this.scopeEscalationLoginUrl;
+        },
         disableDaemon() {
             (async () => {
                 try {
