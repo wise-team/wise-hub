@@ -18,7 +18,10 @@
                     :value="isVoting" :yesIcon="yesIcon" :noIcon="noIcon" :error="isVotingError"
                     yesText="You are a Wise Voter. An expert!"
                     noText="You are not a voter. Would you like to become one?"
-                />
+                >
+                    <router-link :to="'/rulesets/for/@' + username">Check rulesets for you</router-link>, 
+                    <a :href="votingPageUrl">Vote with wise</a>
+                </loadable-icon-phrase-control>
             </p>
             <p class="card-text">
                 <loadable-icon-phrase-control 
@@ -26,16 +29,23 @@
                     :value="isDelegating" :yesIcon="yesIcon" :noIcon="noIcon" :error="isDelegatingError"
                     yesText="You are a Wise Delegator. The community is proud of you!"
                     noText="You are not yet a delegator. Would you like to learn how to delegate?"
-                />
+                >
+                    <router-link :to="'/@' + username + '/rulesets'">Create rulesets</router-link> 
+                </loadable-icon-phrase-control>
             </p>
             <p class="card-text">
                 <loadable-icon-phrase-control 
-                    :loading="isLoadingSupporting" loadingText="Are you supporting us by voting for the @wise-team witness? (loading...)"
+                    :loading="isLoadingSupporting" :loadingText="'Are you supporting us by voting for the @' + witnessName + ' witness? (loading...)'"
                     :value="isSupporting" :yesIcon="yesIcon" :noIcon="noIcon" :error="isSupportingError"
-                    yesText="Thank you for supporting us by voting for @wise-team witness."
-                    noText="You are not supporting us yet. Would you like to vote for @wise-team witness?"
-                />
-            </p>            
+                    :yesText="'Thank you for supporting us by voting for @' + witnessName + ' witness.'"
+                    :noText="'You are not supporting us yet. Would you like to vote for @' + witnessName + 'witness?'"
+                >
+                    <a :href="witnessVoteUrl">Vote for @{{ witnessName }}</a>
+                </loadable-icon-phrase-control>
+            </p>
+            <p class="card-text">
+                <small>Need help? Check the <a :href="manualUrl">manual</a> for more instructions!</small>
+            </p>        
         </b-card>
     </span>
 </template>
@@ -52,6 +62,10 @@ export default Vue.extend({
     props: [ "account" ],
     data() {
         return {
+            manualUrl: /*§ §*/ "https://docs.wise.vote/introduction" /*§ ' "' + data.config.manual.url.production + '" ' §.*/,
+            votingPageUrl: /*§ '"' + data.config.votingPage.url.production + '"' §*/"https://wise.vote/voting-page/"/*§ §.*/,
+            witnessName: /*§ '"' + data.config.witness.account + '"' §*/"wise-team"/*§ §.*/,
+            witnessVoteUrl: /*§ '"' + data.config.urls.voteForWitness + '"' §*/"https://steemit.com/~witnesses"/*§ §.*/
         };
     },
     methods: {
@@ -60,6 +74,9 @@ export default Vue.extend({
         yesIcon() { return icons.ok; },
         noIcon() { return icons.notice; },
         loadingIcon() { return icons.loading; },
+        username(): string {
+            return d(s(this.$store).state.auth.username);
+        },
         isLoadingVoting(): boolean {
             return s(this.$store).state.status.accountStats.voting.loading;
         },

@@ -22,7 +22,7 @@
             <font-awesome-icon class="pwil-icon pwil-icon-yes" :icon="yesIcon" />
         </b-col>
         <b-col>
-            <p>{{ yesText }}</p>
+            <p>{{ yesText }} <slot></slot></p>
         </b-col>
     </b-row>
     <b-row v-else>
@@ -30,7 +30,7 @@
             <font-awesome-icon class="pwil-icon pwil-icon-no" :icon="noIcon" />
         </b-col>
         <b-col>
-            <p>{{ noText }}</p>
+            <p>{{ noText }} <slot></slot></p>
         </b-col>
     </b-row>
 </b-container>
