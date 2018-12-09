@@ -1,11 +1,5 @@
 version: "3.3"
 
-networks:
-  vault-net:
-    external:
-      #§ 'name: ' + data.config.vault.docker.network
-      name: vault-net
-
 services:
   #§ data.config.hub.docker.services.nginx.name + ':'
   nginx:
@@ -41,10 +35,6 @@ services:
       #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
       STEEMCONNECT_CALLBACK_URL: "https://dev.wise.jblew.pl/api/auth/callback"
       LOGIN_REDIRECT_URL: "/"
-    networks:
-      - default
-      #§ '- ' + data.config.vault.docker.network
-      - vault-net
     restart: always
 
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
@@ -57,8 +47,6 @@ services:
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
       WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.jblew.pl/
       WISE_LOG_LEVEL: debug
-    networks:
-      - default
     restart: always
 
   #§ d(data.config.hub.docker.services.publisher.name) + ':'
@@ -77,12 +65,7 @@ services:
       #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
       VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-publisher-approle-secret
       WISE_LOG_LEVEL: debug
-      #§ 'WISE_VAULT_URL: "https://' + data.config.vault.docker.services.vault.container + ':8200"'
-      WISE_VAULT_URL: "https://wise-vault:8200"
-    networks:
-      - default
-      #§ '- ' + data.config.vault.docker.network
-      - vault-net
+      WISE_VAULT_URL: "https://vault.wise.vote:8200"
     restart: always
 
   #§ d(data.config.hub.docker.services.realtime.name) + ':'
