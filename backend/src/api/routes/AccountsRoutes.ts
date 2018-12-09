@@ -22,7 +22,7 @@ export class AccountsRoutes {
     public routes(app: express.Application) {
         app.get(common.urls.api.accounts.base + "/:account/settings",
             (req, res) => asyncReq(res, async () => {
-                const accountName = d("req.params.account", req.params.account);
+                const accountName = d(req.params.account, "req.params.account");
                 const user: User | undefined = await this.usersManager.getUser(accountName);
                 if (!user) {
                     res.status(404);
