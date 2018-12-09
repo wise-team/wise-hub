@@ -10,7 +10,7 @@
         <b-alert variant="success" :show="result.length > 0">
             <font-awesome-icon :icon="successIcon" /> {{ result }}
         </b-alert>
-        <b-alert variant="info" :show="result.length > 0 && daemonEnabled">
+        <b-alert variant="info" :show="result.length > 0 && !daemonEnabled">
             <h4>Is your daemon enabled?</h4>
             <p>
                 Your daemon on wise hub is disabled.
