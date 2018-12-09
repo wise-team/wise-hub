@@ -5,6 +5,4 @@ cd "${DIR}"
 
 echo "Docker stack deploy:"
 
-docker stack deploy -c stack/stack.yml -c stack/stack.override.yml hub
-
-./scripts/tailall.sh
+docker stack deploy -c stack/stack.yml -c stack/stack.staging.yml hub

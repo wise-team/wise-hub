@@ -6,8 +6,11 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Visualizer = require('webpack-visualizer-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
 
-module.exports = {
+const smp = new SpeedMeasurePlugin();
+
+const webpackConfig = {
   entry: './src/index.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -90,18 +93,18 @@ module.exports = {
       title: 'WISE for steem: hub'
     })
   ]
-}
+};
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports.devtool = '#source-map'
+  webpackConfig.devtool = '#source-map'
   // http://vue-loader.vuejs.org/en/workflow/production.html
-  module.exports.plugins = (module.exports.plugins || []).concat([
+  webpackConfig.plugins = (webpackConfig.plugins || []).concat([
     new webpack.LoaderOptionsPlugin({
       minimize: true
     })
   ])
 
-  module.exports.optimization = {
+  webpackConfig.optimization = {
     minimizer: [
       // we specify a custom UglifyJsPlugin here to get source maps in production
       new UglifyJsPlugin({
@@ -117,3 +120,5 @@ if (process.env.NODE_ENV === 'production') {
     ]
   };
 }
+
+module.exports = smp.wrap(webpackConfig);

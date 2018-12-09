@@ -1,10 +1,13 @@
-import { Vault } from "../lib/vault/Vault";
 import * as fs from "fs";
+import * as BluebirdPromise from "bluebird";
+import { Vault } from "../lib/vault/Vault";
 import { Log } from "./Log";
 
 export class AppRole {
     public static async login(vault: Vault, requiredPolicies: string []) {
         try {
+            Log.log().debug("Performing Vault login. Vault status=" + JSON.stringify(await vault.getStatus()));
+
             const roleName = process.env.VAULT_APPROLE_NAME;
             if (!roleName) throw new Error("/lib/AppRole: Env VAULT_APPROLE_NAME is missing");
 
@@ -23,8 +26,13 @@ export class AppRole {
             await vault.appRoleLogin(roleName, requiredPolicies, id, secret);
         }
         catch (error) {
-            Log.log().error("Error during AppRole login: " + error + ". Throwing.");
-            throw error;
+            Log.log().error("Error during AppRole login: " + error + ". Waiting 20s before next login attempt.");
+            if ((error as any).response) console.log((error as any).response);
+
+            await BluebirdPromise.delay(20 * 1000);
+
+            // try again
+            await AppRole.login(vault, requiredPolicies);
         }
     }
 }

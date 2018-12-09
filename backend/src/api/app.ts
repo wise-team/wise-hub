@@ -15,6 +15,7 @@ import * as helmet from "helmet";
 import { Log } from "../lib/Log";
 import { DaemonRoutes } from "./routes/DaemonRoutes";
 import { RulesetsRoutes } from "./routes/RulesetsRoutes";
+import { AccountsRoutes } from "./routes/AccountsRoutes";
 
 export class App {
     public app: express.Application;
@@ -28,6 +29,7 @@ export class App {
 
     private statusRoutes: StatusRoutes;
     private userRoutes: UserRoutes;
+    private accountsRoutes: AccountsRoutes;
     private daemonRoutes: DaemonRoutes;
     private rulesetsRoutes: RulesetsRoutes;
 
@@ -54,22 +56,21 @@ export class App {
         this.authManager = new AuthManager(this.vault, this.usersManager);
 
         this.statusRoutes = new StatusRoutes(this.redis, this.vault);
+        this.accountsRoutes = new AccountsRoutes(this.redis, this.usersManager);
         this.userRoutes = new UserRoutes(this.redis, this.usersManager);
         this.daemonRoutes = new DaemonRoutes(this.redis);
         this.rulesetsRoutes = new RulesetsRoutes(this.redis, this.usersManager);
     }
 
     public async init() {
-        await this.vault.init();
-
-        Log.log().debug("AppRole login...");
+        Log.log().debug("Initialising vault connection");
         const policies = /*§ §*/["wise-hub-api"]/*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
-        await AppRole.login(this.vault, policies);
-        Log.log().info("AppRole login success");
+        await this.vault.init(vault => AppRole.login(vault, policies));
 
         await this.usersManager.init();
 
         await this.userRoutes.init();
+        await this.accountsRoutes.init();
         await this.statusRoutes.init();
         await this.daemonRoutes.init();
         await this.rulesetsRoutes.init();
@@ -91,7 +92,12 @@ export class App {
         const RedisSessionStore = connectRedis(ExpressSession);
         const sessionDynamicOpts: ExpressSession.SessionOptions = {
             secret: sessionSecret,
-            store: new RedisSessionStore({ url: this.redisUrl })
+            store: new RedisSessionStore({ url: this.redisUrl }),
+            saveUninitialized: true,
+            rolling: true,
+            cookie: {
+                maxAge: /*§ §*/604800000/*§ data.config.hub.api.cookie.maxAgeMs §.*/
+            }
         };
         const resolvedSessionOptions = _.merge({}, this.sessionOptions, sessionDynamicOpts);
 
@@ -105,14 +111,15 @@ export class App {
 
     private async routes() {
         this.app.get("/", (req, res) => {
-            res.send("Error: backend serves all pages at /api/...");
+            res.send("Error: backend/api serves all pages at /api/...");
         });
 
-        this.authManager.routes(this.app);
-        this.statusRoutes.routes(this.app);
-        this.userRoutes.routes(this.app);
-        this.daemonRoutes.routes(this.app);
-        this.rulesetsRoutes.routes(this.app);
+        await this.authManager.routes(this.app);
+        await this.statusRoutes.routes(this.app);
+        await this.userRoutes.routes(this.app);
+        await this.accountsRoutes.routes(this.app);
+        await this.daemonRoutes.routes(this.app);
+        await this.rulesetsRoutes.routes(this.app);
 
         this.app.get("/api/rules", async (req, res) => {
             const out: any = {};

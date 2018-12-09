@@ -70,7 +70,7 @@ export default Vue.extend({
     data() {
         return {
             uuid: uniqueId(),
-            manualUrl: /*§ §*/ "https://wise.vote/documentation" /*§ ' "' + data.config.manual.url.production + '" ' §.*/,
+            manualUrl: /*§ §*/ "https://docs.wise.vote/introduction" /*§ ' "' + data.config.manual.url.production + '" ' §.*/,
             votingpageUrl: /*§ §*/ "https://wise.vote/voting-page/" /*§ ' "' + data.config.votingPage.url.production + '" ' §.*/,
         };
     },

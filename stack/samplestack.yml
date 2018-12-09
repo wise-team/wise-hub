@@ -1,0 +1,22 @@
+version: "3.3"
+
+networks:
+  vault-net:
+    external:
+      #§ 'name: ' + data.config.vault.docker.network
+      name: vault-net
+  default_and_external:
+    external:
+      name: default_and_external
+  
+    
+
+services:
+  net_test:
+    image: alpine
+    command: ping 8.8.8.8
+    networks:
+      - default_and_external
+      - vault-net
+      
+# docker network create --driver=overlay --attachable default_and_external

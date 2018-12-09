@@ -1,43 +1,17 @@
 version: "3.3"
 
-networks:
-  vault-net:
-    external:
-      #§ 'name: ' + data.config.vault.docker.network
-      name: vault-net
-  proxy-tier:
-    external:
-      name: caddy-proxy
-  default:
-    driver: bridge
-
 services:
   #§ data.config.hub.docker.services.nginx.name + ':'
   nginx:
-    expose:
-      - 80
     environment:
-      WISE_ENVIRONMENT_TYPE: staging
-      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
-      WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.jblew.pl/
+      WISE_ENVIRONMENT_TYPE: production
+      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
+      WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
       #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
       STEEMD_ENDPOINT_URL: https://anyx.io
-      #§ 'STEEMCONNECT_REDIRECT_URI: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
-      STEEMCONNECT_REDIRECT_URI: "https://dev.wise.jblew.pl/api/auth/callback"
-      #§ "VIRTUAL_HOST: \"" + url(data.config.hub.url.staging).hostname + "\""
-      VIRTUAL_HOST: "dev.wise.jblew.pl"
-      VIRTUAL_NETWORK: "caddy-proxy"
-      VIRTUAL_PORT: 80
-      #§ 'CADDY_TLS: ' + ( url(data.config.hub.url.staging).protocol === "https:" ? '"yes"' : '"no"')
-      CADDY_TLS: "yes"
-      CADDY_TIMEOUTS: "read 5m, write 2m"
-    networks:
-      - default
-      - proxy-tier
+      #§ 'STEEMCONNECT_REDIRECT_URI: "' + data.config.hub.url.production + data.config.hub.urls.api.auth.callback.substring(1) + '"'
+      STEEMCONNECT_REDIRECT_URI: "https://wise.vote/api/auth/callback"
     restart: always
-
-  #§ data.config.hub.docker.services.redis.name + ':'
-  redis:
 
   #§ d(data.config.hub.docker.services.api.name) + ':'
   api:
@@ -55,17 +29,12 @@ services:
       #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.api.secrets.appRoleSecret
       VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-api-approle-secret
       WISE_LOG_LEVEL: debug
-      #§ 'WISE_VAULT_URL: "https://' + data.config.vault.docker.services.vault.container + ':8200"'
-      WISE_VAULT_URL: "https://wise-vault:8200"
+      WISE_VAULT_URL: "https://vault.wise.vote:8200"
       # refer this guide for session options: https://github.com/expressjs/session
       SESSION_OPTIONS: '{ "cookie": { "secure": false }, "resave": false, "saveUninitialized": false }'
-      #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
-      STEEMCONNECT_CALLBACK_URL: "https://dev.wise.jblew.pl/api/auth/callback"
+      #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.hub.url.production + data.config.hub.urls.api.auth.callback.substring(1) + '"'
+      STEEMCONNECT_CALLBACK_URL: "https://wise.vote/api/auth/callback"
       LOGIN_REDIRECT_URL: "/"
-    networks:
-      - default
-      #§ '- ' + data.config.vault.docker.network
-      - vault-net
     restart: always
 
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
@@ -75,11 +44,9 @@ services:
       RULESETS_LOADING_STRATEGY: "wisesql-preload"
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
       STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io,https://anyx.io"
-      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
-      WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.jblew.pl/
+      #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
+      WISE_SQL_ENDPOINT_URL: https://sql.wise.vote/
       WISE_LOG_LEVEL: debug
-    networks:
-      - default
     restart: always
 
   #§ d(data.config.hub.docker.services.publisher.name) + ':'
@@ -98,12 +65,7 @@ services:
       #§ 'VAULT_APPROLE_SECRET_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
       VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-publisher-approle-secret
       WISE_LOG_LEVEL: debug
-      #§ 'WISE_VAULT_URL: "https://' + data.config.vault.docker.services.vault.container + ':8200"'
-      WISE_VAULT_URL: "https://wise-vault:8200"
-    networks:
-      - default
-      #§ '- ' + data.config.vault.docker.network
-      - vault-net
+      WISE_VAULT_URL: "https://vault.wise.vote:8200"
     restart: always
 
   #§ d(data.config.hub.docker.services.realtime.name) + ':'
@@ -114,20 +76,16 @@ services:
 secrets:
   #§ data.config.hub.docker.services.api.secrets.appRoleId + ':'
   hub-api-approle-id:
-    #§ 'file: /run/wise/secrets/' + data.config.hub.docker.services.api.secrets.appRoleId
-    file: /run/wise/secrets/hub-api-approle-id
+    external: true
   #§ data.config.hub.docker.services.api.secrets.appRoleSecret + ':'
   hub-api-approle-secret:
-    #§ 'file: /run/wise/secrets/' + data.config.hub.docker.services.api.secrets.appRoleSecret
-    file: /run/wise/secrets/hub-api-approle-secret
+    external: true
   #§ data.config.hub.docker.services.publisher.secrets.appRoleId + ':'
   hub-publisher-approle-id:
-    #§ 'file: /run/wise/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId
-    file: /run/wise/secrets/hub-publisher-approle-id
+    external: true
   #§ data.config.hub.docker.services.publisher.secrets.appRoleSecret + ':'
   hub-publisher-approle-secret:
-    #§ 'file: /run/wise/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
-    file: /run/wise/secrets/hub-publisher-approle-secret
+    external: true
 
 volumes:
   #§ data.config.hub.docker.services.redis.volume + ':'

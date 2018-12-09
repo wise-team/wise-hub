@@ -34,7 +34,7 @@ SECRETNAME_API_ROLE_ID="hub-api-approle-id"
 SECRETNAME_API_ROLE_SECRET="hub-api-approle-secret"
 
 #§ 'PUBLISHER_ROLE_NAME="' + data.config.hub.docker.services.publisher.appRole.role + '"'
-PUBLISHER_ROLE_NAME="wise-hub-daemon"
+PUBLISHER_ROLE_NAME="wise-hub-publisher"
 #§ 'SECRETNAME_PUBLISHER_ROLE_ID="' + data.config.hub.docker.services.publisher.secrets.appRoleId + '"'
 SECRETNAME_PUBLISHER_ROLE_ID="hub-publisher-approle-id"
 #§ 'SECRETNAME_PUBLISHER_ROLE_SECRET="' + data.config.hub.docker.services.publisher.secrets.appRoleSecret + '"'

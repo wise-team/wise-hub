@@ -14,7 +14,9 @@
             </div>
         </b-col>
         <b-col class="p-1">
-            <em class="text-muted history-log-time">{{ timeText }}</em><br />
+            <em class="text-muted history-log-time">
+                <dynamic-time-component :timestamp="op.timestamp" />
+            </em><br />
             <span v-if="isSetRules">
                 <h4>
                     <router-link :to="'/@' + op.delegator">@{{ op.delegator }}</router-link>
@@ -81,6 +83,8 @@ import { d, assertString, formatBigInt, timeDifferenceStr } from "../../util/uti
 import { DaemonLogEntry } from "../../api/DaemonLogEntry";
 import { EffectuatedWiseOperation, SetRules, ConfirmVote, SendVoteorder } from "steem-wise-core";
 
+import DynamicTimeComponent from "../controls/DynamicTimeComponent.vue";
+
 export default Vue.extend({
     props: {
         op: {
@@ -94,13 +98,6 @@ export default Vue.extend({
     methods: {
     },
     computed: {
-        timeText(): string {
-            if (this.op.timestamp) {
-                // return timeDifferenceStr(Date.now(), new Date(this.entry.time).getTime());
-                return new Date(this.op.timestamp).toUTCString() + "";
-            }
-            else return "";
-        },
         isSetRules(): boolean {
             return SetRules.isSetRules(this.op.command);
         },
@@ -114,6 +111,7 @@ export default Vue.extend({
         voteIcon() { return icons.voter; },
     },
     components: {
+        DynamicTimeComponent,
     },
 });
 </script>

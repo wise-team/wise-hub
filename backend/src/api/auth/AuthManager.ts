@@ -51,7 +51,8 @@ export class AuthManager {
                 clientSecret: steemConnectSecret.v,
                 callbackURL: this.steemconnectCallbackUrl,
                 scope: [],
-                scopeSeparator: ","
+                scopeSeparator: ",",
+                state: true,
             } as any,
             (accessToken: string, refreshToken: string, profile: any,  cb: (error: any, user: any) => void) => {
                 (async () => {
@@ -131,7 +132,6 @@ export class AuthManager {
 
     public static isUserAuthenticated(req: express.Request, res: express.Response, next: express.NextFunction) {
         if (req.user) {
-            console.log("Authenticated as " + req.user.account);
             next();
         } else {
             res.status(401);

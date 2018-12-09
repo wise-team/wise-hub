@@ -22,8 +22,9 @@ export class NormalizedRulesets {
         this.setRulesArraySchema = new normalizr.schema.Array(setRulesSchema);
     }
 
-    public normalize(setrArray: SetRules []): NormalizedRulesets.Result  {
-        const normalizedData = normalizr.normalize(setrArray, this.setRulesArraySchema);
+    public normalize(setRArray: SetRules []): NormalizedRulesets.Result  {
+        const clonedSetRArray = _.cloneDeep(setRArray); // normalizr changes input data in very not elegant way
+        const normalizedData = normalizr.normalize(clonedSetRArray, this.setRulesArraySchema);
 
         return _.merge(
             {},
@@ -34,10 +35,12 @@ export class NormalizedRulesets {
 
     public denormalizeSetRules(setRulesIds: string [], normalized: NormalizedRulesets.Result): SetRulesForVoter [] {
         const denormalized = normalizr.denormalize(
-            setRulesIds, this.setRulesArraySchema, normalized.entities
+            _.cloneDeep(setRulesIds), this.setRulesArraySchema, _.cloneDeep(normalized.entities)
         );
 
-        const clonedDenormalized: EffectuatedSetRules [] = _.cloneDeep(denormalized);
+        const denormalizedNoNulls = denormalized.filter((elem: any) => !!elem);
+
+        const clonedDenormalized: EffectuatedSetRules [] = _.cloneDeep(denormalizedNoNulls);
         return clonedDenormalized.map((esr: EffectuatedSetRules) => {
             const res: SetRulesForVoter = {
                 voter: esr.voter,
@@ -53,10 +56,12 @@ export class NormalizedRulesets {
 
     public denormalizeRulesets(rulesetIds: string [], normalized: NormalizedRulesets.Result): Ruleset [] {
         const denormalized = normalizr.denormalize(
-            rulesetIds, new normalizr.schema.Array(this.rulesetSchema), normalized.entities
+            _.cloneDeep(rulesetIds), new normalizr.schema.Array(this.rulesetSchema), _.cloneDeep(normalized.entities)
         );
 
-        const clonedDenormalized: Ruleset [] = _.cloneDeep(denormalized);
+        const denormalizedNoNulls = denormalized.filter((elem: any) => !!elem);
+
+        const clonedDenormalized: Ruleset [] = _.cloneDeep(denormalizedNoNulls);
         return clonedDenormalized.map((ruleset: Ruleset) => {
             ruleset = _.omit(ruleset, "id");
             ruleset.rules = ruleset.rules.map(rule => _.omit(rule, "id"));

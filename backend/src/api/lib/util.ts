@@ -14,9 +14,12 @@ export function asyncReq(res: express.Response, fn: () => Promise<any>) {
     })();
 }
 
-export function d <T> (input: T | undefined): T {
+export function d <T> (input: T | undefined, what?: string): T {
     if (typeof input !== "undefined") return input;
-    else throw new Error("Input value is undefined (d() fn)");
+    else {
+        if (what) throw new Error("Input value (" + what + ") is undefined (d() fn)");
+        else throw new Error("Input value is undefined (d() fn)");
+    }
 }
 
 export function i <T, R> (i: T | undefined, fn: ($: T) => R): R {

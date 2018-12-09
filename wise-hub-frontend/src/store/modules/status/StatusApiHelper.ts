@@ -17,13 +17,13 @@ export class StatusApiHelper {
     }
 
     public static async isVoting(accountName: string): Promise<boolean> {
-        const query = "/operations?delegator=eq." + d(accountName) + "&operation_type=eq.set_rules&select=count";
+        const query = "/operations?voter=eq." + d(accountName) + "&operation_type=eq.send_voteorder&select=count";
         const result = await Axios.get(StatusApiHelper.ENDPOINT_URL + query);
         return d(result.data[0].count) > 0;
     }
 
     public static async isDelegating(accountName: string): Promise<boolean> {
-        const query = "/operations?voter=eq." + d(accountName) + "&operation_type=eq.send_voteorder&select=count";
+        const query = "/operations?delegator=eq." + d(accountName) + "&operation_type=eq.set_rules&select=count";
         const result = await Axios.get(StatusApiHelper.ENDPOINT_URL + query);
         return d(result.data[0].count) > 0;
     }
