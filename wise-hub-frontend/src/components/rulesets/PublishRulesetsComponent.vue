@@ -10,6 +10,22 @@
         <b-alert variant="success" :show="result.length > 0">
             <font-awesome-icon :icon="successIcon" /> {{ result }}
         </b-alert>
+        <b-alert variant="info" :show="result.length > 0 && daemonEnabled">
+            <h4>Is your daemon enabled?</h4>
+            <p>
+                Your daemon on wise hub is disabled.
+                You can enable the daemon in the
+                <router-link :to="'/@' + username + '/daemon'">Daemon settings panel</router-link>.
+            </p>
+            <p>
+                <small><i>
+                    For advanced users:
+                    If you want to run the daemon on your own server please read the
+                    <a :href="daemonInstallationInstructionsLink">daemon installation instructions</a>.
+                    If you are already running the daemon on your server, ignore the message.
+                </i></small>
+            </p>
+        </b-alert>
     </div>
     <div v-else></div>
 </template>
@@ -26,6 +42,7 @@ import { DelayedExecutor } from "../../util/DelayedExecutor";
 import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
 import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 import { Wise, RulesUpdater, SetRulesForVoter } from "steem-wise-core";
+import { UserSettings } from "../../../../backend/src/common/model/User";
 
 const generateOpsExecutor = new DelayedExecutor(1200);
 
@@ -33,11 +50,15 @@ export default Vue.extend({
     props: [ "for" ],
     data() {
         return {
+            daemonInstallationInstructionsLink: /*§ '"' + data.config.urls.daemonInstallationInstructions + '"' §*/"https://docs.wise.vote/installation"/*§ §.*/
         };
     },
     methods: {
     },
     computed: {
+        username(): string {
+            return d(s(this.$store).state.auth.username);
+        },
         loading(): boolean {
             return s(this.$store).state.rulesets.publish.loading;
         },
@@ -49,6 +70,15 @@ export default Vue.extend({
         },
         forMe(): boolean {
             return s(this.$store).state.rulesets.publish.for === this.for;
+        },
+        /*hasOneRuleset(): boolean {
+            return _.keys(s(this.$store).state.rulesets.normalizedRulesets.entities.rulesets).length === 1;
+        },*/
+        settings(): UserSettings {
+            return d(d(s(this.$store).state.auth.user).settings);
+        },
+        daemonEnabled(): boolean {
+            return d(this.settings.daemonEnabled);
         },
         successIcon() { return icons.success; },
         loadingIcon() { return icons.loading; },
