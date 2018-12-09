@@ -90,14 +90,14 @@ export default Vue.extend({
             error: "",
             success: false,
             showDisableDaemonAlert: false,
-            showEnableDaemonAlert: false
+            showEnableDaemonAlert: this.$route.query.enable_daemon
         };
     },
     mounted: function () {
         this.$nextTick( () => {
             if (this.$route.query.enable_daemon
                 && this.hasCorrectScope
-                && s(this.$store).getters.isLoggedIn
+                // && s(this.$store).getters.isLoggedIn
                ) {
                 console.log("Enabling daemon based on query params");
                 this.enableDaemon();
