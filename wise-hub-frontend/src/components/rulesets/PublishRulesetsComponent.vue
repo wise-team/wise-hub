@@ -42,7 +42,7 @@ import { DelayedExecutor } from "../../util/DelayedExecutor";
 import { NormalizedRulesets } from "../../store/modules/rulesets/NormalizedRulesets";
 import { RulesetsModule } from "../../store/modules/rulesets/RulesetsModule";
 import { Wise, RulesUpdater, SetRulesForVoter } from "steem-wise-core";
-import { UserSettings } from "../../../../backend/src/common/model/User";
+import { UserSettings } from "../../store/modules/auth/User";
 
 const generateOpsExecutor = new DelayedExecutor(1200);
 
