@@ -6,9 +6,11 @@ export class SessionRedirect {
     public static getCurrentRedirect(): { path: string, query: Dictionary<string> } | undefined {
         const got = SessionRedirect.getAndClear();
         if (got && got.path && got.query && got.expire) {
-            if (got.expire < Date.now()) {
+            if (Date.now() < got.expire) {
+                console.log("Session redirect activated: " + got.path, got.query);
                 return { path: got.path, query: got.query };
             }
+            else console.log("Redirect expired");
         }
         return undefined;
     }
@@ -20,10 +22,11 @@ export class SessionRedirect {
             query: query,
             expire: Date.now() + 1000 /*ms*/ * 60 * 3600 * 4 //4h
         };
+        console.log("On next return you will be redirected to " + path, query);
         SessionRedirect.set(redObj);
     }
 
-    private static set(value: any) { 
+    private static set(value: any) {
         sessionStorage.setItem(SessionRedirect.SESSSTOR_KEY, JSON.stringify(value));
     }
 
