@@ -12,7 +12,7 @@ Cool &amp; handy frontend for wise
 
 - Feel free to talk with us on our chat: [https://discordapp.com/invite/CwxQDbG](https://discordapp.com/invite/CwxQDbG) .
 - You can read [The Wise Manual](https://docs.wise.vote/introduction)
-- You can also contact Jędrzej at jedrzejblew@gmail.com (if you think that you found a security issue, please contact me quickly).
+- You can also contact us at contact@wiseteam.io (if you think that you found a security issue, please contact us quickly).
 
 You can also ask questions as issues in appropriate repository: See [issues for this repository](https://github.com/wise-team/wise-hub/issues).
 
@@ -26,7 +26,7 @@ We welcome warmly:
 - Bug reports via [issues](https://github.com/wise-team/wise-hub).
 - Enhancement requests via via [issues](https://github.com/wise-team/wise-hub/issues).
 - [Pull requests](https://github.com/wise-team/wise-hub/pulls)
-- Security reports to _jedrzejblew@gmail.com_.
+- Security reports to _contact@wiseteam.io_.
 
 **Before** contributing please **read [Wise CONTRIBUTING guide](https://github.com/wise-team/steem-wise-core/blob/master/CONTRIBUTING.md)**.
 
