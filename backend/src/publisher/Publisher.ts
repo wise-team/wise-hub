@@ -41,7 +41,7 @@ export class Publisher {
                     await this.throttle();
                 }
                 else {
-                    if (i % 10 == 0) Log.log().info("No ops to publish at " + (new Date().toISOString()));
+                    if (i % 100 == 0) Log.log().info("No ops to publish at " + (new Date().toISOString()));
                 }
             }
             catch (error) {
@@ -59,11 +59,16 @@ export class Publisher {
                 this.daemonLog.emit({ msg: "Publisher is publishing operations to blockchain via SteemConnect... Account: @"
                     + otp.delegator + ". Operations: " + otp.ops.map(op => op[0]).join(", ") }, otp.delegator);
                 await this.doPublish(otp);
+                await this.removeFromQueue(otp);
             }
             catch (error) {
-                this.daemonLog.emit({ msg: "Error when publishing ops to account @" + otp.delegator + " via SteemConnect: " + error, error: error + "" }, otp.delegator);
-                Log.log().exception(Log.level.error, error);
-                console.error(error);
+                try {
+                    await this.processPublishError(otp, error);
+                }
+                catch (errorInError) {
+                    Log.log().error("Error in error publish processing code");
+                    Log.log().exception(Log.level.error, errorInError);
+                }
             }
         })();
     }
@@ -81,7 +86,6 @@ export class Publisher {
 
         const result: { id: string; block_num: number; trx_num: number; } = d(resp.result);
 
-        await this.queue.removeFromProcessingQueue(otp);
         Log.log().info("SteemConnect broadcast result =" + JSON.stringify(result, undefined, 2));
         Log.log().info("Successfully pushed operation via steemconnect (trx_id=" + result.id + ")");
         this.daemonLog.emit({
@@ -96,5 +100,27 @@ export class Publisher {
         Log.log().info(msg);
         this.daemonLog.emit({ msg: msg });
         await BluebirdPromise.delay(StaticConfig.PUBLISH_THROTTLING_MS);
+    }
+
+    private async removeFromQueue(otp: OpsToPublish) {
+        await this.queue.removeFromProcessingQueue(otp);
+    }
+
+    private async processPublishError(otp: OpsToPublish, error: Error) {
+        let errorMsg = "Error when publishing ops to account @" + otp.delegator + " via SteemConnect: ";
+        if (error.name === "SDKError" && (error as any).error === "server_error") {
+            errorMsg += "Steemconnect error: " + ((error as any).error_description ? (error as any).error_description : error + "");
+            errorMsg += "Because of this kind of error, the operation will be removed from queue.";
+            await this.removeFromQueue(otp);
+            console.error("SC2SDKError", error);
+        }
+        else {
+            errorMsg += error.name + ": " + error.message;
+            Log.log().exception(Log.level.error, error);
+            console.error(error);
+        }
+        errorMsg = "" + error;
+
+        this.daemonLog.emit({ msg: errorMsg, error: error + "" }, otp.delegator);
     }
 }
