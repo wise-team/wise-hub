@@ -28,13 +28,8 @@ export default Vue.extend({
     },
     methods: {
         catchError(fn:() => any) {
-            try {
-                this.error = "";
-                fn();
-            }
-            catch (error) {
-                this.error = error + ": " + error.message;
-            }
+            try { this.error = ""; fn(); }
+            catch (error) {  this.error = error + ": " + error.message; }
         },
         saveRule(rule: any) {
             s(this.$store).dispatch(RulesetsModule.Actions.updateRule, rule);
@@ -52,7 +47,7 @@ export default Vue.extend({
             },
             set(dateLocal: string): void { this.catchError(() => {
                 const dateUtc = new Date(dateLocal).toISOString();
-                this.saveRule(_.set(_.cloneDeep(this.rule), "data", dateUtc));
+                this.saveRule(_.set(_.cloneDeep(this.rule), "date", dateUtc));
                 this.error = "";
             }); }
         },
