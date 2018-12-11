@@ -21,10 +21,6 @@
 
 -------------
 
-Version of steem-wise-core: 
-
-Version of nodejs: 
-
 Links to gist with output / logs (or at least a picture):
 
 Links to steemd / steemit :
