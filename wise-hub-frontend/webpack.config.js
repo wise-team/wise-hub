@@ -9,6 +9,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
 
 const smp = new SpeedMeasurePlugin();
+const buildDateTime = (new Date()).toISOString();
 
 const webpackConfig = {
   entry: './src/index.ts',
@@ -84,7 +85,8 @@ const webpackConfig = {
       } : {
         NODE_ENV: '"development"'
       },
-      "__VERSION__": JSON.stringify(require("./package.json").version)
+      "__BUILDDATETIME__": JSON.stringify(buildDateTime),
+      "__VERSION__": JSON.stringify(require("./package.json").version),
     }),
     new HtmlWebpackPlugin({
       filename: '../index.html',
