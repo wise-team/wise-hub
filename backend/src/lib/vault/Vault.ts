@@ -183,23 +183,22 @@ export class Vault {
     }
 
     private renewTokenIn(waitTimeMs: number, incrementS: number) {
-        Log.log().info("Renewing vault token in " + (waitTimeMs / 1000) + "s");
+        Log.log().debug("Renewing vault token in " + (waitTimeMs / 1000) + "s");
         setTimeout(() => {
             (async () => {
                 try {
                     const resp = await this.call("POST", "/v1/auth/token/renew-self", { increment: incrementS });
                     this.token = d(resp.data.auth.client_token);
-                    console.log(JSON.stringify(resp.data));
                     const leaseDurationS = d(resp.data.auth.lease_duration);
 
-                    if (leaseDurationS > 60) {
+                    if (leaseDurationS > 240) {
                         const nextRenewAfterMs = Math.round(leaseDurationS * 1000 * 2 / 3);
-                        Log.log().info("Vault token renewed. Valid for " + leaseDurationS + " seconds (until: "
+                        Log.log().debug("Vault token renewed. Valid for " + leaseDurationS + " seconds (until: "
                                 + (new Date(Date.now() + leaseDurationS * 1000).toISOString()) + " Next renew after " + nextRenewAfterMs + "ms");
                         this.renewTokenIn(nextRenewAfterMs, incrementS);
                     }
                     else {
-                        Log.log().info("Vault token renewed. Valid for " + leaseDurationS + " seconds (until: "
+                        Log.log().debug("Vault token renewed. Valid for " + leaseDurationS + " seconds (until: "
                                 + (new Date(Date.now() + leaseDurationS * 1000).toISOString()) + " Lease duration is below the threshold. Performing login.");
                         await this.loginCallback(this);
                     }
