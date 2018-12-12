@@ -14,7 +14,7 @@ const repoUrl = /*§ §*/ "wise-team/wise-hub" /*§ ' "' + data.config.repositor
 console.log("Steem-wise-hub. This is open source software: https://github.com/" + repoUrl);
 BuildContext.failIfMissing();
 WindowContext.failIfMissing();
-console.log("steem-wise-hub version: " + BuildContext.VERSION);
+console.log("steem-wise-hub version: " + BuildContext.VERSION + ". Built at " + BuildContext.BUILDDATETIME);
 console.log("steem-wise-core version: " + Wise.getVersion());
 console.log("Hosted in environment type: " + WindowContext.ENVIRONMENT_TYPE);
 
@@ -34,6 +34,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import BootstrapVue from "bootstrap-vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import VueNotification from "vue-notification";
 
 /**
  * Import components
@@ -60,7 +61,15 @@ import "./style.css";
  */
 Vue.use(BootstrapVue);
 Vue.use(VueRouter);
+Vue.use(VueNotification);
 Vue.component("font-awesome-icon", FontAwesomeIcon);
+
+
+// Error handling:
+Vue.config.errorHandler = function (err, vm, info) {
+    console.error(err);
+    Vue.notify({ title: "Error", type: "error", text: err + "" });
+};
 
 /**
  * Start app
@@ -99,7 +108,7 @@ const v = new Vue({
             const redirect = SessionRedirect.getCurrentRedirect();
             if (redirect) router.push({ path: redirect.path, query: redirect.query });
         });
-    }
+    },
 });
 
 

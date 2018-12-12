@@ -42,21 +42,23 @@ export default Vue.extend({
                     this.loading = true;
                     const accountExists = await AuthModuleApiHelper.accountExists(this.voter);
                     if (accountExists) {
-                        s(this.$store).dispatch(
+                        /*s(this.$store).dispatch(
                             RulesetsModule.Actions.changeRulesetVoter,
                             { setRulesId: this.setRulesId, rulesetId: this.ruleset.id, voter: this.voter }
-                        );
+                        );*/
                         this.loading = false;
                         this.error = "";
                     }
                     else {
                         this.loading = false;
                         this.error = "Account @" + this.voter + " does not exist";
+                        console.error(this.error);
                     }
                 }
                 catch(error) {
                     this.error = error + ": " + error.message;
                     this.loading = false;
+                    console.error(error);
                 }
             })();
         }

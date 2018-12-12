@@ -123,6 +123,7 @@ export default Vue.extend({
                 }
                 catch (error) {
                     this.error = "Error: " + error;
+                    console.error(error);
                 }
             })();
         },
@@ -140,6 +141,7 @@ export default Vue.extend({
                 }
                 catch (error) {
                     this.error = "Error: " + error;
+                    console.error(error);
                 }
             })();
         }

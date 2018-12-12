@@ -29,7 +29,7 @@ export default Vue.extend({
     methods: {
         catchError(fn:() => any) {
             try { this.error = ""; fn(); }
-            catch (error) {  this.error = error + ": " + error.message; }
+            catch (error) {  this.error = error + ": " + error.message; console.error(error); }
         },
         saveRule(rule: any) {
             s(this.$store).dispatch(RulesetsModule.Actions.updateRule, rule);

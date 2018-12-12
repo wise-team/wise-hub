@@ -164,8 +164,8 @@ export default Vue.extend({
                     s(this.$store).dispatch(RulesetsModule.Actions.renameRuleset, { rulesetId: this.ruleset.id, name: value });
                 }
                 catch (error) {
-                    console.error(error);
                     this.error = error + ": " + error.message;
+                    console.error(error);
                 }
             }
         },

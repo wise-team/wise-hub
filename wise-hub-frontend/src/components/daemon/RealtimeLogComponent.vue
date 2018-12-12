@@ -87,6 +87,7 @@ export default Vue.extend({
                 catch (error) {
                     this.error = error + "";
                     this.loading = false;
+                    console.warn(error);
                 }
             })();
         }

@@ -40,6 +40,7 @@ export default Vue.extend({
             }
             catch (error) {
                 this.error = error + ": " + error.message;
+                console.error(error);
             }
         }
     },

@@ -1,6 +1,7 @@
 <!-- src/components/App.vue -->
 <template>
     <div id="main">
+        <notifications position="bottom left" />
         <b-container class="main-container">
             <b-row>
                 <b-col>
@@ -36,6 +37,10 @@ export default Vue.extend({
     data() {
         return {
         };
+    },
+    errorCaptured (err, vm, info) {
+        this.$notify({ title: "Error", type: "error", text: err + "" });
+        console.error("Captured, ", err);
     },
     methods: {
     },
