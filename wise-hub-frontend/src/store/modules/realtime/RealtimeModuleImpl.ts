@@ -2,6 +2,7 @@ import { MutationTree, ActionTree, GetterTree, Module } from "vuex";
 import { RealtimeModule as Me } from "./RealtimeModule";
 import { d, assertString, isEqualWithFunctions } from "../../../util/util";
 import * as _ from "lodash";
+import ow from "ow";
 import * as socketio from "socket.io-client";
 import Axios from "axios";
 import { Log } from "../../../Log";
@@ -15,15 +16,16 @@ export namespace RealtimeModuleImpl {
             error: ""
         },
         params: {
-            socketIoURI: "",
+            socketIoURI: undefined,
             socketIoOpts: {},
             preloadFn: async () => [],
             tailLength: 100,
             preloadPreprocess: (entry: object) => entry,
-            messagePreprocess: (message: string) => message
+            messagePreprocess: (message: object) => message
         },
         messages: []
     };
+    Me.validateState(state);
     export const persistentPaths: string [] = [
         
     ];
@@ -45,27 +47,33 @@ export namespace RealtimeModuleImpl {
 
     const mutations: MutationTree<Me.State> = {
         [Mutations.appendMessages](
-            state: Me.State, payload: any [],
+            state: Me.State, payload: object [],
         ) {
+            ow(payload, ow.array.label("payload").ofType(ow.object));
+
             state.messages = [...payload, ...state.messages].slice(0, state.params.tailLength);
+            Me.validateState(state);
         },
 
         [Mutations.clearMessages](
             state: Me.State
         ) {
             state.messages = [];
+            Me.validateState(state);
         },
 
         [Mutations.setStatus](
             state: Me.State, payload: Me.Status,
         ) {
             state.status = _.merge({}, state.status, payload);
+            Me.validateState(state);
         },
 
         [Mutations.setParams](
             state: Me.State, payload: Me.Params,
         ) {
             state.params = payload;
+            Me.validateState(state);
         },
     };
 
@@ -81,6 +89,8 @@ export namespace RealtimeModuleImpl {
         [Me.Actions.setParams]: (
             { commit, dispatch, state }, payload: Me.Params,
         ): void => {
+            Me.Params.validate(payload);
+
             Log.log().info("RealtimeModule.Actions.setParams");
             if (!isEqualWithFunctions(payload, state.params)) {
                 Log.log().info("Loading realtime");
@@ -108,6 +118,7 @@ export namespace RealtimeModuleImpl {
                     commit(Mutations.setStatus, { loading: false, error: "" } as Me.Status);
                 }
                 catch (error) {
+                    console.error(error);
                     commit(Mutations.setStatus, { loading: false, error: "Error while preloading: " + error } as Me.Status);
                 }
             })();
@@ -122,11 +133,11 @@ export namespace RealtimeModuleImpl {
                     socketIOHolder.socketio.close();
                     socketIOHolder.socketio = undefined;
                 }
-
-                socketIOHolder.socketio = socketio(state.params.socketIoURI, state.params.socketIoOpts);
+                socketIOHolder.socketio = socketio(d(state.params.socketIoURI), state.params.socketIoOpts);
 
                 socketIOHolder.socketio.on("msg", (msg: string) => {
-                    const preprocessResult = state.params.messagePreprocess(msg);
+                    const msgObj = JSON.parse(msg);
+                    const preprocessResult = state.params.messagePreprocess(msgObj);
                     if (preprocessResult) commit(Mutations.appendMessages, [ preprocessResult ]);
                 });
 
@@ -156,6 +167,7 @@ export namespace RealtimeModuleImpl {
                 });
             }
             catch (error) {
+                console.error(error);
                 commit(Mutations.setStatus, { connecting: false, error: "Error while initiating socket: " + error } as Me.Status);
             }
         })();}

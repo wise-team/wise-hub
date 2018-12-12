@@ -33,7 +33,7 @@ export class Mutations {
   public static updateNowTimer = "updateNowTimer";
 }
 const mutations: MutationTree<RootState> = {
-  [Mutations.updateNowTimer](state: RootState, payload: string) {
+  [Mutations.updateNowTimer](state: RootState) {
     state.nowTimer = new Date;
   },
 };
@@ -43,7 +43,7 @@ export class Actions {
 }
 const actions: ActionTree<RootState, RootState> = {
   [Actions.initialize]: (
-      { commit, dispatch, state }, payload?: {} | undefined,
+      { commit, dispatch, state }
   ): void => {
       dispatch(AuthModule.Actions.initialize);
       dispatch(StatusModule.Actions.initialize);

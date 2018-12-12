@@ -70,8 +70,8 @@ export default Vue.extend({
                 preloadPreprocess: (entry: any) => {
                     return { ...entry as EffectuatedWiseOperation, id: uniqueId() }; // load for everyone
                 },
-                messagePreprocess: (msg: string) => {
-                    const entry: DaemonLogEntry = JSON.parse(msg);
+                messagePreprocess: (msg: object) => {
+                    const entry: DaemonLogEntry = msg as any;
                     if (entry.wiseOp) { // only wise operations
                         if (this.account && this.account.length > 0) {
                             if (this.account !== entry.wiseOp.delegator && this.account !== entry.wiseOp.voter) {

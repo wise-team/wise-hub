@@ -2,6 +2,8 @@ import { MutationTree, ActionTree, GetterTree, Module } from "vuex";
 import { StatusApiHelper } from "./StatusApiHelper";
 import { StatusModule as Me } from "./StatusModule";
 import { d, assertString } from "../../../util/util";
+import { EffectuatedWiseOperation } from "steem-wise-core";
+import ow from "ow";
 
 export namespace StatusModuleImpl {
 
@@ -37,6 +39,7 @@ export namespace StatusModuleImpl {
             operations: []
         }
     };
+    Me.validateState(state);
     export const persistentPaths: string [] = [
         
     ];
@@ -61,37 +64,67 @@ export namespace StatusModuleImpl {
         [Mutations.setAccountStatsLoadedFor](
             state: Me.State, payload: string,
         ) {
+            ow(payload, ow.string.label("payload"));
+
             state.accountStats.loadedFor = payload;
+            Me.validateState(state);
         },
 
         [Mutations.setAccountStatsVoting](
             state: Me.State, payload: { loading: boolean; value: boolean; error: string; },
         ) {
+            ow(payload.loading, ow.boolean.label("payload.loading"));
+            ow(payload.value, ow.boolean.label("payload.value"));
+            ow(payload.error, ow.string.label("payload.error"));
+
             state.accountStats.voting = payload;
+            Me.validateState(state);
         },
 
         [Mutations.setAccountStatsDelegating](
             state: Me.State, payload: { loading: boolean; value: boolean; error: string; },
         ) {
+            ow(payload.loading, ow.boolean.label("payload.loading"));
+            ow(payload.value, ow.boolean.label("payload.value"));
+            ow(payload.error, ow.string.label("payload.error"));
+
             state.accountStats.delegating = payload;
+            Me.validateState(state);
         },
 
         [Mutations.setAccountStatsSupporting](
             state: Me.State, payload: { loading: boolean; value: boolean; error: string; },
         ) {
+            ow(payload.loading, ow.boolean.label("payload.loading"));
+            ow(payload.value, ow.boolean.label("payload.value"));
+            ow(payload.error, ow.string.label("payload.error"));
+
             state.accountStats.supporting = payload;
+            Me.validateState(state);
         },
 
         [Mutations.setGeneralStats](
             state: Me.State, payload: { loading: boolean; error: string; voters: number; delegators: number; operations: number; },
         ) {
+            ow(payload.loading, ow.boolean.label("payload.loading"));
+            ow(payload.voters, ow.number.finite.label("payload.voters"));
+            ow(payload.delegators, ow.number.finite.label("payload.delegators"));
+            ow(payload.operations, ow.number.finite.label("payload.operations"));
+            ow(payload.error, ow.string.label("payload.error"));
+
             state.generalStats = payload;
+            Me.validateState(state);
         },
 
         [Mutations.setLatestOperations](
-            state: Me.State, payload: { loading: boolean; error: string; operations: Me.WiseOperation []; },
+            state: Me.State, payload: { loading: boolean; error: string; operations: EffectuatedWiseOperation []; },
         ) {
+            ow(payload.loading, ow.boolean.label("payload.loading"));
+            ow(payload.operations, ow.array.label("payload.operations").ofType(ow.object));
+            ow(payload.error, ow.string.label("payload.error"));
+
             state.latestOperations = payload;
+            Me.validateState(state);
         },
     };
 
@@ -130,6 +163,8 @@ export namespace StatusModuleImpl {
         [Me.Actions.setAccountName]: (
             { commit, dispatch, state }, payload: { accountName: string },
         ): void => {
+            ow(payload.accountName, ow.string.minLength(3).label("payload.accountName"));
+
             if (payload.accountName !== state.accountStats.loadedFor) {
                 commit(Mutations.setAccountStatsLoadedFor, d(assertString(payload.accountName)));
                 dispatch(PrivateActions.loadAccountStats);

@@ -26,6 +26,7 @@ import { icons } from "../../icons";
 import { StatusModule } from "../../store/modules/status/StatusModule";
 import { s } from "../../store/store";
 import { d, assertString, formatBigInt, timeDifferenceStr } from "../../util/util";
+import { EffectuatedWiseOperation, SendVoteorder, SetRules, ConfirmVote } from "steem-wise-core";
 
 const articleLinkBase = /*§ §*/ "https://steemit.com/@{author}/{permlink}" /*§ ' "' + data.config.hub.visual.read.lastActivity.articleLinkBase + '" ' §.*/;
 const trxLinkBase = /*§ §*/ "https://steemd.com/tx/{trx}" /*§ ' "' + data.config.hub.visual.read.lastActivity.trxLinkBase + '" ' §.*/;
@@ -33,7 +34,7 @@ const trxLinkBase = /*§ §*/ "https://steemd.com/tx/{trx}" /*§ ' "' + data.con
 export default Vue.extend({
     props: {
         op: {
-            type: Object as () => StatusModule.WiseOperation
+            type: Object as () => EffectuatedWiseOperation
         }
     },
     data() {
@@ -45,17 +46,16 @@ export default Vue.extend({
     },
     computed: {
         account(): string {
-            return this.op.operation_type === "set_rules" || this.op.operation_type === "confirm_vote"
-                ? this.op.delegator : this.op.voter;
+            return SendVoteorder.isSendVoteorder(this.op.command)? this.op.voter : this.op.delegator;
         },
         didWhatText(): string {
-            if (this.op.operation_type === "set_rules") {
+            if (SetRules.isSetRules(this.op.command)) {
                 return "Set rules for @" + this.op.voter
             }
-            else if (this.op.operation_type === "confirm_vote") {
+            else if (ConfirmVote.isConfirmVote(this.op.command)) {
                 return "Confirmed vote by @" + this.op.voter
             }
-            else if (this.op.operation_type === "send_voteorder") {
+            else if (SendVoteorder.isSendVoteorder(this.op.command)) {
                 return "Send a voteorder to @" + this.op.delegator
             }
             else return "Unknown operation type"

@@ -1,4 +1,7 @@
+import ow from "ow";
+
 import { User } from "./User";
+import { userInfo } from "os";
 
 export namespace AuthModule {
     export const modulePathName = "auth";
@@ -11,6 +14,13 @@ export namespace AuthModule {
         user: User | undefined;
         loading: boolean;
         error: string;
+    }
+    export function validateState(state: State) {
+        ow(state.username, ow.string.label("state.state"));
+        ow(state.user, ow.any(ow.undefined, ow.object.label("state.user")));
+        if (state.user) User.validate(state.user);
+        ow(state.loading, ow.boolean.label("state.loading"));
+        ow(state.error, ow.string.label("state.error"));
     }
 
     export class Actions {

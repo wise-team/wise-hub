@@ -1,4 +1,5 @@
 import { MutationTree, ActionTree, GetterTree, Module } from "vuex";
+import ow from "ow";
 
 import { AuthModule as Me } from "./AuthModule";
 import { User, UserSettings } from "./User";
@@ -16,6 +17,7 @@ export namespace AuthModuleImpl {
         loading: true,
         error: "",
     };
+    Me.validateState(state);
     export const persistentPaths: string [] = [
         "username"
     ];
@@ -38,21 +40,25 @@ export namespace AuthModuleImpl {
             state: Me.State, payload: { username: string; },
         ) {
             state.username = d(payload.username);
+            Me.validateState(state);
         },
         [Mutations.setError](
             state: Me.State, payload: { error: string; },
         ) {
             state.error = assertString(d(payload.error));
+            Me.validateState(state);
         },
         [Mutations.setLoading](
             state: Me.State, payload: { loading: boolean },
         ) {
             state.loading = d(payload.loading);
+            Me.validateState(state);
         },
         [Mutations.setUser](
             state: Me.State, payload: { user: User | undefined },
         ) {
             state.user = payload.user;
+            Me.validateState(state);
         },
     };
 
@@ -61,7 +67,7 @@ export namespace AuthModuleImpl {
      */
     const actions: ActionTree<Me.State, Me.State> = {
         [Me.Actions.initialize]: (
-            { commit, dispatch, state }, payload: { username: string },
+            { commit, dispatch, state }
         ): void => {
             (async () => {
                 try {
@@ -82,6 +88,7 @@ export namespace AuthModuleImpl {
                     }
                 }
                 catch(error) {
+                    console.error(error);
                     commit(Mutations.setError, { error: error + "" });
                     commit(Mutations.setUser, { user: undefined });
                     commit(Mutations.setLoading, { loading: false });
@@ -93,6 +100,7 @@ export namespace AuthModuleImpl {
         [Me.Actions.saveSettings]: async (
             { commit, dispatch, state }, payload: { settings: UserSettings },
         ) => {
+            UserSettings.validate(payload.settings);
             const settings = d(payload.settings);
             console.log("AuthModule.Acrtions.saveSettings.payload=" + JSON.stringify(payload));
             await AuthModuleApiHelper.saveUserSettings(settings);
@@ -102,6 +110,8 @@ export namespace AuthModuleImpl {
         [Me.Actions.logout]: (
             { commit, dispatch, state }, payload: { username: string },
         ): void => {
+            ow(payload.username, ow.string.minLength(3).label("payload.username"));
+
             (async () => {
                 try {
                     commit(Mutations.setError, { error: "" });
@@ -113,6 +123,7 @@ export namespace AuthModuleImpl {
                     commit(Mutations.setUsername, { username: "" });
                 }
                 catch(error) {
+                    console.error(error);
                     commit(Mutations.setError, { error: error + "" });
                     commit(Mutations.setLoading, { loading: false });
                 }

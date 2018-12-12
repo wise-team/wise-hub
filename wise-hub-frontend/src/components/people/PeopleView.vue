@@ -24,6 +24,7 @@ import { StatusModule } from "../../store/modules/status/StatusModule";
 import { s } from "../../store/store";
 import * as _ from "lodash";
 import { d, assertString, formatBigInt, timeDifferenceStr } from "../../util/util";
+import { EffectuatedWiseOperation, SendVoteorder } from "steem-wise-core";
 
 import { StatusApiHelper } from "../../store/modules/status/StatusApiHelper";
 
@@ -35,7 +36,7 @@ export default Vue.extend({
         return {
             loading: true,
             error: "",
-            ops: [] as StatusModule.WiseOperation []
+            ops: [] as EffectuatedWiseOperation []
         };
     },
     mounted() {
@@ -45,9 +46,9 @@ export default Vue.extend({
                 this.error = "";
 
                 const allOps = await StatusApiHelper.loadLatestOperations(800);
-                const oneOpPerUserArr: StatusModule.WiseOperation []
-                    = _.uniqBy(allOps, (op: StatusModule.WiseOperation) => {
-                        return op.operation_type === "set_rules" || op.operation_type === "confirm_vote" ? op.delegator : op.voter;
+                const oneOpPerUserArr: EffectuatedWiseOperation []
+                    = _.uniqBy(allOps, (op: EffectuatedWiseOperation) => {
+                        return  SendVoteorder.isSendVoteorder(op.command) ? op.voter : op.delegator;
                     });
                 this.ops = oneOpPerUserArr;
                 
@@ -57,6 +58,7 @@ export default Vue.extend({
             catch (error) {
                 this.error = error + "";
                 this.loading = false;
+                console.error(error);
             }
         })();
     },

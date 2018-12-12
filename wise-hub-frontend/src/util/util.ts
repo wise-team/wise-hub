@@ -69,3 +69,22 @@ export function isEqualWithFunctions(o1: any, o2: any): boolean {
         return undefined;
     });
 }
+
+export function errToStr<T>(fn: () => T): T | string {
+    try {
+        return fn();
+    }
+    catch (error) {
+        return error + "";
+    }
+}
+
+export function nestValidate(fn: () => void): boolean | string {
+    try {
+        fn();
+        return true;
+    }
+    catch (error) {
+        return error + "";
+    }
+}

@@ -70,7 +70,7 @@ const webpackConfig = {
   performance: {
     hints: false
   },
-  devtool: '#eval-source-map',
+  devtool: 'eval-source-map',
   node: {
     fs: "empty" // fix can't resolve "fs" in winston
   },
@@ -98,7 +98,7 @@ const webpackConfig = {
 };
 
 if (process.env.NODE_ENV === 'production') {
-  webpackConfig.devtool = '#source-map'
+  webpackConfig.devtool = 'source-map'
   // http://vue-loader.vuejs.org/en/workflow/production.html
   webpackConfig.plugins = (webpackConfig.plugins || []).concat([
     new webpack.LoaderOptionsPlugin({

@@ -1,4 +1,5 @@
 import Axios from "axios";
+import ow from "ow";
 import * as steemJs from "steem";
 import { Wise, EffectuatedSetRules, WiseSQLApi, DirectBlockchainApi, SteemOperationNumber } from "steem-wise-core";
 import { d, i } from "../../../util/util";
@@ -15,6 +16,7 @@ export class AuthModuleApiHelper {
     }
 
     public static getLoginUrl(scope: AuthModuleApiHelper.LoginScope): string {
+        ow(scope, ow.string.label("scope").oneOf(AuthModuleApiHelper.scopes));
         return scope;
     }
 
@@ -22,6 +24,7 @@ export class AuthModuleApiHelper {
         try {
             const resp = await Axios.get(consts.urls.api.user.base);
             const user: User = resp.data;
+            User.validate(user);
             return user;
         }
         catch (error) {
@@ -31,7 +34,8 @@ export class AuthModuleApiHelper {
     }
 
     public static async saveUserSettings(settings: UserSettings) {
-        console.log("AuthModuleApiHelper.saveUserSettings=" + JSON.stringify(settings));
+        UserSettings.validate(settings);
+
         const saveResp = await Axios.post(consts.urls.api.user.settings, settings);
         console.log("Saved settings, response= " + JSON.stringify(saveResp));
     }
@@ -47,4 +51,9 @@ export namespace AuthModuleApiHelper {
     export const LoginScope_EMPTY: LoginScope = consts.urls.api.auth.login.scope.empty;
     export const LoginScope_CUSTOM_JSON: LoginScope = consts.urls.api.auth.login.scope.custom_json;
     export const LoginScope_CUSTOM_JSON_VOTE_OFFLINE: LoginScope = consts.urls.api.auth.login.scope.custom_json_vote_offline;
+    export const scopes = [
+        LoginScope_EMPTY,
+        LoginScope_CUSTOM_JSON,
+        LoginScope_CUSTOM_JSON_VOTE_OFFLINE
+    ];
 }

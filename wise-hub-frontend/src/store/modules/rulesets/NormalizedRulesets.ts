@@ -1,6 +1,9 @@
 import { EffectuatedSetRules, Ruleset, Rule, SetRules, SetRulesForVoter } from "steem-wise-core";
 import * as normalizr from "normalizr";
 import * as _ from "lodash";
+import ow from "ow";
+import { nestValidate } from "../../../util/util";
+import { IsEmail, IsNotEmpty, IsUrl, MaxLength, validateSync } from "class-validator";
 
 export class NormalizedRulesets {
     private idIncrementer: { n: number } = { n: 0 };
@@ -81,11 +84,28 @@ export namespace NormalizedRulesets {
         id: ID;
     }
 
+    export namespace NormalizedRule {
+        export function validate(rule: NormalizedRule) {
+            ow(rule.id, ow.string.nonEmpty.label(".id"));
+            ow(rule, ow.object.label(".").is(rule => Rule.isRule(rule) || `${rule} is not a valid rule`));
+        }
+    }
+
+
     export interface NormalizedRuleset {
         id: ID;
         name: string;
         rules: ID [];
     }
+
+    export namespace NormalizedRuleset {
+        export function validate(ruleset: NormalizedRuleset) {
+            ow(ruleset.id, ow.string.nonEmpty.label(".id"));
+            ow(ruleset.name, ow.string.label(".name"));
+            ow(ruleset.rules, ow.array.label(".rules").ofType(ow.string.nonEmpty));
+        }
+    }
+
 
     export interface NormalizedSetRulesForVoter {
         id: ID;
@@ -94,6 +114,16 @@ export namespace NormalizedRulesets {
         rulesets: ID [];
     }
 
+    export namespace NormalizedSetRulesForVoter {
+        export function validate(srfv: NormalizedSetRulesForVoter) {
+            ow(srfv.id, ow.string.nonEmpty.label(".id"));
+            ow(srfv.voter, ow.string.label(".voter"));
+            ow(srfv.delegator, ow.string.label(".delegator"));
+            ow(srfv.rulesets, ow.array.label(".rulesets").ofType(ow.string.nonEmpty));
+        }
+    }
+
+
     export interface Result {
         result: ID [];
         entities: {
@@ -101,5 +131,32 @@ export namespace NormalizedRulesets {
             rulesets: { [key: string]: NormalizedRuleset },
             setRules: { [key: string]: NormalizedSetRulesForVoter },
         };
+    }
+
+    export namespace Result {
+        export function validate(result: Result) {
+            ow(result.result, ow.array.label(".result").ofType(
+                ow.string.nonEmpty.is(srfvId => !!result.entities.setRules[srfvId] || `SetRules#${srfvId} is not in the store`)
+            ));
+            
+            ow(result.entities, ow.object.label(".entities").hasKeys("rules", "rulesets", "setRules"));
+            ow(result.entities.rules, ow.object.label(".entities.rules")
+                .valuesOfType(ow.object.is(rule => nestValidate(() => NormalizedRule.validate(rule as NormalizedRule)))));
+
+            ow(result.entities.rulesets, ow.object.label(".entities.rulesets")
+                .valuesOfType(ow.object
+                    .is(ruleset => nestValidate(() => NormalizedRuleset.validate(ruleset as NormalizedRuleset)))
+                    .is(ruleset => (ruleset as NormalizedRuleset).rules
+                        .filter(ruleId => !result.entities.rules[ruleId]).length == 0 || `Not all rules of ruleset ${ruleset} are in the store`)
+                ));
+            
+
+            ow(result.entities.setRules, ow.object.label(".entities.setRules")
+                .valuesOfType(ow.object
+                    .is(srfv => nestValidate(() => NormalizedSetRulesForVoter.validate(srfv as NormalizedSetRulesForVoter)))
+                    .is(srfv => (srfv as NormalizedSetRulesForVoter).rulesets
+                        .filter(rulesetId => !result.entities.rulesets[rulesetId]).length == 0 || `Not all rulesets of setRules #${(srfv as any).id} are in the store`)
+                ));
+        }
     }
 }
