@@ -25,9 +25,9 @@
             </p>
             <p class="card-text">
                 <br />
-                Join the community:
+                Join the this brave community,
             </p>
-            <b-button :href="loginUrl" variant="primary">with SteemConnect</b-button>
+            <b-button to="/people" variant="primary">meet the People</b-button>
         </b-card>
     </span>
 </template>
