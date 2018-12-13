@@ -25,7 +25,7 @@
             </p>
             <p class="card-text">
                 <br />
-                Join the this brave community,
+                Join this brave community,
             </p>
             <b-button to="/people" variant="primary">meet the People</b-button>
         </b-card>
