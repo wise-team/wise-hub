@@ -3,7 +3,6 @@ import * as normalizr from "normalizr";
 import * as _ from "lodash";
 import ow from "ow";
 import { nestValidate } from "../../../util/util";
-import { IsEmail, IsNotEmpty, IsUrl, MaxLength, validateSync } from "class-validator";
 
 export class NormalizedRulesets {
     private idIncrementer: { n: number } = { n: 0 };
