@@ -562,7 +562,7 @@ export namespace RulesetsModuleImpl {
                     const srfv = denormalizedSRFV[0];
                     const result = await RulesetsModuleApiHelper.saveSetRules(srfv);
                     commit(Mutations.updatePublishStatus, { 
-                        loading: false, error: "",
+                        loading: false, error: "", for: d(payload.for),
                         result : "Rulesets successfully published, transaction: " + result.id + " in block " + result.block_num
                     });
                     commit(Mutations.updateEdit, { modified: false, rulesetId: "" });
@@ -604,7 +604,7 @@ export namespace RulesetsModuleImpl {
                     const srfv = denormalizedSRFV[0];
                     const result = await RulesetsModuleApiHelper.saveSetRules(srfv);
                     commit(Mutations.updatePublishStatus, { 
-                        loading: false, error: "",
+                        loading: false, error: "", for: "delete",
                         result : "SetRules for @" + srfv.voter + " successfully published, transaction: " + result.id + " in block " + result.block_num
                     });
                     commit(Mutations.updateEdit, { modified: false, rulesetId: "" });
