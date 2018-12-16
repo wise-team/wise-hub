@@ -14,8 +14,8 @@ import { UsersManager } from "../../lib/UsersManager";
 import { Log } from "../../lib/Log";
 import { AccountInfo } from "steem";
 
+// TODO: Move process.env management to root file and pass only arguments
 export class AuthManager {
-    private oauth2ClientId: string = /*§ §*/"wisevote.app"/*§ JSON.stringify(data.config.steemconnect.settings.client_id)  §.*/;
     private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/{
   "baseAuthorizationUrl": "https://steemconnect.com/oauth2/authorize",
   "tokenUrl": "https://steemconnect.com/api/oauth2/token",
@@ -24,6 +24,7 @@ export class AuthManager {
 
     private steemconnectCallbackUrl: string;
     private loginRedirectUrl: string;
+    private oauth2ClientId: string; // JSON.stringify(data.config.steemconnect.app.production.settings.client_id)
 
     private vault: Vault;
     private usersManager: UsersManager;
@@ -31,6 +32,10 @@ export class AuthManager {
     public constructor(vault: Vault, usersManager: UsersManager) {
         this.vault = vault;
         this.usersManager = usersManager;
+
+        const oauth2ClientIdEnv = process.env.OAUTH2_CLIENT_ID;
+        if (!oauth2ClientIdEnv) throw new Error("Env OAUTH2_CLIENT_ID is missing");
+        this.oauth2ClientId = oauth2ClientIdEnv;
 
         const steemconnectCallbackUrlEnv = process.env.STEEMCONNECT_CALLBACK_URL;
         if (!steemconnectCallbackUrlEnv) throw new Error("Env STEEMCONNECT_CALLBACK_URL is missing");

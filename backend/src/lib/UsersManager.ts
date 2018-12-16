@@ -10,9 +10,9 @@ import { DelegatorManager } from "./DelegatorManager";
 import Axios from "axios";
 import { Log } from "./Log";
 
-
+// TODO: Move process.env management to root file and pass only arguments
 export class UsersManager {
-    private oauth2ClientId: string = /*§ §*/"wisevote.app"/*§ JSON.stringify(data.config.steemconnect.settings.client_id)  §.*/;
+    private oauth2ClientId: string;
     private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/{
   "baseAuthorizationUrl": "https://steemconnect.com/oauth2/authorize",
   "tokenUrl": "https://steemconnect.com/api/oauth2/token",
@@ -27,6 +27,10 @@ export class UsersManager {
         this.vault = vault;
         this.redis = redis;
         this.options = options;
+
+        const oauth2ClientIdEnv = process.env.OAUTH2_CLIENT_ID;
+        if (!oauth2ClientIdEnv) throw new Error("Env OAUTH2_CLIENT_ID is missing");
+        this.oauth2ClientId = oauth2ClientIdEnv;
     }
 
     public async init() {
