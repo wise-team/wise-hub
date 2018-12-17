@@ -1,14 +1,16 @@
+import ow from "ow";
 import { Vault } from "./vault/Vault";
 import { Redis } from "ioredis";
 import { User, defaultUserSettings, UserSettings } from "../common/model/User";
 import { common } from "../common/common";
 import { d } from "./util";
 import * as jwt_decode from "jwt-decode";
-import * as sc2 from "steemconnect";
 import * as _ from "lodash";
 import { DelegatorManager } from "./DelegatorManager";
 import Axios from "axios";
 import { Log } from "./Log";
+import { Steemconnect } from "./Steemconnect";
+import { OperationWithDescriptor } from "steem";
 
 // TODO: Move process.env management to root file and pass only arguments
 export class UsersManager {
@@ -22,6 +24,7 @@ export class UsersManager {
     private options: UsersManagerOptions;
     private vault: Vault;
     private redis: Redis;
+    private steemconnect: Steemconnect;
 
     public constructor(redis: Redis, vault: Vault, options: UsersManagerOptions) {
         this.vault = vault;
@@ -31,32 +34,37 @@ export class UsersManager {
         const oauth2ClientIdEnv = process.env.OAUTH2_CLIENT_ID;
         if (!oauth2ClientIdEnv) throw new Error("Env OAUTH2_CLIENT_ID is missing");
         this.oauth2ClientId = oauth2ClientIdEnv;
+
+        const steemconnectCallbackUrlEnv = process.env.STEEMCONNECT_CALLBACK_URL;
+        if (!steemconnectCallbackUrlEnv) throw new Error("Env STEEMCONNECT_CALLBACK_URL is missing");
+
+        this.steemconnect = new Steemconnect(this.oauth2ClientId, steemconnectCallbackUrlEnv);
     }
 
     public async init() {
     }
 
-    public async login(user_: User, accessToken: string, refreshToken: string): Promise<User> {
+    public async login(accessToken: string, refreshToken?: string): Promise<User> {
         if (!accessToken) throw new Error("Access token is missing");
 
-        const username = d(user_.account);
+        const me: Steemconnect.Me = await this.steemconnect.me(accessToken);
+        const username = d(me.name);
 
         const getUser: User | undefined = await this.getUser(username);
         const user: User = {
             account: username,
             profile:
-                   user_.profile
+                   me
                 || (getUser ? getUser.profile : {} as any),
             scope: _.union(
                 [],
-                user_.scope || [],
+                me.scope || [],
                 (getUser ? getUser.scope : [])
             ),
             settings: _.merge(
                 {},
                 defaultUserSettings,
                 (getUser ? getUser.settings : {}),
-                user_.settings || {}
             )
         };
 
@@ -82,6 +90,7 @@ export class UsersManager {
 
         await this.setUser(username, user);
 
+        Log.log().info("Logged in @" + me.name + " with retrived scope = " + me.scope + ", and escalated scope = " + user.scope);
         return user;
     }
 
@@ -90,23 +99,20 @@ export class UsersManager {
         const accessToken = await this.getAccessToken(username);
 
         if (accessToken) {
-            const sc2 = this.createEphemericSC2();
-            sc2.setAccessToken(accessToken.token);
-            await new Promise<any>((resolve, reject) => {
-                sc2.revokeToken((err, result) => {
-                    if (err) reject(err);
-                    else resolve(result);
-                });
-            });
+            await this.steemconnect.revokeToken(accessToken.token);
         }
 
         await this.deleteAccessToken(username);
         await this.deleteRefreshToken(username);
     }
 
-    public async constructOfflineSteemConnect(username: string, scope: string []): Promise<sc2.SteemConnectV2> {
+    public async broadcast(username: string, scope: string [], ops: OperationWithDescriptor []): Promise<Steemconnect.BroadcastResult> {
+        ow(username, ow.string.nonEmpty.label("username"));
+        ow(scope, ow.array.nonEmpty.ofType(ow.string).label("scope"));
+        ow(ops, ow.array.nonEmpty.ofType(ow.object).label("ops"));
+
         let accessToken = await this.getAccessToken(username);
-        if (!accessToken) throw new Error("User \"" + username + "\" not found!");
+        if (!accessToken) throw new Error("User \"" + username + "\"'s access token not found in vault!");
 
         scope.forEach(requiredScopeElem => {
             if (d(accessToken).payload.scope.indexOf(requiredScopeElem) === -1) {
@@ -118,13 +124,7 @@ export class UsersManager {
             accessToken = await this.refreshAccessToken(username, scope);
         }
 
-        const sc =  sc2.Initialize({
-            app: this.oauth2ClientId,
-            callbackURL: undefined,
-            scope: scope,
-        });
-        sc.setAccessToken(accessToken.token);
-        return sc;
+        return await this.steemconnect.broadcast(username, scope, ops, accessToken.token);
     }
 
     private async refreshAccessToken(username: string, scope: string []): Promise<{ token: string, payload: AccessTokenJWTPayload }> {
@@ -248,16 +248,13 @@ export class UsersManager {
         }
     }
 
-    private createEphemericSC2(): sc2.SteemConnectV2 {
-        const steemconnectCallbackUrlEnv = process.env.STEEMCONNECT_CALLBACK_URL;
-        if (!steemconnectCallbackUrlEnv) throw new Error("Env STEEMCONNECT_CALLBACK_URL is missing");
-
+    /*private createEphemericSC2(): sc2.SteemConnectV2 {
         return sc2.Initialize({
             app: this.oauth2ClientId,
             callbackURL: steemconnectCallbackUrlEnv,
             scope: [], // in this manager we do not perform any scoped operations
         });
-    }
+    }*/
 }
 
 export interface UsersManagerOptions {

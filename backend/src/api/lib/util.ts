@@ -1,15 +1,15 @@
 import * as express from "express";
 import { Log } from "../../lib/Log";
 
-export function asyncReq(res: express.Response, fn: () => Promise<any>) {
+export function asyncReq(where: string, res: express.Response, fn: () => Promise<any>) {
     (async () => {
         try {
             await fn();
         }
         catch (error) {
-            Log.log().logError("api/lib/util#asyncReq()", error);
+            Log.log().logError("api/lib/util#asyncReq(where=" + where + ")", error);
             res.status(500);
-            res.send("Error: " + error);
+            res.send({ errors: [ error.name + ": " + error.message + " " + error.stack ? error.stack : "" ] });
         }
     })();
 }

@@ -22,7 +22,7 @@ export class UserRoutes {
     public routes(app: express.Application) {
         app.get(common.urls.api.user.base,
             AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq(res, async () => {
+            (req, res) => asyncReq("api/routes/UserRoutes.ts route user base", res, async () => {
                 const requser: User = d(req.user);
                 const user: User | undefined = await this.usersManager.getUser(d(requser.account));
                 if (!user) {
@@ -37,7 +37,7 @@ export class UserRoutes {
 
         app.get(common.urls.api.user.settings,
             AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq(res, async () => {
+            (req, res) => asyncReq("api/routes/UserRoutes.ts route user settings GET", res, async () => {
                 const requser: User = d(req.user);
                 const user: User | undefined = await this.usersManager.getUser(d(requser.account));
                 if (!user) {
@@ -52,7 +52,7 @@ export class UserRoutes {
 
         app.post(common.urls.api.user.settings,
             AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq(res, async () => {
+            (req, res) => asyncReq("api/routes/UserRoutes.ts route user settings POST", res, async () => {
                 const userSettings = req.body;
                 if (!userSettings) throw new Error("Undefined payload");
                 if (!isUserSettings(userSettings)) throw new Error("Invalid user settings");

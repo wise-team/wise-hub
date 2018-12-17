@@ -6,9 +6,9 @@ import { common } from "../common/common";
 import { Log } from "../lib/Log";
 import { StaticConfig } from "./StaticConfig";
 import { UsersManager } from "../lib/UsersManager";
-import * as sc2 from "steemconnect";
 import { d } from "../lib/util";
 import { DaemonLog } from "../daemon/DaemonLog";
+import { Steemconnect } from "../lib/Steemconnect";
 
 export class Publisher {
     private redis: Redis;
@@ -73,17 +73,7 @@ export class Publisher {
     }
 
     private async doPublish(otp: OpsToPublish) {
-        const ops = otp.ops;
-        const sc: sc2.SteemConnectV2 = await this.usersManager.constructOfflineSteemConnect(otp.delegator, this.requiredScope);
-        console.log("Got SC2, performing broadcast...");
-        const resp = await new Promise<any>((resolve, reject) => {
-            sc.broadcast(ops, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
-            });
-        });
-
-        const result: { id: string; block_num: number; trx_num: number; } = d(resp.result);
+        const result: Steemconnect.BroadcastResult =  await this.usersManager.broadcast(otp.delegator, this.requiredScope, otp.ops);
 
         Log.log().info("SteemConnect broadcast result =" + JSON.stringify(result, undefined, 2));
         Log.log().info("Successfully pushed operation via steemconnect (trx_id=" + result.id + ")");

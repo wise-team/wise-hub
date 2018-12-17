@@ -1,13 +1,8 @@
 import { Redis } from "ioredis";
 import * as express from "express";
-import * as sc2 from "steemconnect";
 import { asyncReq, d } from "../lib/util";
 import { AuthManager } from "../auth/AuthManager";
-import { User, isUserSettings } from "../../common/model/User";
-import { common } from "../../common/common";
-import { RulesManager } from "../../daemon/rules/RulesManager";
 import Wise, { SteemOperationNumber, SetRulesForVoter, RulesUpdater } from "steem-wise-core";
-import { Vault } from "../../lib/vault/Vault";
 import { UsersManager } from "../../lib/UsersManager";
 
 export class RulesetsRoutes {
@@ -26,7 +21,7 @@ export class RulesetsRoutes {
     public routes(app: express.Application) {
         app.post("/api/rulesets/publish",
             AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq(res, async () => {
+            (req, res) => asyncReq("api/routes/RulesetsRoutes.ts route publish", res, async () => {
                 const delegator = d(req.user.account);
                 const srfv: SetRulesForVoter = d(req.body);
                 if (!SetRulesForVoter.isSetRulesForVoter(srfv)) {
@@ -37,17 +32,9 @@ export class RulesetsRoutes {
                     delegator, d(srfv.voter), srfv.rulesets
                 );
 
-                const sc: sc2.SteemConnectV2 =
-                    await this.usersManager.constructOfflineSteemConnect(delegator, [ "custom_json" ]);
+                const result =
+                    await this.usersManager.broadcast(delegator, [ "custom_json" ], ops);
 
-                const resp = await new Promise<any>((resolve, reject) => {
-                    sc.broadcast(ops, (err, result) => {
-                        if (err) reject(err);
-                        else resolve(result);
-                    });
-                });
-
-                const result: { id: string; block_num: number; trx_num: number; } = d(resp.result);
                 res.send(result);
             })
         );

@@ -21,7 +21,7 @@ export class AccountsRoutes {
 
     public routes(app: express.Application) {
         app.get(common.urls.api.accounts.base + "/:account/settings",
-            (req, res) => asyncReq(res, async () => {
+            (req, res) => asyncReq("api/routes/AccountRoutes.ts.ts route account settings", res, async () => {
                 const accountName = d(req.params.account, "req.params.account");
                 const user: User | undefined = await this.usersManager.getUser(accountName);
                 if (!user) {

@@ -2,7 +2,6 @@
 import * as BluebirdPromise from "bluebird";
 import * as express from "express";
 import * as passport from "passport";
-import * as sc2 from "steemconnect";
 import ow from "ow";
 import { d } from "../lib/util";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -14,6 +13,7 @@ import { asyncReq } from "../lib/util";
 import { UsersManager } from "../../lib/UsersManager";
 import { Log } from "../../lib/Log";
 import { AccountInfo } from "steem";
+import { Steemconnect } from "../../lib/Steemconnect";
 
 // TODO: Move process.env management to root file and pass only arguments
 export class AuthManager {
@@ -29,6 +29,7 @@ export class AuthManager {
 
     private vault: Vault;
     private usersManager: UsersManager;
+    private steemconnect: Steemconnect;
 
     public constructor(vault: Vault, usersManager: UsersManager) {
         ow(vault, ow.object.label("vault"));
@@ -51,6 +52,8 @@ export class AuthManager {
         if (!loginRedirectUrlEnv) throw new Error("Env LOGIN_REDIRECT_URL is missing");
         ow(loginRedirectUrlEnv, ow.string.minLength(1).label("loginRedirectUrlEnv"));
         this.loginRedirectUrl = loginRedirectUrlEnv;
+
+        this.steemconnect = new Steemconnect(this.oauth2ClientId, this.steemconnectCallbackUrl);
     }
 
     public async configure(app: express.Application) {
@@ -127,7 +130,7 @@ export class AuthManager {
 
         app.get(common.urls.api.auth.logout,
             AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq(res, async () => {
+            (req, res) => asyncReq("api/auth/AuthManager.ts route logout", res, async () => {
                 req.logout();
                 res.send(JSON.stringify({ logout: true, revoke_all: false }));
             })
@@ -135,7 +138,7 @@ export class AuthManager {
 
         app.get(common.urls.api.auth.revoke_all,
             AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq(res, async () => {
+            (req, res) => asyncReq("api/auth/AuthManager.ts route revoke_all", res, async () => {
                 await this.usersManager.logout(d(req.user));
                 req.logout();
                 res.send(JSON.stringify({ logout: true, revoke_all: true }));
@@ -153,31 +156,7 @@ export class AuthManager {
     }
 
     private async performLogin(accessToken: string, refreshToken: string): Promise<User> {
-        const sc2 = this.createEphemericSC2();
-        sc2.setAccessToken(accessToken);
-        const me: { name: string, account: AccountInfo, scope: string [], user_metadata: object } =
-            await new Promise<any>((resolve, reject) => {
-                sc2.me((error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                });
-            });
-        const userObjBeforeLogin: User = {
-            scope: me.scope,
-            account: me.name,
-            profile: me,
-        };
-        const user: User = await this.usersManager.login(userObjBeforeLogin, accessToken, refreshToken);
-
-        Log.log().info("Logged in @" + me.name + " with retrived scope = " + me.scope + ", and escalated scope = " + user.scope);
+        const user: User = await this.usersManager.login(accessToken, refreshToken);
         return user;
-    }
-
-    private createEphemericSC2(): sc2.SteemConnectV2 {
-        return sc2.Initialize({
-            app: this.oauth2ClientId,
-            callbackURL: this.steemconnectCallbackUrl,
-            scope: [], // in this manager we do not perform any scoped operations
-        });
     }
 }

@@ -19,7 +19,7 @@ export class StatusRoutes {
     }
 
     public routes(app: express.Application) {
-        app.get("/api/status", (req, res) => asyncReq(res, async () => {
+        app.get("/api/status", (req, res) => asyncReq("api/routes/StatusRoutes.ts route status", res, async () => {
             const sTime = Date.now();
             let publicSecret: any = undefined;
             const vaultStatus: { initialized?: boolean; sealed?: boolean; error?: string; } = {};
@@ -58,7 +58,7 @@ export class StatusRoutes {
             res.send(JSON.stringify(payload));
         }));
 
-        app.get("/api/publisher/queue", (req, res) => asyncReq(res, async () => {
+        app.get("/api/publisher/queue", (req, res) => asyncReq("api/routes/StatusRoutes.ts route publisher queue", res, async () => {
             const toPublishQueue = await this.redis.lrange(common.redis.toPublishQueue, 0, 500);
             const publishProcessingQueue = await this.redis.lrange(common.redis.publishProcessingQueue, 0, 500);
 
