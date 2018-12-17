@@ -3,6 +3,7 @@ import * as BluebirdPromise from "bluebird";
 import * as express from "express";
 import * as passport from "passport";
 import * as sc2 from "steemconnect";
+import ow from "ow";
 import { d } from "../lib/util";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as OAuth2Strategy } from "passport-oauth2";
@@ -30,24 +31,31 @@ export class AuthManager {
     private usersManager: UsersManager;
 
     public constructor(vault: Vault, usersManager: UsersManager) {
+        ow(vault, ow.object.label("vault"));
+        ow(usersManager, ow.object.label("usersManager"));
+
         this.vault = vault;
         this.usersManager = usersManager;
 
         const oauth2ClientIdEnv = process.env.OAUTH2_CLIENT_ID;
         if (!oauth2ClientIdEnv) throw new Error("Env OAUTH2_CLIENT_ID is missing");
+        ow(oauth2ClientIdEnv, ow.string.minLength(2).label("oauth2ClientIdEnv"));
         this.oauth2ClientId = oauth2ClientIdEnv;
 
         const steemconnectCallbackUrlEnv = process.env.STEEMCONNECT_CALLBACK_URL;
         if (!steemconnectCallbackUrlEnv) throw new Error("Env STEEMCONNECT_CALLBACK_URL is missing");
+        ow(steemconnectCallbackUrlEnv, ow.string.minLength(5).startsWith("https://").label("steemconnectCallbackUrlEnv"));
         this.steemconnectCallbackUrl = steemconnectCallbackUrlEnv;
 
         const loginRedirectUrlEnv = process.env.LOGIN_REDIRECT_URL;
         if (!loginRedirectUrlEnv) throw new Error("Env LOGIN_REDIRECT_URL is missing");
+        ow(loginRedirectUrlEnv, ow.string.minLength(5).startsWith("https://").label("loginRedirectUrlEnv"));
         this.loginRedirectUrl = loginRedirectUrlEnv;
     }
 
     public async configure(app: express.Application) {
         const steemConnectSecret: { v: string } = await this.vault.getSecret(common.vault.secrets.steemConnectClientSecret);
+        if (!(steemConnectSecret && steemConnectSecret.v && steemConnectSecret.v.length > 0)) throw new Error("Missing SteemConnect client secret");
 
         passport.use(new OAuth2Strategy({
                 authorizationURL: this.oauth2Settings.baseAuthorizationUrl,
