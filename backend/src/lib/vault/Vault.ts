@@ -1,5 +1,7 @@
 import Axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import { Log } from "../Log";
+import ow from "ow";
+import * as _ from "lodash";
 
 export function d <T> (input: T | undefined): T {
     if (typeof input !== "undefined") return input;
@@ -14,10 +16,14 @@ export class Vault {
     private loginCallback: (vault: Vault) => Promise<any> = async () => {};
 
     public constructor(vaultAddr: string) {
+        ow(vaultAddr, ow.string.startsWith("http").label("vaultAddr"));
+
         this.vaultAddr = vaultAddr;
     }
 
     public async init(loginCallback: (vault: Vault) => Promise<any>) {
+        ow(loginCallback, ow.function.label("loginCallback"));
+
         this.loginCallback = loginCallback;
 
         try {
@@ -36,25 +42,33 @@ export class Vault {
         return this.token.length > 0;
     }
 
-    public async call(method: "GET" | "POST" | "PUT" | "DELETE", path: string, data: any, token: string = this.token): Promise<AxiosResponse> {
-        if (!token) throw new Error("Token is not set. Vault client is unauthorized.");
+    public async call(
+        method: "GET" | "POST" | "PUT" | "DELETE" | "LIST",
+        path: string, data: any, token: string | undefined = this.token, authorized: boolean = true
+    ): Promise<AxiosResponse> {
+        ow(method, ow.string.label("method").oneOf([ "GET", "POST", "PUT", "DELETE", "LIST" ]));
+        ow(path, ow.string.label("path").startsWith("/"));
+        // do not validate token with 'ow': validation error could accidentally print the token
+        ow(authorized, ow.boolean.label("authorized"));
+
+
+        if (authorized && !token) throw new Error("Token is not set. Vault client is unauthorized.");
+
+        const headers: _.Dictionary<string> = {};
+        if (authorized) headers["X-Vault-Token"] = token;
         return this.errorTransformer("call " + path, async () => {
             return await Axios({
                 method: method,
                 url: this.vaultAddr + path,
                 data: data,
-                headers: {
-                    "X-Vault-Token": token
-                }
+                headers: headers
             });
         });
     }
 
     public async userPassLogin(username: string, password: string, requiredPolicies: string []) {
-        const loginResp = await this.errorTransformer("userPassLogin", async () => {
-            return await Axios.post(this.vaultAddr + "/v1/auth/userpass/login/" + username,
-            { password: password });
-        });
+        const loginResp = await this.call("POST", "/v1/auth/userpass/login/" + username,
+            { password: password }, undefined, false);
 
         requiredPolicies.forEach(requiredPolicy => {
             if (loginResp.data.auth.policies.indexOf(requiredPolicy) < 0)
@@ -72,10 +86,8 @@ export class Vault {
     }
 
     public async appRoleLogin(roleName: string, requiredPolicies: string [], roleId: string, roleSecret: string) {
-        const loginResp = await this.errorTransformer("appRoleLogin", async () => {
-            return await Axios.post(this.vaultAddr + "/v1/auth/approle/login",
-            { role_id: roleId, secret_id: roleSecret });
-        });
+        const loginResp = await this.call("POST", "/v1/auth/approle/login",
+        { role_id: roleId, secret_id: roleSecret }, undefined, false);
 
         if (loginResp.data.auth.metadata.role_name !== roleName)
             throw new Error("This AppRole is not " + roleName + ", instead logged in as "
@@ -99,7 +111,7 @@ export class Vault {
     public async getStatus(): Promise<any> {
         let resp;
         try {
-            resp =  await this.errorTransformer("getStatus", async () => await Axios.get(this.vaultAddr + "/v1/sys/health"));
+            resp = this.call("GET", "/v1/sys/health", undefined, undefined, false);
         }
         catch (error) {
             resp = error.response;
@@ -135,13 +147,15 @@ export class Vault {
     }
 
     public async initVault(opts: { secret_shares: number, secret_threshold: number }): Promise<{ root_token: string, keys: string [], keys_base64: string [] }> {
-        const resp = await Axios.post(this.vaultAddr + "/v1/sys/init", { secret_shares: opts.secret_shares, secret_threshold: opts.secret_threshold });
+        const resp: AxiosResponse<any> = await this.call("POST", "/v1/sys/init",
+        { secret_shares: opts.secret_shares, secret_threshold: opts.secret_threshold }, undefined, false);
         this.token = d(resp.data.root_token);
         return d(resp.data);
     }
 
     public async unseal(key: string) {
-        await Axios.post(this.vaultAddr + "/v1/sys/unseal", { key: key });
+        await this.call("POST", "/v1/sys/unseal",
+        { key: key }, undefined, false);
     }
 
     public async seal() {
@@ -216,11 +230,14 @@ export class Vault {
             return await fn();
         }
         catch (error) {
-            if (error.response && error.response.data) {
-                console.error("Vault error (where=" + where + ")", error);
-                const errObject = new Error("Vault error: " + error + ", response: " + JSON.stringify(error.response.data));
-                (errObject as any).data = error.response.data;
-                if (error.response.status) (errObject as any).response = { status: error.response.status };
+            if (error.response || error.request) { // do not log full responses or requests for security reason
+                const errorDescriptors: string [] = _.get(error, "response.data.errors", []);
+                const msg = "Vault error: " + error.name + ", message: " + error.message + ", error descriptors: " + JSON.stringify(errorDescriptors);
+                const errObject: any = new Error(msg);
+                errObject.vault = true;
+                errObject.errors = errorDescriptors;
+                errObject.response.status = _.get(error, "response.status", 0);
+
                 throw errObject;
             }
             else throw error;
