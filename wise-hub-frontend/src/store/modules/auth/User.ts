@@ -8,7 +8,6 @@ export interface User {
     profile: undefined | {
         name: string;
         account: steem.AccountInfo;
-        scope: string [];
         user_metadata: any;
     };
     scope: string [];
@@ -26,8 +25,9 @@ export namespace User {
             ow(user.profile.account, ow.object.label(".profile.account")
                 .hasKeys("witness_votes", "witnesses_voted_for", "voting_power", "reputation"));
 
-            ow(user.profile.scope, ow.array.label(".profile.scope").ofType(ow.string)
-                .is((scope: string []) => _.xor(scope, user.scope).length == 0 || `.scope is not equal to .scope`));
+            // do not rely on this value, as it is
+            /*ow(user.profile.scope, ow.array.label(".profile.scope").ofType(ow.string)
+                .is((scope: string []) => _.xor(scope, user.scope).length == 0 || `.profile.scope is not equal to .scope`));*/
             ow(user.profile.user_metadata, ow.object.label(".profile.user_metadata"));
         }
         
