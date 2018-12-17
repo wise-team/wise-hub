@@ -20,7 +20,14 @@ export class Log extends AbstractLog {
     }
 
     public logError(exceptionMsg: string, error: Error, attachement: any = undefined): void {
-        this.error(JSON.stringify({ logMsgType: "error", logger: this.getName(), ...error, msg: exceptionMsg, attachement: attachement }));
+        const stack = new Error().stack;
+        this.error(JSON.stringify({
+            logMsgType: "error",
+            logger: this.getName(),
+            ...error,
+            msg: exceptionMsg,
+            attachement: attachement,
+            loggerStack: stack }));
     }
 
     public static log(): Log {
