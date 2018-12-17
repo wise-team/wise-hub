@@ -111,7 +111,7 @@ export class Vault {
     public async getStatus(): Promise<any> {
         let resp;
         try {
-            resp = this.call("GET", "/v1/sys/health", undefined, undefined, false);
+            resp = await this.call("GET", "/v1/sys/health", undefined, undefined, false);
         }
         catch (error) {
             resp = error.response;
@@ -119,7 +119,7 @@ export class Vault {
                 throw error;
             }
         }
-        return resp.data;
+        return d(resp.data);
     }
 
     public async getSecret(secretPath: string): Promise<any> {
