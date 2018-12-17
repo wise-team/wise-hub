@@ -108,10 +108,8 @@ export namespace AuthModuleImpl {
         },
 
         [Me.Actions.logout]: (
-            { commit, dispatch, state }, payload: { username: string },
+            { commit, dispatch, state },
         ): void => {
-            ow(payload.username, ow.string.minLength(3).label("payload.username"));
-
             (async () => {
                 try {
                     commit(Mutations.setError, { error: "" });
