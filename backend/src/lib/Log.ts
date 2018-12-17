@@ -1,4 +1,5 @@
 import { AbstractLog } from "steem-wise-core";
+import * as serializeError from "serialize-error";
 
 export class Log extends AbstractLog {
     private static INSTANCE: Log = new Log();
@@ -19,15 +20,15 @@ export class Log extends AbstractLog {
         throw new Error("Instead of #init() please call #initialize(debug, verbose) which indirectly overrides init");
     }
 
-    public logError(exceptionMsg: string, error: Error, attachement: any = undefined): void {
+    public logError(debugInfo: string, error: Error, attachement: any = undefined): void {
         const stack = new Error().stack;
         this.error(JSON.stringify({
             logMsgType: "error",
-            logger: this.getName(),
-            ...error,
-            msg: exceptionMsg,
+            logger: { name: this.getName(), stack: stack },
+            debug: { info: debugInfo },
             attachement: attachement,
-            loggerStack: stack }));
+            ...serializeError(error),
+        }));
     }
 
     public static log(): Log {

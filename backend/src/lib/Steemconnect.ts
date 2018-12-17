@@ -85,9 +85,11 @@ export class Steemconnect {
         ow(error, ow.object.label("error"));
 
         if (error.error_description) {
-            return new Error(error.message ? error.message : "" + ": "
+            const err = new Error(error.message ? error.message : "" + ": "
                     + error.error ? error.error : "" + " "
                     + error.error_description);
+            console.error(err);
+            return err;
         }
         else return error;
     }
