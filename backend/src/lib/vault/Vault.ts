@@ -236,7 +236,7 @@ export class Vault {
                 const errObject: any = new Error(msg);
                 errObject.vault = true;
                 errObject.errors = errorDescriptors;
-                errObject.response.status = _.get(error, "response.status", 0);
+                errObject.response = { status: _.get(error, "response.status", 0) };
 
                 throw errObject;
             }
