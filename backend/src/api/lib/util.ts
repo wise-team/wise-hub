@@ -7,7 +7,7 @@ export function asyncReq(res: express.Response, fn: () => Promise<any>) {
             await fn();
         }
         catch (error) {
-            Log.log().exception(Log.level.error, error);
+            Log.log().logError("api/lib/util#asyncReq()", error);
             res.status(500);
             res.send("Error: " + error);
         }

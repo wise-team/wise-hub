@@ -12,8 +12,7 @@ export class WiseOperationsLog {
                 await WiseOperationsLog.doPreload(redis, apiHelper);
             }
             catch (error) {
-                Log.log().warn("Failed to preload wise operations");
-                Log.log().exception(Log.level.warn, error);
+                Log.log().logError("daemon/WiseOperationsLog.ts failed to preload wise operations", error);
             }
         // });
     }

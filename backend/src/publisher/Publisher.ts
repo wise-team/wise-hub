@@ -45,7 +45,7 @@ export class Publisher {
                 }
             }
             catch (error) {
-                Log.log().exception(Log.level.error, error);
+                Log.log().logError("publisher/Publisher.ts#Publisher.run", error);
                 await BluebirdPromise.delay(200);
             }
             i++;
@@ -66,8 +66,7 @@ export class Publisher {
                     await this.processPublishError(otp, error);
                 }
                 catch (errorInError) {
-                    Log.log().error("Error in error publish processing code");
-                    Log.log().exception(Log.level.error, errorInError);
+                    Log.log().logError("publisher/Publisher.ts#Publisher.publish Error in error publish processing code", errorInError, { publishedError: error });
                 }
             }
         })();
@@ -112,12 +111,12 @@ export class Publisher {
             errorMsg += "Steemconnect error: " + ((error as any).error_description ? (error as any).error_description : error + "");
             errorMsg += "Because of this kind of error, the operation will be removed from queue.";
             await this.removeFromQueue(otp);
-            console.error("SC2SDKError", error);
+
+            Log.log().logError("publisher/Publisher.ts#Publisher.processPublishError: " + errorMsg, error, { operationReschedule: false });
         }
         else {
             errorMsg += error.name + ": " + error.message;
-            Log.log().exception(Log.level.error, error);
-            console.error(error);
+            Log.log().logError("publisher/Publisher.ts#Publisher.processPublishError: " + errorMsg, error, { operationReschedule: true });
         }
         errorMsg = "" + error;
 

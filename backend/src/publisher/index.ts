@@ -51,8 +51,7 @@ const vault = new Vault(vaultAddr);
         publisher.run();
     }
     catch (error) {
-        Log.log().exception(Log.level.error, error);
-        console.error(error);
+        Log.log().logError("publisher/index.ts async runner", error);
         process.exit(1);
     }
 })();

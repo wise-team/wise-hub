@@ -76,8 +76,8 @@ export class DaemonManager {
                    dgp = await this.apiHelper.getSteem().getDynamicGlobalPropertiesAsync();
                 }
                 catch (error) {
-                    Log.log().warn("Error while getting DynamicGlobalProperties, Retrying in 5 seconds");
-                    Log.log().exception(Log.level.warn, error);
+                    Log.log().logError("daemon/Daemon.ts#DaemonManager.determineStartBlock Error while getting DynamicGlobalProperties, Retrying in 5 seconds",
+                        error);
                     await BluebirdPromise.delay(5000);
                 }
             }

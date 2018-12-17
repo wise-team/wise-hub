@@ -43,7 +43,7 @@ const io: socket_io.Server = socket_io(server, {
 console.log("Redis subscribe to " + common.redis.channels.realtimeKey);
 subRedis.subscribe(common.redis.channels.realtimeKey, (error: any, count: number) => {
     if (error) {
-        Log.log().exception(Log.level.error, error);
+        Log.log().logError("realtime/index.ts#subRedis.subscribe", error, { channel: common.redis.channels.realtimeKey, count: count });
         process.exit(1);
     }
     else Log.log().info("Subscribe successful, count=" + count);
@@ -61,7 +61,8 @@ subRedis.on("message", function (channel: string, message: string) {
         }
     }
     catch (error) {
-        Log.log().exception(Log.level.error, error);
+        Log.log().logError("realtime/index.ts#subRedis.onMessage error in message processing", error,
+            { channel: common.redis.channels.realtimeKey, message: message });
     }
 });
 Log.log().info("Wise realtime is operational");
@@ -84,8 +85,8 @@ io.on("connection", function(socket) {
     }
     socket.join(room, (err: any) => {
         if (err) {
-            Log.log().error("Error while joining room " + room + ": " + err);
-            Log.log().exception(Log.level.error, err);
+            Log.log().logError("realtime/index.ts#io.on(connection).socket.join error while joining room", err,
+                { room: room, query: query });
         }
         else {
             Log.log().info("Client joined room '" + room + "'");
@@ -109,16 +110,15 @@ process.on("SIGTERM", function () {
     });
 });
 
-// hartbeat
 
+// hartbeat
 function hartbeat() {
     (async () => {
         try {
             await redis.set(common.redis.realtimeHartbeat, "ALIVE", "EX", 10);
         }
         catch (error) {
-            Log.log().warn("Error during hartbeat: " + error);
-            Log.log().exception(Log.level.warn, error);
+            Log.log().logError("realtime/index.ts#hartbeat", error);
         }
     })();
 

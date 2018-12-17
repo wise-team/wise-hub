@@ -60,8 +60,7 @@ process.on("SIGTERM", () => {
         daemonManager.run();
     }
     catch (error) {
-        Log.log().exception(Log.level.error, error);
-        console.error(error);
+        Log.log().logError("daemon/index.ts in async call", error);
         process.exit(1);
     }
 })();

@@ -86,7 +86,7 @@ export class Daemon {
     }
 
     private onError(error: Error, proceeding: boolean) {
-        Log.log().exception(Log.level.error, error);
+        Log.log().logError("daemon/Daemon.ts#Daemon.onError", error, { proceeding: proceeding });
         if (!proceeding) Log.log().error("This is an irreversible error!");
         this.daemonLog.emit({ msg: "Daemon error", error: error + "" });
     }
@@ -171,7 +171,7 @@ export class Daemon {
             this.safeAsyncCall(async () => await this.sendOps(op.delegator, opsToSend));
         }
         catch (error) {
-            Log.log().exception(Log.level.error, error);
+            Log.log().logError("daemon/Daemon.ts#Daemon.voteorderCommit", error, { cmd: cmd, op: op, verdict: verdict });
         }
     }
 
@@ -192,8 +192,7 @@ export class Daemon {
                 await fn();
             }
             catch (error) {
-                Log.log().error("Unhandled error in UniversalSynchronizer callback: " + error);
-                Log.log().exception(Log.level.error, error);
+                Log.log().logError("daemon/Daemon.ts#Daemon.safeAsyncCall Unhandled error in Daemon callback", error);
             }
         })();
     }

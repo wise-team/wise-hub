@@ -24,8 +24,7 @@ export class DaemonLog {
                 else await this._emit(msg, delegator);
             }
             catch (error) {
-                Log.log().exception(Log.level.error, error);
-                console.error(error);
+                Log.log().logError("daemon/Daemon.ts#DaemonLog.emit", error, { logMessage: msg, delegator: delegator });
             }
         })();
     }

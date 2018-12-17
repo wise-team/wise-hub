@@ -46,6 +46,6 @@ const PORT = 3000;
         });
     }
     catch (error) {
-        Log.log().exception(Log.level.error, error);
+        Log.log().logError("api/index.ts async runner", error);
     }
  })();

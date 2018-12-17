@@ -74,7 +74,7 @@ export class AuthManager {
                         return cb(undefined, user);
                     }
                     catch (error) {
-                        Log.log().exception(Log.level.error, error);
+                        Log.log().logError("AuthManager.configure.passport.callback", error);
                         return cb(error, undefined);
                     }
                 })();

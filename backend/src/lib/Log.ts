@@ -19,6 +19,10 @@ export class Log extends AbstractLog {
         throw new Error("Instead of #init() please call #initialize(debug, verbose) which indirectly overrides init");
     }
 
+    public logError(exceptionMsg: string, error: Error, attachement: any = undefined): void {
+        this.error(JSON.stringify({ logMsgType: "error", logger: this.getName(), ...error, msg: exceptionMsg, attachement: attachement }));
+    }
+
     public static log(): Log {
         return Log.INSTANCE;
     }
