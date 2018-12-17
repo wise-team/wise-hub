@@ -28,7 +28,7 @@ export class AuthModuleApiHelper {
             return user;
         }
         catch (error) {
-            if (error.response.status === 401) return false;
+            if (error.response && error.response.status && error.response.status === 401) return false;
             else throw error;
         }
     }
