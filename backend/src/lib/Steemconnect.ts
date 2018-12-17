@@ -93,7 +93,9 @@ export class Steemconnect {
                         error.message ? error.message : "" + ": "
                       + error.error ? error.error : "" + " "
                       + error.error_description;
+                console.error("Steemconnect decorated error " + JSON.stringify(error), error);
             }
+            else console.error("Steemconnect not-decorated error" + JSON.stringify(error), error);
             throw error;
         }
     }
