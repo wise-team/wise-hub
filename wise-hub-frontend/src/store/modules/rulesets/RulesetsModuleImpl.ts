@@ -337,7 +337,7 @@ export namespace RulesetsModuleImpl {
             NormalizedRulesets.NormalizedRuleset.validate(payload.ruleset);
             ow(payload.setRulesId, ow.any(ow.undefined, validators.validateSetRulesId(state, "payload.setRulesId")));
             ow(payload.voter, ow.any(ow.undefined, ow.string.label("payload.voter")));
-            ow(payload, ow.object.is((payload: any) => !!payload.setRulesId || payload.voter || `Payload must either include a voter or setRulesId`));
+            ow(payload, ow.object.label("payload").is((payload: any) => !!payload.setRulesId || !!payload.voter || `Payload must either include a voter or setRulesId`));
 
             if (payload.ruleset.rules.length === 0) {
                 const rule = {
