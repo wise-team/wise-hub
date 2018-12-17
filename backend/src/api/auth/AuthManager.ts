@@ -49,7 +49,7 @@ export class AuthManager {
 
         const loginRedirectUrlEnv = process.env.LOGIN_REDIRECT_URL;
         if (!loginRedirectUrlEnv) throw new Error("Env LOGIN_REDIRECT_URL is missing");
-        ow(loginRedirectUrlEnv, ow.string.minLength(5).startsWith("https://").label("loginRedirectUrlEnv"));
+        ow(loginRedirectUrlEnv, ow.string.minLength(1).label("loginRedirectUrlEnv"));
         this.loginRedirectUrl = loginRedirectUrlEnv;
     }
 
