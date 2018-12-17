@@ -20,12 +20,12 @@ export class Steemconnect {
 
         const sc2 = this.constructSC2([]);
         sc2.setAccessToken(accessToken);
-        return await this.wrapSC2Error(async () => new Promise<Steemconnect.Me>((resolve, reject) => {
+        return await new Promise<Steemconnect.Me>((resolve, reject) => {
             sc2.me((error, result) => {
-                if (error) reject(error);
+                if (error) reject(this.transformSC2Error(error));
                 else resolve(result as any);
             });
-        }))
+        })
         .then(res => {
             ow(res.account, ow.object.label("lib/Steemconnect.ts sc2.me().response.account"));
             ow(res.user_metadata, ow.object.label("lib/Steemconnect.ts sc2.me().response.user_metadata"));
@@ -43,12 +43,12 @@ export class Steemconnect {
 
         const sc2 = this.constructSC2(scope);
         sc2.setAccessToken(accessToken);
-        const resp = await this.wrapSC2Error(async () => new Promise<any>((resolve, reject) => {
-            sc2.broadcast(ops, (err, result) => {
-                if (err) reject(err);
+        const resp = await new Promise<any>((resolve, reject) => {
+            sc2.broadcast(ops, (error, result) => {
+                if (error) reject(this.transformSC2Error(error));
                 else resolve(result);
             });
-        }));
+        });
         ow(resp.result, ow.object.label("sc2.broadcast().response.result"));
         ow(resp.result.id, ow.number.label("sc2.broadcast().response.result.id"));
         ow(resp.result.block_num, ow.number.label("sc2.broadcast().response.result.block_num"));
@@ -63,12 +63,12 @@ export class Steemconnect {
 
         const sc2 = this.constructSC2([]);
         sc2.setAccessToken(accessToken);
-        return await this.wrapSC2Error(async () => new Promise<any>((resolve, reject) => {
+        return await new Promise<any>((resolve, reject) => {
             sc2.revokeToken((error, result) => {
-                if (error) reject(error);
+                if (error) reject(this.transformSC2Error(error));
                 else resolve(result);
             });
-        }));
+        });
     }
 
     private constructSC2(scope: string []): sc2.SteemConnectV2 {
@@ -81,23 +81,15 @@ export class Steemconnect {
         });
     }
 
-    private async wrapSC2Error<T>(fn: () => Promise<T>): Promise<T> {
-        ow(fn, ow.function.label("fn"));
+    private transformSC2Error<T>(error: any): Error {
+        ow(error, ow.object.label("error"));
 
-        try {
-            return await fn();
+        if (error.error_description) {
+            return new Error(error.message ? error.message : "" + ": "
+                    + error.error ? error.error : "" + " "
+                    + error.error_description);
         }
-        catch (error) {
-            if (error.error_description) {
-                error.message =
-                        error.message ? error.message : "" + ": "
-                      + error.error ? error.error : "" + " "
-                      + error.error_description;
-                console.error("Steemconnect decorated error " + JSON.stringify(error), error);
-            }
-            else console.error("Steemconnect not-decorated error" + JSON.stringify(error), error);
-            throw error;
-        }
+        else return error;
     }
 }
 
