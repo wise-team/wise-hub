@@ -119,6 +119,10 @@ export class Daemon {
             this.safeAsyncCall(async () => {
                 try {
                     const esr: EffectuatedSetRules = await this.rulesManager.getRules(op.delegator, op.voter, op.moment);
+                    if (esr.rulesets.length === 0) {
+                        Log.log().warn("@" + op.delegator + " has no rulesets for @" + op.voter + ","
+                            + " but @" + op.voter + " asked to vote with ruleset\"" + cmd.rulesetName + "\".");
+                        return;
                     const verdict: ValidationRunner.Verdict = await this.validationRunner.validate(cmd, op, esr);
                     this.voteorderCommit(cmd, op, verdict);
                 }
