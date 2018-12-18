@@ -94,7 +94,7 @@ export class UsersManager {
         return user;
     }
 
-    public async logout(user: User) {
+    public async forgetUser(user: User) {
         const username = d(user.account);
         const accessToken = await this.getAccessToken(username);
 

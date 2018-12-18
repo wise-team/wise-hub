@@ -139,7 +139,7 @@ export class AuthManager {
         app.get(common.urls.api.auth.revoke_all,
             AuthManager.isUserAuthenticated,
             (req, res) => asyncReq("api/auth/AuthManager.ts route revoke_all", res, async () => {
-                await this.usersManager.logout(d(req.user));
+                await this.usersManager.forgetUser(d(req.user));
                 req.logout();
                 res.send(JSON.stringify({ logout: true, revoke_all: true }));
             })
