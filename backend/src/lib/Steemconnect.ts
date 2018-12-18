@@ -49,8 +49,9 @@ export class Steemconnect {
                 else resolve(result);
             });
         });
+
         ow(resp.result, ow.object.label("sc2.broadcast().response.result"));
-        ow(resp.result.id, ow.number.label("sc2.broadcast().response.result.id"));
+        ow(resp.result.id, ow.string.label("sc2.broadcast().response.result.id"));
         ow(resp.result.block_num, ow.number.label("sc2.broadcast().response.result.block_num"));
         ow(resp.result.trx_num, ow.number.label("sc2.broadcast().response.result"));
 
