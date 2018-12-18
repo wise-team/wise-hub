@@ -123,6 +123,7 @@ export class Daemon {
                         Log.log().warn("@" + op.delegator + " has no rulesets for @" + op.voter + ","
                             + " but @" + op.voter + " asked to vote with ruleset\"" + cmd.rulesetName + "\".");
                         return;
+                    }
                     const verdict: ValidationRunner.Verdict = await this.validationRunner.validate(cmd, op, esr);
                     this.voteorderCommit(cmd, op, verdict);
                 }
