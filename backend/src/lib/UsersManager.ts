@@ -35,10 +35,7 @@ export class UsersManager {
         if (!oauth2ClientIdEnv) throw new Error("Env OAUTH2_CLIENT_ID is missing");
         this.oauth2ClientId = oauth2ClientIdEnv;
 
-        const steemconnectCallbackUrlEnv = process.env.STEEMCONNECT_CALLBACK_URL;
-        if (!steemconnectCallbackUrlEnv) throw new Error("Env STEEMCONNECT_CALLBACK_URL is missing");
-
-        this.steemconnect = new Steemconnect(this.oauth2ClientId, steemconnectCallbackUrlEnv);
+        this.steemconnect = new Steemconnect(this.oauth2ClientId, "-callback-url-required-only-for-login-");
     }
 
     public async init() {
