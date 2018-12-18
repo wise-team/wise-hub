@@ -1,4 +1,3 @@
-import Axios from "axios";
 import ow from "ow";
 import * as steemJs from "steem";
 import { Wise, EffectuatedSetRules, WiseSQLApi, DirectBlockchainApi, SteemOperationNumber } from "steem-wise-core";
@@ -7,6 +6,7 @@ import { BuildContext } from "../../../BuildContext";
 import { WindowContext } from "../../../WindowContext";
 import { consts } from "../../../consts";
 import { User, UserSettings } from "./User";
+import { WiseApiHelper } from "../../../api/WiseApiHelper";
 
 export class AuthModuleApiHelper {
     public static async accountExists(username: string): Promise<boolean> {
@@ -22,7 +22,7 @@ export class AuthModuleApiHelper {
 
     public static async getUser(): Promise<User | false> {
         try {
-            const resp = await Axios.get(consts.urls.api.user.base);
+            const resp = await WiseApiHelper.queryApi({ method: "GET", url: consts.urls.api.user.base });
             const user: User = resp.data;
             User.validate(user);
             return user;
@@ -36,12 +36,12 @@ export class AuthModuleApiHelper {
     public static async saveUserSettings(settings: UserSettings) {
         UserSettings.validate(settings);
 
-        const saveResp = await Axios.post(consts.urls.api.user.settings, settings);
+        const saveResp = await WiseApiHelper.queryApi({ method: "POST", url: consts.urls.api.user.settings, data: settings });
         console.log("Saved settings, response= " + JSON.stringify(saveResp));
     }
 
     public static async logout() {
-        await Axios.get(consts.urls.api.auth.logout);
+        await WiseApiHelper.queryApi({ method: "GET", url: consts.urls.api.auth.logout });
     }
 }
 

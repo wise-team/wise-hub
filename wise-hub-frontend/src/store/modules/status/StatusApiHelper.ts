@@ -1,4 +1,3 @@
-import Axios from "axios";
 import ow from "ow";
 import * as steemJs from "steem";
 import { d } from "../../../util/util";
@@ -6,6 +5,7 @@ import { StatusModule } from "./StatusModule";
 import { BuildContext } from "../../../BuildContext";
 import { WindowContext } from "../../../WindowContext";
 import { WiseSQLProtocol, EffectuatedWiseOperation } from "steem-wise-core";
+import { WiseApiHelper } from "../../../api/WiseApiHelper";
 
 export class StatusApiHelper {
     private static WITNESS_ACCOUNT = /*§ §*/ "wise-team" /*§ ' "' + data.config.witness.account + '" ' §.*/;
@@ -14,7 +14,7 @@ export class StatusApiHelper {
 
     public static async loadGeneralStats(): Promise<{ operations: number; delegators: number; voters: number; }> {
         const query = "/stats";
-        const resp = await Axios.get(StatusApiHelper.ENDPOINT_URL + query);
+        const resp = await WiseApiHelper.queryApi({ method: "GET", url: StatusApiHelper.ENDPOINT_URL + query });
         const result = { operations: d(resp.data[0].operations), delegators: d(resp.data[0].delegators), voters: d(resp.data[0].voters) };
 
         ow(result.operations, ow.number.label("result.operations").greaterThanOrEqual(0));
@@ -27,7 +27,7 @@ export class StatusApiHelper {
         ow(accountName, ow.string.label("accountName").minLength(3));
 
         const query = "/operations?voter=eq." + d(accountName) + "&operation_type=eq.send_voteorder&select=count";
-        const resp = await Axios.get(StatusApiHelper.ENDPOINT_URL + query);
+        const resp = await WiseApiHelper.queryApi({ method: "GET", url: StatusApiHelper.ENDPOINT_URL + query });
         ow(resp.data[0].count, ow.number.greaterThanOrEqual(0));
 
         const result = d(resp.data[0].count) > 0;
@@ -40,7 +40,7 @@ export class StatusApiHelper {
         ow(accountName, ow.string.label("accountName").minLength(3));
 
         const query = "/operations?delegator=eq." + d(accountName) + "&operation_type=eq.set_rules&select=count";
-        const resp = await Axios.get(StatusApiHelper.ENDPOINT_URL + query);
+        const resp = await WiseApiHelper.queryApi({ method: "GET", url: StatusApiHelper.ENDPOINT_URL + query });
         ow(resp.data[0].count, ow.number.greaterThanOrEqual(0));
 
         const result = d(resp.data[0].count) > 0;
@@ -71,30 +71,6 @@ export class StatusApiHelper {
         });
         ow(operations, ow.array.label("operations").ofType(ow.object));
 
-        /*const query = ;
-        const result = await Axios.get(StatusApiHelper.ENDPOINT_URL + query);
-
-        const operations: StatusModule.WiseOperation [] = [];
-
-        result.data.forEach((op: any) => {
-            const wiseOp: StatusModule.WiseOperation = {
-                id: op.id,
-                block_num: op.block_num,
-                transaction_num: op.transaction_num,
-                transaction_id: op.transaction_id,
-                timestamp: op.timestamp,
-                moment: op.moment,
-                voter: op.voter,
-                delegator: op.delegator,
-                operation_type: op.operation_type,
-                json_str: op.json_str,
-                data: JSON.parse(op.json_str)
-            };
-            
-            operations.push(wiseOp);
-        });
-
-        return operations;*/
         return operations;
     }
 }

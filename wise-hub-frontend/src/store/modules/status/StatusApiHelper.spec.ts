@@ -7,7 +7,6 @@ import { WindowContext } from "../../../WindowContext";
 // WindowContext.WISE_SQL_ENDPOINT_URL = "https://sql.wise.vote/";
 // WindowContext.STEEMD_ENDPOINT_URL = "https://api.steemit.com";
 import { StatusApiHelper } from "./StatusApiHelper";
-import Axios from "axios";
 
 chaiUse(chaiAsPromised);
 

@@ -88,7 +88,7 @@ export class Steemconnect {
             const err = new Error((error.message ? error.message : "") + ": "
                     + (error.error ? error.error : "") + " "
                     + error.error_description);
-            console.error(err);
+            // console.error(err);
             return err;
         }
         else return error;

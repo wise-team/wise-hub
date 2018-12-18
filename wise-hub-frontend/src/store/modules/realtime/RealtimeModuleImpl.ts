@@ -4,7 +4,6 @@ import { d, assertString, isEqualWithFunctions } from "../../../util/util";
 import * as _ from "lodash";
 import ow from "ow";
 import * as socketio from "socket.io-client";
-import Axios from "axios";
 import { Log } from "../../../Log";
 
 export namespace RealtimeModuleImpl {

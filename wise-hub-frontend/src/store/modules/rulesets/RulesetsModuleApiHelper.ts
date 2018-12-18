@@ -2,8 +2,8 @@ import { Wise, EffectuatedSetRules, WiseSQLApi, DirectBlockchainApi, SteemOperat
 import { d, i } from "../../../util/util";
 import { BuildContext } from "../../../BuildContext";
 import { WindowContext } from "../../../WindowContext";
-import Axios from "axios";
 import ow from "ow";
+import { WiseApiHelper } from "../../../api/WiseApiHelper";
 
 export class RulesetsModuleApiHelper {
     private static API = new WiseSQLApi(WindowContext.WISE_SQL_ENDPOINT_URL, Wise.constructDefaultProtocol(), new DirectBlockchainApi(Wise.constructDefaultProtocol()));
@@ -19,7 +19,7 @@ export class RulesetsModuleApiHelper {
     public static async saveSetRules(srfv: SetRulesForVoter): Promise<{ id: string; block_num: number; trx_num: number; }> {
         SetRulesForVoter.validateSetRulesForVoter(srfv);
 
-        const resp = await Axios.post("/api/rulesets/publish", srfv);
+        const resp = await await WiseApiHelper.queryApi({ method: "POST", url: "/api/rulesets/publish", data: srfv });
         if (!resp.data || !resp.data.id) throw new Error("Invalid response on save rules: " + JSON.stringify(resp.data));
         const result = resp.data;
 
