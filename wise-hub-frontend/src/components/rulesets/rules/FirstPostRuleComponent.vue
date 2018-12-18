@@ -2,7 +2,7 @@
 <template>
     <div class="first_post-rule-component">
         <b-input-group>
-            <b-form-input type="text" :disabled="!enabled" readonly value="Author's first post only"></b-form-input>
+            <b-form-input type="text" class="t-rule-firstpost-disabled-input" :disabled="!enabled" readonly value="Author's first post only"></b-form-input>
         </b-input-group>
         <small class="text-danger">{{ error }}</small>
     </div>

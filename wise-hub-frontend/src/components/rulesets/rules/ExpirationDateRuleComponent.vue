@@ -2,7 +2,7 @@
 <template>
     <div class="expiration_date-rule-component">
         <b-input-group prepend="Expire ruleset">
-            <b-form-input type="datetime-local" :disabled="!enabled" v-model="date"></b-form-input>
+            <b-form-input type="datetime-local" class="t-rule-expire-datetime-input" :disabled="!enabled" v-model="date"></b-form-input>
         </b-input-group>
         <small class="text-danger">{{ error }}</small>
     </div>

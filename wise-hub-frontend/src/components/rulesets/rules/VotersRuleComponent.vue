@@ -3,9 +3,9 @@
     <div class="voters-rule-component">
         <b-input-group prepend="Mode">
             <b-input-group-prepend>
-                <b-form-select v-model="mode" :options="modes" :disabled="!enabled" class="voters-mode-select" />
+                <b-form-select v-model="mode" :options="modes" :disabled="!enabled" class="voters-mode-select t-rule-voters-select" />
             </b-input-group-prepend>
-            <b-form-input type="text" :disabled="!enabled" v-model="voters"></b-form-input>
+            <b-form-input type="text" :disabled="!enabled" v-model="voters" class="t-rule-voters-list-input"></b-form-input>
         </b-input-group>
         <small class="text-danger">{{ error }}</small>
     </div>

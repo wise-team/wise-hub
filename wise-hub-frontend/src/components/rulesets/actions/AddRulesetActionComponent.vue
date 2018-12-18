@@ -3,10 +3,12 @@
     <div>
         <h4>Add new ruleset</h4>
         <b-input-group prepend="@" class="mb-2">
-            <b-form-input type="text" v-model="voter" placeholder="Voter"></b-form-input>
+            <b-form-input type="text" v-model="voter" placeholder="Voter" class="t-addnewruleset-voter-input"></b-form-input>
         </b-input-group>
         <p class="text-right">
-            <b-button variant="primary" :disabled="voter.length === 0 && loading" @click="addRuleset()">
+            <b-button variant="primary" :disabled="voter.length === 0 && loading" @click="addRuleset()"
+                class="t-addnewruleset-btn"
+            >
                 <font-awesome-icon v-if="loading" :icon="loadingIcon" spin />
                 Add ruleset for @{{ voter }}
             </b-button>

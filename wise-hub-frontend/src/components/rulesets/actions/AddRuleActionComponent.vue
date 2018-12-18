@@ -1,11 +1,12 @@
 <!-- src/components/rulesets/actions/AddRulesetActionComponent.vue -->
 <template>
     <div>
-        <b-dropdown :id="'add-rule-dropdown-' + unique" text="Add rule" class="m-2"
+        <b-dropdown :id="'add-rule-dropdown-' + unique" text="Add rule" class="m-2 t-addrule-dropdown"
             variant="outline-secondary"
         >
             <b-dropdown-item-button
                 v-for="rule in rules" :key="rule.name"
+                class="t-addrule-dropdown-item"
                 @click="addRule(rule.defaultRule)"
             >
                 <span :style="'color: ' + rule.color + ';'">

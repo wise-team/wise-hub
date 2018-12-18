@@ -21,12 +21,12 @@
                     </router-link>
                 </li>-->
                 <li class="nav-item">
-                    <router-link class="nav-link" to="/" exact>
+                    <router-link class="nav-link t-navlink-history" to="/" exact>
                         <font-awesome-icon :icon="trendingIcon" /> History
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link class="nav-link" to="/people">
+                    <router-link class="nav-link  t-navlink-people" to="/people">
                         <font-awesome-icon :icon="peopleIcon" /> People
                     </router-link>
                 </li>
@@ -36,17 +36,17 @@
                     </router-link>
                 </li>-->
                 <li class="nav-item">
-                    <a class="nav-link" :href="votingpageUrl" target="_blank" rel="nofollow noopener">
+                    <a class="nav-link t-navlink-votingpage" :href="votingpageUrl" target="_blank" rel="nofollow noopener">
                         <font-awesome-icon :icon="voteIcon" /> Vote
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a :href="manualUrl" class="nav-link" target="_blank" rel="nofollow noopener">
+                    <a :href="manualUrl" class="nav-link t-navlink-manual" target="_blank" rel="nofollow noopener">
                         <font-awesome-icon :icon="manualIcon" /> Manual <!--<sup><font-awesome-icon :icon="externalLinkIcon" /></sup>-->
                     </a>
                 </li>
                 <li class="nav-item">
-                    <router-link class="nav-link" to="/daemon">
+                    <router-link class="nav-link t-navlink-daemon" to="/daemon">
                         <font-awesome-icon :icon="trendingIcon" /> Status
                     </router-link>
                 </li>

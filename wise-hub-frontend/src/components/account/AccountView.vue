@@ -11,17 +11,17 @@
             <b-row>
                 <b-col class="text-center">
                     <div class="bigicon wise-color"><font-awesome-icon :icon="delegateIcon" /></div>
-                    <h2><router-link :to="'/@' + account + '/rulesets'">Rulesets by {{ accountOrYou }}</router-link></h2>
+                    <h2><router-link :to="'/@' + account + '/rulesets'" class="t-rulesetsbyyou-link">Rulesets by {{ accountOrYou }}</router-link></h2>
                     <p>Rulesets that you set for other users</p>
                 </b-col>
                 <b-col class="text-center">
                     <div class="bigicon wise-color"><font-awesome-icon :icon="voteIcon" /></div>
-                    <h2><router-link :to="'/rulesets/for/@' + account + ''">Rulesets for {{ accountOrYou }}</router-link></h2>
+                    <h2><router-link :to="'/rulesets/for/@' + account + ''" class="t-rulesetsforyou-link">Rulesets for {{ accountOrYou }}</router-link></h2>
                     <p>Rulesets that other users set for you</p>
                 </b-col>
                 <b-col class="text-center">
                     <div class="bigicon wise-color"><font-awesome-icon :icon="daemonIcon" /></div>
-                    <h2><router-link :to="'/@' + account + '/daemon'">Daemon of {{ accountOrYou }}</router-link></h2>
+                    <h2><router-link :to="'/@' + account + '/daemon'" class="t-yourdaemonlog-link">Daemon of {{ accountOrYou }}</router-link></h2>
                     <p>Daemon settings and live event log</p>
                 </b-col>
             </b-row>

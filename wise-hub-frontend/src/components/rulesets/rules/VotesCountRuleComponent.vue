@@ -5,7 +5,7 @@
             <b-input-group-prepend>
                 <b-form-select v-model="mode" :options="modes" :disabled="!enabled" class="votes_count-mode-select" />
             </b-input-group-prepend>
-            <b-form-input type="number" :disabled="!enabled" min="0" v-model="votes_count"></b-form-input>
+            <b-form-input type="number" :disabled="!enabled" min="0" v-model="votes_count" class="t-rule-votescount-value-input"></b-form-input>
         </b-input-group>
         <small class="text-danger">{{ error }}</small>
     </div>

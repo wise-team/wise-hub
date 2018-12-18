@@ -12,7 +12,7 @@
             <small v-if="modified" class="text-danger">*to be saved</small>
         </p>
         <h3 v-if="!edit"><small class="text-muted">title:</small> {{ ruleset.name }}</h3>
-        <b-input-group v-else size="lg" prepend="Name" placeholder="Ruleset name" class="mb-4 mb-md-2">
+        <b-input-group v-else size="lg" prepend="Name" placeholder="Ruleset name" class="mb-4 mb-md-2 t-ruleseteditor-rulesetname-input">
             <b-form-input type="text" v-model="rulesetName" :disabled="!edit"></b-form-input>
         </b-input-group>
 

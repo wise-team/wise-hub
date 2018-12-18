@@ -16,9 +16,9 @@
             </span>
             <small v-if="opened && canEdit">
                 &nbsp;
-                <b-button size="sm" variant="primary" @click="initiateEdit()">edit</b-button>
+                <b-button size="sm" variant="primary" @click="initiateEdit()" class="t-ruleset-edit-btn">edit</b-button>
                 &nbsp;
-                <b-button size="sm" variant="warning" @click="initiateDelete()">delete</b-button>
+                <b-button size="sm" variant="warning" @click="initiateDelete()" class="t-ruleset-edit-btn">delete</b-button>
             </small>
         </h4>
         <b-collapse :id="unique + '-collapse-delete'" v-model="deleteOpened">
@@ -36,10 +36,14 @@
                     class="mb-3"
                 />
                 <p class="text-right" v-if="edit">
-                    <b-button variant="secondary" :disabled="!(modified && !saveLoading)" @click="revertChanges()">
+                    <b-button variant="secondary" :disabled="!(modified && !saveLoading)" @click="revertChanges()"
+                        class="t-ruleset-revertchanges-btn"
+                    >
                         Revert changes
                     </b-button>
-                    <b-button variant="primary" :disabled="!(modified && !saveLoading)" @click="saveChanges()">
+                    <b-button variant="primary" :disabled="!(modified && !saveLoading)" @click="saveChanges()"
+                        class="t-ruleset-save-btn"
+                    >
                         Save to blockchain
                     </b-button>
                 </p>

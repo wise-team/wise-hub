@@ -16,8 +16,8 @@
             <template slot="button-content">
                 <em class="username">@{{ username }}</em>
             </template>
-            <b-dropdown-item :to="'/@' + username">Account</b-dropdown-item>
-            <b-dropdown-item @click="logout">Logout</b-dropdown-item>
+            <b-dropdown-item :to="'/@' + username" class="t-account-dropitem">Account</b-dropdown-item>
+            <b-dropdown-item @click="logout" class="t-logout-dropitem">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
     </b-navbar-nav>
 
@@ -25,7 +25,7 @@
     <b-nav-form v-else class="justify-content-end">
         <span v-if="isLoading"><font-awesome-icon :icon="loadingIcon" spin />&nbsp;</span>
         <span class="steemconnect-error-msg">{{ errorMessage }}</span>
-        <a class="btn btn-outline-secondary ml-2" :href="loginUrl">
+        <a class="btn btn-outline-secondary ml-2 t-login-link" :href="loginUrl">
             SteemConnect login
         </a>
     </b-nav-form>

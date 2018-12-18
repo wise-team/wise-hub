@@ -5,8 +5,9 @@
             <b-row>
                 <div class="p-2 mt-3 text-center text-small w-100">
                     <strong>More info</strong>, star &amp; fork on
-                        <b-button variant="secondary" size="sm"
-                            :href="'https://github.com/' + githubOrganization + '/' + repositoryName">
+                    <b-button variant="secondary" size="sm"
+                        :href="'https://github.com/' + githubOrganization + '/' + repositoryName"
+                    >
                         <font-awesome-icon :icon="githubIcon" /> {{ githubOrganization + '/' + repositoryName }}
                     </b-button>
                     <p> </p>

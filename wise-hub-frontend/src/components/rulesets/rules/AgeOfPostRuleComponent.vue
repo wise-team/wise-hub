@@ -5,7 +5,7 @@
             <b-input-group-prepend>
                 <b-form-select v-model="mode" :options="modes" :disabled="!enabled" class="age_of_post-mode-select" />
             </b-input-group-prepend>
-            <b-form-input type="number" :disabled="!enabled" min="0" step="1" v-model="value"></b-form-input>
+            <b-form-input type="number" class="t-ageofpostrule-input" :disabled="!enabled" min="0" step="1" v-model="value"></b-form-input>
             <b-input-group-append>
                 <b-form-select v-model="unit" :options="units" :disabled="!enabled" class="age_of_post-mode-select" />
             </b-input-group-append>

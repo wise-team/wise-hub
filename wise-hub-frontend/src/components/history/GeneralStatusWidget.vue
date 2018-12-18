@@ -27,7 +27,7 @@
                 <br />
                 Join this brave community,
             </p>
-            <b-button to="/people" variant="primary">meet the People</b-button>
+            <b-button to="/people" variant="primary" class="t-people-btn">meet the People</b-button>
         </b-card>
     </span>
 </template>

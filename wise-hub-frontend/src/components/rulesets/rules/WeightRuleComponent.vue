@@ -2,10 +2,10 @@
 <template>
     <div class="weight-rule-component">
         <b-input-group prepend="Minimal weight" append="%" class="mb-1">
-            <b-form-input type="number" :disabled="!enabled" min="-100" max="100" step="0.1" v-model="min"></b-form-input>
+            <b-form-input type="number" :disabled="!enabled" min="-100" max="100" step="0.1" v-model="min" class="t-rule-weight-min-input"></b-form-input>
         </b-input-group>
         <b-input-group prepend="Maximal weight" append="%">
-            <b-form-input type="number" :disabled="!enabled" min="-100" max="100" step="0.1" v-model="max"></b-form-input>
+            <b-form-input type="number" :disabled="!enabled" min="-100" max="100" step="0.1" v-model="max" class="t-rule-weight-max-input"></b-form-input>
         </b-input-group>
         <small class="text-danger">{{ error }}</small>
     </div>

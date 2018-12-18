@@ -5,10 +5,10 @@
             <b-input-group-prepend>
                 <b-form-select v-model="unit" :options="units" :disabled="!enabled" class="weight_for_period-mode-select" />
             </b-input-group-prepend>
-            <b-form-input type="number" :disabled="!enabled" min="0" step="1" v-model="period"></b-form-input>
+            <b-form-input type="number" :disabled="!enabled" min="0" step="1" v-model="period" class="t-rule-weightforperiod-period-input"></b-form-input>
         </b-input-group>
         <b-input-group prepend="Num of full upvotes">
-            <b-form-input type="number" :disabled="!enabled" min="0" step="0.1" v-model="weight"></b-form-input>
+            <b-form-input type="number" :disabled="!enabled" min="0" step="0.1" v-model="weight" class="t-rule-weightforperiod-weight-input"></b-form-input>
         </b-input-group>
         <small class="text-danger">{{ error }}</small>
     </div>

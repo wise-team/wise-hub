@@ -10,10 +10,18 @@
                 <b-form-input disabled type="text" :value="statusText" :class="statusCssClass"></b-form-input>
                 
                 <b-input-group-append v-if="daemonEnabled">
-                    <b-btn variant="danger" :disabled="loading" @click="showDisableDaemonAlert=true">Disable</b-btn>
+                    <b-btn variant="danger" :disabled="loading" @click="showDisableDaemonAlert=true"
+                        class="t-daemonsettings-disable-btn"
+                    >
+                        Disable
+                    </b-btn>
                 </b-input-group-append>
                 <b-input-group-append v-else>
-                    <b-btn variant="success" :disabled="loading" @click="showEnableDaemonAlert=true">Enable</b-btn>
+                    <b-btn variant="success" :disabled="loading" @click="showEnableDaemonAlert=true"
+                        class="t-daemonsettings-enable-btn"
+                    >
+                        Enable
+                    </b-btn>
                 </b-input-group-append>
             </b-input-group>
         </p>
@@ -28,7 +36,9 @@
                 are sent in the &quot;disabled&quot; period, will not be synchronized.
             </p>
             <p>
-                <b-button size="lg" variant="danger" :disabled="loading" @click="disableDaemon">Disable my daemon</b-button>
+                <b-button size="lg" variant="danger" :disabled="loading" @click="disableDaemon" class="t-disable-daemon-confirm-btn">
+                    Disable my daemon
+                </b-button>
             </p>
         </b-alert>
 
@@ -54,11 +64,15 @@
             </p>
             <p v-if="!hasCorrectScope">
                 <b-button size="lg" variant="success" 
-                @click="grantPermissions">Grant 3 permissions</b-button>
+                @click="grantPermissions" class="t-grant-permissions-for-daemon-btn">
+                    Grant 3 permissions
+                </b-button>
             </p>
             <p>
                 <b-button size="lg" variant="success" 
-                :disabled="loading || !hasCorrectScope" @click="enableDaemon">Enable my daemon</b-button>
+                :disabled="loading || !hasCorrectScope" @click="enableDaemon" class="t-enable-daemon-confirm-btn">
+                    Enable my daemon
+                </b-button>
             </p>
         </b-alert>
 

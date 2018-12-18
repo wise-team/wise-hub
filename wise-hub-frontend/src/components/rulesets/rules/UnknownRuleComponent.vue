@@ -2,7 +2,7 @@
 <template>
     <div class="unknown-rule-component">
         <div class="input-group">
-            <input type="text" class="form-control" 
+            <input type="text" class="form-control t-rule-unknown-json-input" 
                 :disabled="!enabled"
                 v-model="ruleJson"
             />

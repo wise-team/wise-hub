@@ -2,7 +2,7 @@
 <template>
     <div>
         <h5>Delete ruleset <em>{{ ruleset.name }}</em></h5>
-        <b-button @click="deleteRuleset()" size="sm" variant="danger">
+        <b-button @click="deleteRuleset()" size="sm" variant="danger" class="t-confirmdelete-btn">
             <font-awesome-icon :icon="deleteIcon" /> Confirm delete
         </b-button>
         <hr />

@@ -3,7 +3,7 @@
     <div>
         <h5>Rename ruleset</h5>
         <b-input-group prepend="Name">
-            <b-form-input v-model="rulesetName"></b-form-input>
+            <b-form-input v-model="rulesetName" class="t-renameruleset-name-input"></b-form-input>
         </b-input-group>
         <span class="text-danger">{{ error }}</span>
         <hr />

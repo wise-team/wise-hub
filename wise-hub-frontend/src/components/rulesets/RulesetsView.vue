@@ -53,7 +53,11 @@
                     Then you will be able to move on.
                 </p>
             </div>
-            <b-btn class="mt-3" variant="danger" block @click="hideUnsavedModal() && revertChanges()">Reset changes</b-btn>
+            <b-btn class="mt-3 t-modal-resetchanges-btn"
+                variant="danger" block @click="hideUnsavedModal() && revertChanges()"
+            >
+                Reset changes
+            </b-btn>
         </b-modal>
     </div>
 </template>

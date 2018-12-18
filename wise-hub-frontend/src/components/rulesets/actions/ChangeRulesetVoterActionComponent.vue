@@ -3,8 +3,8 @@
     <div>
         <h5>Change voter</h5>
         <b-input-group prepend="@">
-            <b-form-input v-model="voter" :disabled="loading"></b-form-input>
-            <b-button @click="changeVoter()" variant="primary">
+            <b-form-input v-model="voter" :disabled="loading" class="t-changevoter-input"></b-form-input>
+            <b-button @click="changeVoter()" variant="primary" class="t-changevoter-btn">
                 <font-awesome-icon v-if="loading" :icon="loadingIcon" spin />
                 Change
             </b-button>

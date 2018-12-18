@@ -5,7 +5,7 @@
             <b-input-group-prepend>
                 <b-form-select v-model="mode" :options="modes" :disabled="!enabled" class="payout-mode-select" />
             </b-input-group-prepend>
-            <b-form-input type="number" :disabled="!enabled" min="0" step="0.1" v-model="payout"></b-form-input>
+            <b-form-input type="number" class="t-rule-payout-value-input" :disabled="!enabled" min="0" step="0.1" v-model="payout"></b-form-input>
         </b-input-group>
         <small class="text-danger">{{ error }}</small>
     </div>

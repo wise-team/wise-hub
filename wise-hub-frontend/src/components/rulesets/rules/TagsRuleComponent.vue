@@ -5,7 +5,7 @@
             <b-input-group-prepend>
                 <b-form-select v-model="mode" :options="modes" :disabled="!enabled" class="tags-mode-select" />
             </b-input-group-prepend>
-            <b-form-input type="text" :disabled="!enabled" v-model="tags"></b-form-input>
+            <b-form-input type="text" :disabled="!enabled" v-model="tags" class="t-rule-tags-list-input"></b-form-input>
         </b-input-group>
         <small class="text-danger">{{ error }}</small>
     </div>
