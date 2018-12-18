@@ -9,7 +9,7 @@ export function asyncReq(where: string, res: express.Response, fn: () => Promise
         catch (error) {
             Log.log().logError("api/lib/util#asyncReq(where=" + where + ")", error);
             res.status(500);
-            res.send({ errors: [ error.name + ": " + error.message + " " + error.stack ? error.stack : "" ] });
+            res.send({ errors: [ error.name + ": " + error.message + " at " + (new Date().toISOString()) ] });
         }
     })();
 }
