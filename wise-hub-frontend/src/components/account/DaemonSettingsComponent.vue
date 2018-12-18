@@ -136,7 +136,7 @@ export default Vue.extend({
                     this.showDisableDaemonAlert = false;
                 }
                 catch (error) {
-                    this.error = "Error: " + error;
+                    this.error = "" + error;
                     console.error(error);
                 }
             })();
@@ -154,7 +154,7 @@ export default Vue.extend({
                     this.showDisableDaemonAlert = false;
                 }
                 catch (error) {
-                    this.error = "Error: " + error;
+                    this.error = "" + error;
                     console.error(error);
                 }
             })();
