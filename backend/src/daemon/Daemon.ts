@@ -102,7 +102,7 @@ export class Daemon {
         this.safeAsyncCall(() => this.rulesManager.saveRules(op.delegator, op.voter, es));
         // }
         const setRulesMsg = "Delegator @" + op.delegator + " set rules for voter @" + op.voter
-            + ". Rulesets: [" + setRules.rulesets.join(", ") + "]";
+            + ". Rulesets: [" + setRules.rulesets.map(ruleset => ruleset.name).join(", ") + "]";
         this.daemonLog.emit({ msg: setRulesMsg, wiseOp: op });
         Log.log().info("@" + op.delegator + " set rules for @" + op.voter);
     }
