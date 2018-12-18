@@ -49,10 +49,19 @@ export class WiseApiHelper {
         }
         catch (error) {
             if (error.response && error.response.data && error.response.data.errors) {
-                throw new Error(_.get(error, "response.status", "Response") + " error: " + error.response.data.errors.join(","));
+                const e: any = new Error(_.get(error, "response.status", "Response") + " error: " + error.response.data.errors.join(","));
+                e.response = { status: error.response.status };
+                throw e;
+            }
+            else if (error.response && error.response.data && error.response.data.error) {
+                const e: any = new Error(_.get(error, "response.status", "Response") + " error: " + error.response.data.error);
+                e.response = { status: error.response.status };
+                throw e;
             }
             else if (error.response && error.response.data) {
-                throw new Error(_.get(error, "response.status", "Response") + " error: " + JSON.stringify(error.response.data));
+                const e: any = new Error(_.get(error, "response.status", "Response") + " error: " + JSON.stringify(error.response.data));
+                e.response = { status: error.response.status };
+                throw e;
             }
             else throw error;
         }
