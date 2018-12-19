@@ -20,8 +20,8 @@ COPY entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]
 
 ##§ '\n' + data.config.docker.generateDockerfileFrontMatter(data) + '\n' §##
-LABEL maintainer="The Wise Team (https://wise-team.io/) <jedrzejblew@gmail.com>"
-LABEL vote.wise.wise-version="3.0.5"
+LABEL maintainer="The Wise Team (https://wise-team.io/) <contact@wiseteam.io>"
+LABEL vote.wise.wise-version="3.1.0-rc.1"
 LABEL vote.wise.license="MIT"
 LABEL vote.wise.repository="wise-hub"
 ##§ §.##
