@@ -1,6 +1,6 @@
 {
   "name": "wise-hub-backend",
-  "version": "3.1.0-rc.1",
+  "version": "3.1.0",
   "description": "Backend for Wise HUB",
   "engines": {
     "node": ">=10.12"
@@ -30,7 +30,7 @@
     "serialize-error": "^3.0.0",
     "socket.io": "^2.1.1",
     "socket.io-redis": "^5.2.0",
-    "steem-wise-core": "^3.1.0-rc.1",
+    "steem-wise-core": "^3.1.0",
     "steemconnect": "^2.0.1"
   },
   "devDependencies": {
