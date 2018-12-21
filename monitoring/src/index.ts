@@ -15,7 +15,7 @@ const mentions = process.env.SLACK_MENTIONS;
 ow(mentions, ow.string.label("Env SLACK_MENTIONS"));
 
 const failureNotificationIntervalS = process.env.FAILURE_NOTIFICATION_INTERVAL_S;
-ow(mentions, ow.string.label("Env FAILURE_NOTIFICATION_INTERVAL_S"));
+ow(mentions, ow.string.nonEmpty.label("Env FAILURE_NOTIFICATION_INTERVAL_S"));
 
 // config
 const failureErrorTTLms = parseInt(failureNotificationIntervalS || "3600") * 1000;

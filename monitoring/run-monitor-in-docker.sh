@@ -4,22 +4,17 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "${DIR}"
 
 if [ -z "${SLACK_WEBHOOK_URL}" ]; then
-    echo "SLACK_WEBHOOK_URL env is not set"
+    echo "wise-hub monitoring: SLACK_WEBHOOK_URL env is not set"
     exit 1
 fi
 
 if [ -z "${WISE_ENVIRONMENT_TYPE}" ]; then
-    echo "WISE_ENVIRONMENT_TYPE env is not set"
-    exit 1
-fi
-
-if [ -z "${SLACK_MENTIONS}" ]; then
-    echo "SLACK_MENTIONS env is not set"
+    echo "wise-hub monitoring: WISE_ENVIRONMENT_TYPE env is not set"
     exit 1
 fi
 
 if [ -z "${WISE_HUB_URL}" ]; then
-    echo "WISE_HUB_URL env is not set"
+    echo "wise-hub monitoring: WISE_HUB_URL env is not set"
     exit 1
 fi
 
