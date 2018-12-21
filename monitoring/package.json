@@ -1,0 +1,48 @@
+{
+  "name": "wise-hub-backend-monitoring",
+  "version": "3.1.0",
+  "description": "Wise HUB local monitoring",
+  "engines": {
+    "node": ">=10.12"
+  },
+  "scripts": {
+    "monitor": "ts-node src/index.ts",
+    "mocha": "TS_NODE_FILES=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha -r ts-node/register --reporter json-stream --recursive ./**/*.spec.ts"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "lodash": "^4.17.11",
+    "ow": "^0.8.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/chai-as-promised": "^7.1.0",
+    "@types/lodash": "^4.14.117",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.11.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^5.2.0",
+    "ts-node": "^6.2.0",
+    "tslint": "^5.11.0",
+    "typescript": "^2.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wise-team/wise-hub.git"
+  },
+  "keywords": [
+    "steem",
+    "blockchain",
+    "wise"
+  ],
+  "author": "The Wise Team (https://wise-team.io/)",
+  "contributors": [
+    "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wise-team/wise-hub/issues"
+  },
+  "homepage": "https://wise.vote/"
+}
