@@ -19,13 +19,13 @@ services:
     environment:
       WISE_ENVIRONMENT_TYPE: staging
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
-      WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.vote/
+      WISE_SQL_ENDPOINT_URL: https://sql.staging.wise.vote/
       #§ 'STEEMD_ENDPOINT_URL: ' + data.config.steem.defaultApiUrl
       STEEMD_ENDPOINT_URL: https://anyx.io
       #§ 'STEEMCONNECT_REDIRECT_URI: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
-      STEEMCONNECT_REDIRECT_URI: "https://dev.wise.vote/api/auth/callback"
+      STEEMCONNECT_REDIRECT_URI: "https://staging.wise.vote/api/auth/callback"
       #§ "VIRTUAL_HOST: \"" + url(data.config.hub.url.staging).hostname + "\""
-      VIRTUAL_HOST: "dev.wise.vote"
+      VIRTUAL_HOST: "staging.wise.vote"
       VIRTUAL_NETWORK: "caddy-proxy"
       VIRTUAL_PORT: 80
       #§ 'CADDY_TLS: ' + ( url(data.config.hub.url.staging).protocol === "https:" ? '"yes"' : '"no"')
@@ -60,7 +60,7 @@ services:
       # refer this guide for session options: https://github.com/expressjs/session
       SESSION_OPTIONS: '{ "cookie": { "secure": false }, "resave": false, "saveUninitialized": false }'
       #§ 'STEEMCONNECT_CALLBACK_URL: "' + data.config.hub.url.staging + data.config.hub.urls.api.auth.callback.substring(1) + '"'
-      STEEMCONNECT_CALLBACK_URL: "https://dev.wise.vote/api/auth/callback"
+      STEEMCONNECT_CALLBACK_URL: "https://staging.wise.vote/api/auth/callback"
       LOGIN_REDIRECT_URL: "/"
     networks:
       - default
@@ -76,7 +76,7 @@ services:
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
       STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io,https://anyx.io"
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
-      WISE_SQL_ENDPOINT_URL: https://sql.dev.wise.vote/
+      WISE_SQL_ENDPOINT_URL: https://sql.staging.wise.vote/
       WISE_LOG_LEVEL: debug
     networks:
       - default
