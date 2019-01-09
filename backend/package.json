@@ -32,6 +32,7 @@
     "socket.io-redis": "^5.2.0",
     "steem-wise-core": "^3.1.0",
     "steemconnect": "^2.0.1"
+    "ts-custom-error": "^2.2.2"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.24",
