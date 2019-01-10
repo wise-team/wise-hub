@@ -56,6 +56,7 @@
     "@types/serialize-error": "^2.1.0",
     "@types/socket.io": "^2.1.0",
     "@types/socket.io-redis": "^1.0.25",
+    "@types/uuid": "^3.4.4",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "mocha": "^5.2.0",
