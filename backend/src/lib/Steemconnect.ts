@@ -97,6 +97,9 @@ export class Steemconnect {
                     " " +
                     error.error_description
             );
+            err.name = error.name;
+            if (error.error) (err as any).error = error.error;
+            if (error.error_description) (err as any).error_description = error.error_description;
             // console.error(err);
             return err;
         } else return error;
