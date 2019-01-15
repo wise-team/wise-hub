@@ -20,3 +20,13 @@ export function ow_catch(fn: () => void): boolean | string {
         return error + "";
     }
 }
+
+export function spawnAsync(fn: () => Promise<any>, log: (error: Error) => void = console.error) {
+    (async () => {
+        try {
+            fn();
+        } catch (error) {
+            log(error);
+        }
+    })();
+}
