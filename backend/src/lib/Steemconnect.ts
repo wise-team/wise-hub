@@ -110,3 +110,13 @@ export namespace Steemconnect {
         trx_num: number;
     }
 }
+    export namespace BroadcastResult {
+        export function isBroadcastResult(o: any): o is BroadcastResult {
+            return (
+                (<BroadcastResult>o).id !== undefined &&
+                (<BroadcastResult>o).block_num !== undefined &&
+                (<BroadcastResult>o).trx_num !== undefined
+            );
+        }
+    }
+}
