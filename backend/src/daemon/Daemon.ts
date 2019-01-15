@@ -1,7 +1,17 @@
 import * as steemJs from "steem";
 import { Redis } from "ioredis";
 import { common } from "../common/common";
-import Wise, { UniversalSynchronizer, Api, SteemOperationNumber, SetRules, EffectuatedWiseOperation, SendVoteorder, EffectuatedSetRules, ConfirmVote, WiseOperation } from "steem-wise-core";
+import Wise, {
+    UniversalSynchronizer,
+    Api,
+    SteemOperationNumber,
+    SetRules,
+    EffectuatedWiseOperation,
+    SendVoteorder,
+    EffectuatedSetRules,
+    ConfirmVote,
+    WiseOperation,
+} from "steem-wise-core";
 import { DelegatorManager } from "../lib/DelegatorManager";
 import { ApiHelper } from "./ApiHelper";
 import { Log } from "../lib/Log";
@@ -22,7 +32,14 @@ export class Daemon {
     private apiHelper: ApiHelper;
     private daemonLog: DaemonLog;
 
-    public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper, api: Api, rulesManager: RulesManager, daemonLog: DaemonLog) {
+    public constructor(
+        redis: Redis,
+        delegatorManager: DelegatorManager,
+        apiHelper: ApiHelper,
+        api: Api,
+        rulesManager: RulesManager,
+        daemonLog: DaemonLog
+    ) {
         this.redis = redis;
         this.apiHelper = apiHelper;
         this.delegatorManager = delegatorManager;
@@ -44,10 +61,10 @@ export class Daemon {
             onVoteorder: (voteorder, wiseOp) => this.onVoteorder(voteorder, wiseOp),
             onConfirmVote: (confirmVote, wiseOp) => this.onConfirmVote(confirmVote, wiseOp),
             onStart: () => this.onStart(),
-            onError:  (error: Error, proceeding: boolean) => this.onError(error, proceeding),
+            onError: (error: Error, proceeding: boolean) => this.onError(error, proceeding),
             onFinished: () => this.onFinished(),
-            onBlockProcessingStart: (blockNum) => this.onBlockProcessingStart(blockNum),
-            onBlockProcessingFinished: (blockNum) => this.onBlockProcessingFinished(blockNum)
+            onBlockProcessingStart: blockNum => this.onBlockProcessingStart(blockNum),
+            onBlockProcessingFinished: blockNum => this.onBlockProcessingFinished(blockNum),
         });
     }
 
@@ -77,11 +94,17 @@ export class Daemon {
 
     private async onBlockProcessingFinished(blockNum: number) {
         if (blockNum % 30 == 0) Log.log().info("Finished processing block " + blockNum);
-        this.daemonLog.emit(
-            { msg: "Processed block " + blockNum, key: "block_processing_finished",
-            transaction: { block_num: blockNum, trx_num: -1, trx_id: "" } });
+        this.daemonLog.emit({
+            msg: "Processed block " + blockNum,
+            key: "block_processing_finished",
+            transaction: { block_num: blockNum, trx_num: -1, trx_id: "" },
+        });
 
-        await this.redis.hset(common.redis.daemonStatus.key, common.redis.daemonStatus.props.last_processed_block, blockNum + "");
+        await this.redis.hset(
+            common.redis.daemonStatus.key,
+            common.redis.daemonStatus.props.last_processed_block,
+            blockNum + ""
+        );
         await RulesLoadedUpToBlock.set(this.redis, blockNum);
     }
 
@@ -97,58 +120,118 @@ export class Daemon {
             moment: op.moment,
             voter: op.voter,
             delegator: op.delegator,
-            rulesets: setRules.rulesets
+            rulesets: setRules.rulesets,
         };
         this.safeAsyncCall(() => this.rulesManager.saveRules(op.delegator, op.voter, es));
         // }
-        const setRulesMsg = "Delegator @" + op.delegator + " set rules for voter @" + op.voter
-            + ". Rulesets: [" + setRules.rulesets.map(ruleset => ruleset.name).join(", ") + "]";
+        const setRulesMsg =
+            "Delegator @" +
+            op.delegator +
+            " set rules for voter @" +
+            op.voter +
+            ". Rulesets: [" +
+            setRules.rulesets.map(ruleset => ruleset.name).join(", ") +
+            "]";
         this.daemonLog.emit({ msg: setRulesMsg, wiseOp: op });
         Log.log().info("@" + op.delegator + " set rules for @" + op.voter);
     }
 
     private onConfirmVote(confirmVote: ConfirmVote, op: EffectuatedWiseOperation) {
-        const confirmVoteMsg = "Delegator @" + op.delegator + " confirmed voteorder by @" + op.voter
-        + ". Post: {voteorderTxId= " + confirmVote.voteorderTxId + ", accepted="
-         + confirmVote.accepted + ", msg=" + confirmVote.msg + "]";
+        const confirmVoteMsg =
+            "Delegator @" +
+            op.delegator +
+            " confirmed voteorder by @" +
+            op.voter +
+            ". Post: {voteorderTxId= " +
+            confirmVote.voteorderTxId +
+            ", accepted=" +
+            confirmVote.accepted +
+            ", msg=" +
+            confirmVote.msg +
+            "]";
         this.daemonLog.emit({ msg: confirmVoteMsg, wiseOp: op });
     }
 
-    private onVoteorder(cmd: SendVoteorder, op: EffectuatedWiseOperation, errorTimeout: number = StaticConfig.DAEMON_ON_VOTEORDER_ERROR_REPEAT_AFTER_S) {
+    private onVoteorder(
+        cmd: SendVoteorder,
+        op: EffectuatedWiseOperation,
+        errorTimeout: number = StaticConfig.DAEMON_ON_VOTEORDER_ERROR_REPEAT_AFTER_S
+    ) {
         if (this.delegatorManager.hasDelegator(op.delegator)) {
             this.safeAsyncCall(async () => {
                 try {
-                    const esr: EffectuatedSetRules = await this.rulesManager.getRules(op.delegator, op.voter, op.moment);
+                    const esr: EffectuatedSetRules = await this.rulesManager.getRules(
+                        op.delegator,
+                        op.voter,
+                        op.moment
+                    );
                     if (esr.rulesets.length === 0) {
-                        Log.log().warn("@" + op.delegator + " has no rulesets for @" + op.voter + ","
-                            + " but @" + op.voter + " asked to vote with ruleset\"" + cmd.rulesetName + "\".");
+                        Log.log().warn(
+                            "@" +
+                                op.delegator +
+                                " has no rulesets for @" +
+                                op.voter +
+                                "," +
+                                " but @" +
+                                op.voter +
+                                ' asked to vote with ruleset"' +
+                                cmd.rulesetName +
+                                '".'
+                        );
                         return;
                     }
                     const verdict: ValidationRunner.Verdict = await this.validationRunner.validate(cmd, op, esr);
                     this.voteorderCommit(cmd, op, verdict);
-                }
-                catch (error) {
-                    const timeout = errorTimeout  * ( Math.random() - 0.5 );
-                    setTimeout(() => this.onVoteorder(cmd, op, Math.max(errorTimeout * StaticConfig.DAEMON_ON_VOTEORDER_ERROR_MULTI, 3600 * 3)), timeout);
+                } catch (error) {
+                    const timeout = errorTimeout * (Math.random() - 0.5);
+                    setTimeout(
+                        () =>
+                            this.onVoteorder(
+                                cmd,
+                                op,
+                                Math.max(errorTimeout * StaticConfig.DAEMON_ON_VOTEORDER_ERROR_MULTI, 3600 * 3)
+                            ),
+                        timeout
+                    );
                 }
             });
         }
 
-        const voteorderMsg = "Voter @" + op.voter + " asked delegator @" + op.delegator
-             + " to vote for post [@" + cmd.author + "/" + cmd.permlink + "] with weight "
-             + cmd.weight + ", based on ruleset named \"" + cmd.rulesetName + "\".";
+        const voteorderMsg =
+            "Voter @" +
+            op.voter +
+            " asked delegator @" +
+            op.delegator +
+            " to vote for post [@" +
+            cmd.author +
+            "/" +
+            cmd.permlink +
+            "] with weight " +
+            cmd.weight +
+            ', based on ruleset named "' +
+            cmd.rulesetName +
+            '".';
         this.daemonLog.emit({ msg: voteorderMsg, wiseOp: op });
     }
 
     private async voteorderCommit(cmd: SendVoteorder, op: EffectuatedWiseOperation, verdict: ValidationRunner.Verdict) {
         if (verdict.pass) {
             Log.log().cheapDebug(() => "PASS VOTEORDER: " + JSON.stringify(op, undefined, 2));
+        } else {
+            Log.log().cheapDebug(
+                () => "REJECT VOTEORDER(msg=" + verdict.msg + "): " + JSON.stringify(op, undefined, 2)
+            );
         }
-        else {
-            Log.log().cheapDebug(() => "REJECT VOTEORDER(msg=" + verdict.msg + "): " + JSON.stringify(op, undefined, 2));
-        }
-        this.daemonLog.emit({ msg: "Voteorder by @" + op.voter + " validated by wiseHUB daemon of @"
-         + op.delegator + ". Verdict: " + JSON.stringify(verdict), validated: verdict });
+        this.daemonLog.emit({
+            msg:
+                "Voteorder by @" +
+                op.voter +
+                " validated by wiseHUB daemon of @" +
+                op.delegator +
+                ". Verdict: " +
+                JSON.stringify(verdict),
+            validated: verdict,
+        });
 
         const opsToSend: steemJs.OperationWithDescriptor[] = [];
         try {
@@ -160,7 +243,7 @@ export class Daemon {
             const wiseOp: WiseOperation = {
                 voter: op.voter,
                 delegator: op.delegator,
-                command: confirmCmd
+                command: confirmCmd,
             };
             opsToSend.push(...this.apiHelper.getWiseProtocol().serializeToBlockchain(wiseOp));
 
@@ -169,21 +252,34 @@ export class Daemon {
                     voter: op.delegator,
                     author: cmd.author,
                     permlink: cmd.permlink,
-                    weight: cmd.weight
+                    weight: cmd.weight,
                 };
                 opsToSend.push(["vote", voteOp]);
             }
             this.safeAsyncCall(async () => await this.sendOps(op.delegator, opsToSend));
-        }
-        catch (error) {
-            Log.log().logError("daemon/Daemon.ts#Daemon.voteorderCommit", error, { cmd: cmd, op: op, verdict: verdict });
+        } catch (error) {
+            Log.log().logError("daemon/Daemon.ts#Daemon.voteorderCommit", error, {
+                cmd: cmd,
+                op: op,
+                verdict: verdict,
+            });
         }
     }
 
-    private async sendOps(delegator: string, ops: steemJs.OperationWithDescriptor []) {
+    private async sendOps(delegator: string, ops: steemJs.OperationWithDescriptor[]) {
         await ToSendQueue.addToPublishQueue(this.redis, delegator, ops);
-        this.daemonLog.emit({ msg: ops.length + " operations scheduled to be sent to @" + delegator + " account: "
-                + ops.map(op => op[0]).join(", "), ops: ops }, delegator);
+        this.daemonLog.emit(
+            {
+                msg:
+                    ops.length +
+                    " operations scheduled to be sent to @" +
+                    delegator +
+                    " account: " +
+                    ops.map(op => op[0]).join(", "),
+                ops: ops,
+            },
+            delegator
+        );
     }
 
     private async hartbeat() {
@@ -195,8 +291,7 @@ export class Daemon {
         (async () => {
             try {
                 await fn();
-            }
-            catch (error) {
+            } catch (error) {
                 Log.log().logError("daemon/Daemon.ts#Daemon.safeAsyncCall Unhandled error in Daemon callback", error);
             }
         })();
