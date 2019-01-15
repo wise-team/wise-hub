@@ -1,18 +1,33 @@
 import * as fs from "fs";
 import { Log } from "../lib/Log";
-import * as Redis from "ioredis";
+import * as IORedis from "ioredis";
 import { common } from "../common/common";
 import { Vault } from "../lib/vault/Vault";
 import { AppRole } from "../lib/AppRole";
-import { Publisher } from "./Publisher";
 import { DaemonLog } from "../daemon/DaemonLog";
+import { UsersManager } from "../lib/UsersManager";
+import { BlockingQueueConsumer } from "./queue/BlockingQueueConsumer";
+import { PublishJob } from "./entities/PublishJob";
+import { BlockingQueueConsumerImpl } from "./queue/BlockingQueueConsumerImpl";
+import { StaticConfig } from "./StaticConfig";
+import { PublisherQueue } from "./queue/PublisherQueue";
+import { PublisherQueueImpl } from "./queue/PublisherQueueImpl";
+import { Heartbeat } from "../lib/heartbeat/Heartbeat";
+import { HeartbeatImpl } from "../lib/heartbeat/HeartbeatImpl";
+import { Redis } from "../lib/redis/Redis";
+import { RedisImpl } from "../lib/redis/RedisImpl";
+import { Broadcaster } from "./broadcaster/Broadcaster";
+import { PublisherLog } from "./log/PublisherLog";
+import { PublisherLogImpl } from "./log/PublisherLogImpl";
+import { RedisDualQueueImpl } from "./queue/RedisDualQueueImpl";
+import { BroadcasterImpl } from "./broadcaster/BroadcasterImpl";
 
 /******************
  ** INTIAL SETUP **
  ******************/
 Log.log().initialize();
 
-process.on("unhandledRejection", (err) => {
+process.on("unhandledRejection", err => {
     console.error("Unhandled promise");
     Log.log().error("UNHANDLED PROMISE -> aborting exit");
     Log.log().error(err);
@@ -20,37 +35,81 @@ process.on("unhandledRejection", (err) => {
     process.exit(1);
 });
 
-
 /*****************
- **   CONNECT   **
+ **   ENV   **
  *****************/
 const redisUrl = process.env.REDIS_URL;
 if (!redisUrl) throw new Error("Env REDIS_URL is missing.");
-const redis = new Redis(redisUrl);
-const daemonLog = new DaemonLog(redis);
 
 const vaultAddr = process.env.WISE_VAULT_URL;
- if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
-const vault = new Vault(vaultAddr);
-
-
+if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
 
 /*****************
  **     RUN     **
  *****************/
 (async () => {
     try {
-        Log.log().info("Initialising publisher....");
+        Log.log().info("Starting hub/backend/publisher...");
 
-        Log.log().debug("Initialising vault connection");
-        const requiredPolicies = /*§ §*/["wise-hub-publisher"]/*§ JSON.stringify(data.config.hub.docker.services.publisher.appRole.policies(data.config)) §.*/;
-        await vault.init(vault => AppRole.login(vault, requiredPolicies));
-        Log.log().debug("Vault init successful...");
+        const vault = new Vault(vaultAddr);
+        const redis: Redis = new RedisImpl(redisUrl);
+        const ioredis = new IORedis(redisUrl);
 
-        const publisher = new Publisher(redis, vault, daemonLog);
-        publisher.run();
-    }
-    catch (error) {
+        await vault.init(vault => AppRole.login(vault, StaticConfig.REQUIRED_VAULT_POLICIES));
+
+        const usersManager = new UsersManager(ioredis, vault, { canIssueRefreshTokens: true });
+        const daemonLog = new DaemonLog(ioredis);
+        const publisherLog: PublisherLog = new PublisherLogImpl({
+            log: async (msg: PublisherLog.Message) => await daemonLog.emit(msg),
+            fallbackLog: (msg: string, error?: Error) => console.error(msg, error),
+        });
+        const publisherQueue: PublisherQueue = new PublisherQueueImpl(
+            new RedisDualQueueImpl(redis, {
+                waitingQueueKey: common.redis.toPublishQueue,
+                processingQueueKey: common.redis.publishProcessingQueue,
+            })
+        );
+        const heartbeat: Heartbeat = new HeartbeatImpl(redis, common.redis.publisherHartbeat);
+        const broadcaster: Broadcaster = new BroadcasterImpl({
+            log: (msg: string, error?: Error) => Log.log().logError(msg, error),
+            usersManager: usersManager,
+            retryDelaysSeconds: StaticConfig.RETRIES_DELAYS_SECONDS,
+            broadcastScope: StaticConfig.BROADCAST_SCOPE,
+        });
+
+        let jobConsumer: BlockingQueueConsumer<PublisherQueue.JobEntry, Broadcaster.Result>;
+        jobConsumer = new BlockingQueueConsumerImpl(
+            {
+                sleepAfterErrorMs: StaticConfig.PUBLISH_THROTTLING_MS,
+                sleepBeforeNextTakeMs: StaticConfig.PUBLISH_THROTTLING_MS,
+            },
+            {
+                init: () => publisherQueue.resetProcessingQueue(),
+                heartbeat: () => heartbeat.beat(StaticConfig.JOB_BLOCKINGWAIT_SECONDS),
+                onError: async (error: Error) => Log.log().logError("Error in publisher job consumer", error),
+                fallbackLog: (msg: string, error?: Error) => console.error(msg, error),
+                //
+                take: async () => {
+                    return await publisherQueue.takeJob(StaticConfig.JOB_BLOCKINGWAIT_SECONDS);
+                },
+                process: async (job: PublishJob) => {
+                    publisherLog.logJobStart(job);
+                    PublishJob.validate(job);
+                    return await broadcaster.broadcast(job);
+                },
+                onProcessSuccess: async (job: PublisherQueue.JobEntry, result: Broadcaster.Result) => {
+                    await publisherQueue.finishJob(job);
+                    await publisherLog.logJobSuccess(job, result);
+                },
+                onProcessFailure: async (job: PublisherQueue.JobEntry, error: Error) => {
+                    await publisherLog.logJobFailure(job, error);
+                },
+            }
+        );
+        jobConsumer.start();
+
+        Log.log().info("hub/backend/publisher startup done");
+    } catch (error) {
         Log.log().logError("publisher/index.ts async runner", error);
         process.exit(1);
     }
