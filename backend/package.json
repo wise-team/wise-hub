@@ -8,9 +8,9 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "test": "mocha -r ts-node/register --require source-map-support/register --recursive 'src/**/*.spec.ts'",
-    "boundarytest": "mocha -r ts-node/register --require source-map-support/register --recursive 'src/**/*.boundarytest.ts'",
-    "test-coverage": "TS_NODE_FILES=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc npm run test"
+    "test": "mocha -r ts-node/register --require source-map-support/register --recursive 'src/**/*.spec.test.ts'",
+    "boundarytest": "mocha -r ts-node/register --require source-map-support/register --recursive 'src/**/*.boundary.test.ts'",
+    "test-with-coverage": "TS_NODE_FILES=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc npm run test"
   },
   "dependencies": {
     "@types/steem-js-alpha": "https://github.com/wise-team/types-for-steem-js/raw/master/bin/types-steem-js-alpha-latest.tgz",
@@ -72,6 +72,22 @@
     "ts-node": "^6.2.0",
     "tslint": "^5.11.0",
     "typescript": "^2.9.2"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "**/*.test.ts"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
   },
   "repository": {
     "type": "git",
