@@ -13,6 +13,16 @@ export interface PublisherQueue {
 }
 
 export namespace PublisherQueue {
+    export function isPublisherQueue(obj: any): obj is PublisherQueue {
+        const o = <PublisherQueue>obj;
+        return (
+            o.resetProcessingQueue !== undefined &&
+            o.scheduleJob !== undefined &&
+            o.takeJob !== undefined &&
+            o.finishJob !== undefined
+        );
+    }
+
     export type JobEntry = PublishJob & { redisStringifiedEntry: string };
 
     export namespace JobEntry {
