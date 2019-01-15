@@ -11,9 +11,10 @@ import Axios from "axios";
 import { Log } from "./Log";
 import { Steemconnect } from "./Steemconnect";
 import { OperationWithDescriptor } from "steem";
+import { UsersManagerI } from "./UsersManagerI";
 
 // TODO: Move process.env management to root file and pass only arguments
-export class UsersManager {
+export class UsersManager implements UsersManagerI {
     private oauth2ClientId: string;
     private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/{
   "baseAuthorizationUrl": "https://steemconnect.com/oauth2/authorize",
