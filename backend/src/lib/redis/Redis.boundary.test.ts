@@ -13,7 +13,7 @@ Log.log().initialize();
 
 import { Redis } from "../redis/Redis";
 import { RedisImpl } from "./RedisImpl";
-import { RedisMock } from "./RedisMock";
+import { RedisMock } from "./RedisMock.test";
 
 describe("Redis", function() {
     this.timeout(10000);
@@ -195,6 +195,29 @@ describe("Redis", function() {
             await redis.lpush(key, "elem2");
             await redis.lremAll(key, "elem2");
             expect(await redis.llen(key)).to.be.equal(1);
+        });
+    });
+
+    describe(".rpoplpush()", () => {
+        it("pops the last element from the queue", async () => {
+            const key = "nonexistentkey:" + uuid();
+            await redis.lpush(key, "elem1");
+            await redis.lpush(key, "elem2");
+            await redis.lpush(key, "elem3");
+            await redis.lpush(key, "elem4");
+            expect(await redis.rpoplpush(key, "key2:" + uuid())).to.be.equal("elem1");
+        });
+
+        it("pops the last element and pushes to another queue", async () => {
+            const key1 = "nonexistentlist1:" + uuid();
+            const key2 = "nonexistentlist2:" + uuid();
+            await redis.lpush(key1, "elem1");
+            await redis.lpush(key1, "elem2");
+            await redis.lpush(key2, "elem3");
+            await redis.lpush(key2, "elem4");
+            await redis.rpoplpush(key1, key2);
+            expect(await redis.llen(key1)).to.be.equal(1);
+            expect(await redis.llen(key2)).to.be.equal(3);
         });
     });
 

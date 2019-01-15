@@ -8,7 +8,7 @@ chaiUse(chaiAsPromised);
 import { Heartbeat } from "./Heartbeat";
 import { HeartbeatImpl } from "./HeartbeatImpl";
 import { Redis } from "../redis/Redis";
-import { RedisMock } from "../redis/RedisMock";
+import { RedisMock } from "../redis/Redis.mock.test";
 import { Log } from "../Log";
 
 Log.log().initialize();
@@ -30,7 +30,7 @@ describe("Heartbeat", () => {
             const setWithTTLStub = sinon.fake.throws(new Error("This is intentionally thrown"));
             const redis: Redis = new RedisMock();
             redis.setWithTTL = setWithTTLStub;
-            const hartbeat: Heartbeat = new HeartbeatImpl(redis, "somename");
+            const hartbeat: Heartbeat = new HeartbeatImpl(redis, "somename", () => {});
 
             await hartbeat.beat(10);
         });
