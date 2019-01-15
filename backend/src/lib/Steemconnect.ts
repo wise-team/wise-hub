@@ -25,8 +25,7 @@ export class Steemconnect {
                 if (error) reject(this.transformSC2Error(error));
                 else resolve(result as any);
             });
-        })
-        .then(res => {
+        }).then(res => {
             ow(res.account, ow.object.label("lib/Steemconnect.ts sc2.me().response.account"));
             ow(res.user_metadata, ow.object.label("lib/Steemconnect.ts sc2.me().response.user_metadata"));
             ow(res.scope, ow.array.ofType(ow.string).label("lib/Steemconnect.ts sc2.me().response.scope"));
@@ -35,7 +34,12 @@ export class Steemconnect {
         });
     }
 
-    public async broadcast(account: string, scope: string [], ops: OperationWithDescriptor [], accessToken: string): Promise<Steemconnect.BroadcastResult> {
+    public async broadcast(
+        account: string,
+        scope: string[],
+        ops: OperationWithDescriptor[],
+        accessToken: string
+    ): Promise<Steemconnect.BroadcastResult> {
         ow(account, ow.string.nonEmpty.label("account"));
         ow(scope, ow.array.nonEmpty.ofType(ow.string).label("scope"));
         ow(ops, ow.array.nonEmpty.ofType(ow.object).label("ops"));
@@ -55,7 +59,7 @@ export class Steemconnect {
         ow(resp.result.block_num, ow.number.label("sc2.broadcast().response.result.block_num"));
         ow(resp.result.trx_num, ow.number.label("sc2.broadcast().response.result"));
 
-        const result: { id: string; block_num: number; trx_num: number; } = resp.result;
+        const result: { id: string; block_num: number; trx_num: number } = resp.result;
         return result;
     }
 
@@ -72,13 +76,13 @@ export class Steemconnect {
         });
     }
 
-    private constructSC2(scope: string []): sc2.SteemConnectV2 {
+    private constructSC2(scope: string[]): sc2.SteemConnectV2 {
         ow(scope, ow.array.ofType(ow.string).label("scope"));
 
         return sc2.Initialize({
             app: this.oauth2ClientId,
             callbackURL: this.callbackUrl,
-            scope: scope
+            scope: scope,
         });
     }
 
@@ -86,13 +90,16 @@ export class Steemconnect {
         ow(error, ow.object.label("error"));
 
         if (error.error_description) {
-            const err = new Error((error.message ? error.message : "") + ": "
-                    + (error.error ? error.error : "") + " "
-                    + error.error_description);
+            const err = new Error(
+                (error.message ? error.message : "") +
+                    ": " +
+                    (error.error ? error.error : "") +
+                    " " +
+                    error.error_description
+            );
             // console.error(err);
             return err;
-        }
-        else return error;
+        } else return error;
     }
 }
 
@@ -100,7 +107,7 @@ export namespace Steemconnect {
     export interface Me {
         account: AccountInfo;
         user_metadata: object;
-        scope: string [];
+        scope: string[];
         name: string;
     }
 
@@ -109,7 +116,7 @@ export namespace Steemconnect {
         block_num: number;
         trx_num: number;
     }
-}
+
     export namespace BroadcastResult {
         export function isBroadcastResult(o: any): o is BroadcastResult {
             return (
