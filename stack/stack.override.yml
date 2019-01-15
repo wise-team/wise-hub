@@ -1,9 +1,10 @@
 version: "3.3"
-    
 
 services:
   #§ data.config.hub.docker.services.nginx.name + ':'
   nginx:
+    ports:
+      - 8080:80
     environment:
       WISE_ENVIRONMENT_TYPE: development
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.production
@@ -33,7 +34,8 @@ services:
       #§ 'STEEMCONNECT_CALLBACK_URL: "http://localhost:8080' + data.config.hub.urls.api.auth.callback + '"'
       STEEMCONNECT_CALLBACK_URL: "http://localhost:8080/api/auth/callback"
       LOGIN_REDIRECT_URL: "/"
-      
+      #§ 'OAUTH2_CLIENT_ID: ' + JSON.stringify(data.config.steemconnect.app.staging.settings.client_id)
+      OAUTH2_CLIENT_ID: "wisevote.staging"
 
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
@@ -62,7 +64,8 @@ services:
       VAULT_APPROLE_SECRET_FILE: /run/secrets/hub-publisher-approle-secret
       WISE_LOG_LEVEL: debug
       WISE_VAULT_URL: "http://host.docker.internal:8200"
-
+      #§ 'OAUTH2_CLIENT_ID: ' + JSON.stringify(data.config.steemconnect.app.staging.settings.client_id)
+      OAUTH2_CLIENT_ID: "wisevote.staging"
 
 secrets:
   #§ data.config.hub.docker.services.api.secrets.appRoleId + ':'
@@ -81,5 +84,4 @@ secrets:
 volumes:
   #§ data.config.hub.docker.services.redis.volume + ':'
   wise_hub_redis:
-
 # TODO: do not forget about restart always on production

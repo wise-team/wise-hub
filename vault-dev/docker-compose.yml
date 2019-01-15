@@ -4,14 +4,14 @@ services:
   vault-dev:
     image: vault
     container_name: vault-dev
-    command: vault server -config /vault/config/local.json
+    command: 'sh -c "cat /vault/config/local.json && vault server -config /vault/config/local.json"'
     cap_add:
       - IPC_LOCK
     volumes:
       - ../../secret-vault-dev/Vaultfile:/vault/backend_file:rw
     environment:
-      - 'VAULT_API_ADDR=http://0.0.0.0:8200'
-      - 'VAULT_ADDR=http://127.0.0.1:8200'
-      - 'VAULT_LOCAL_CONFIG={"backend": { "file": { "path": "/vault/backend_file" } }, "default_lease_ttl": "15m", "max_lease_ttl": "30m", "listener": [{"tcp": {"address": "0.0.0.0:8200","tls_disable": 1}}]}'
+      - "VAULT_API_ADDR=http://0.0.0.0:8200"
+      - "VAULT_ADDR=http://127.0.0.1:8200"
+      - 'VAULT_LOCAL_CONFIG={ "ui": true, "backend": { "file": { "path": "/vault/backend_file" } }, "default_lease_ttl": "15m", "max_lease_ttl": "30m", "listener": [{"tcp": {"address": "0.0.0.0:8200","tls_disable": 1}}]}'
     ports:
       - 8200:8200
