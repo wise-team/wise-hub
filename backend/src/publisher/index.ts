@@ -69,7 +69,6 @@ if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
                 processingQueueKey: common.redis.publishProcessingQueue,
             })
         );
-        const heartbeat: Heartbeat = new HeartbeatImpl(redis, common.redis.publisherHartbeat);
         const broadcaster: Broadcaster = new BroadcasterImpl({
             log: (msg: string, error?: Error) => Log.log().logError(msg, error),
             usersManager: usersManager,
@@ -85,7 +84,7 @@ if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
             },
             {
                 init: () => publisherQueue.resetProcessingQueue(),
-                heartbeat: () => heartbeat.beat(StaticConfig.JOB_BLOCKINGWAIT_SECONDS),
+                heartbeat: () => heartbeat.beat(StaticConfig.HEARTBEAT_TTL_SECONDS),
                 onError: async (error: Error) => Log.log().logError("Error in publisher job consumer", error),
                 fallbackLog: (msg: string, error?: Error) => console.error(msg, error),
                 //

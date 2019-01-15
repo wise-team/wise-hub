@@ -17,11 +17,11 @@ import { Steemconnect } from "../../lib/Steemconnect";
 
 // TODO: Move process.env management to root file and pass only arguments
 export class AuthManager {
-    private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/{
-  "baseAuthorizationUrl": "https://steemconnect.com/oauth2/authorize",
-  "tokenUrl": "https://steemconnect.com/api/oauth2/token",
-  "tokenRevocationUrl": "https://steemconnect.com/api/oauth2/token/revoke"
-}/*§ §.*/;
+    private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/ {
+        baseAuthorizationUrl: "https://steemconnect.com/oauth2/authorize",
+        tokenUrl: "https://steemconnect.com/api/oauth2/token",
+        tokenRevocationUrl: "https://steemconnect.com/api/oauth2/token/revoke",
+    } /*§ §.*/;
 
     private steemconnectCallbackUrl: string;
     private loginRedirectUrl: string;
@@ -45,7 +45,19 @@ export class AuthManager {
 
         const steemconnectCallbackUrlEnv = process.env.STEEMCONNECT_CALLBACK_URL;
         if (!steemconnectCallbackUrlEnv) throw new Error("Env STEEMCONNECT_CALLBACK_URL is missing");
-        ow(steemconnectCallbackUrlEnv, ow.string.minLength(5).startsWith("https://").label("steemconnectCallbackUrlEnv"));
+        ow(
+            steemconnectCallbackUrlEnv,
+            ow.any(
+                ow.string
+                    .minLength(5)
+                    .startsWith("https://")
+                    .label("STEEMCONNECT_CALLBACK_URL"),
+                ow.string
+                    .minLength(5)
+                    .startsWith("http://localhost")
+                    .label("STEEMCONNECT_CALLBACK_URL")
+            )
+        );
         this.steemconnectCallbackUrl = steemconnectCallbackUrlEnv;
 
         const loginRedirectUrlEnv = process.env.LOGIN_REDIRECT_URL;
@@ -57,38 +69,43 @@ export class AuthManager {
     }
 
     public async configure(app: express.Application) {
-        const steemConnectSecret: { v: string } = await this.vault.getSecret(common.vault.secrets.steemConnectClientSecret);
-        if (!(steemConnectSecret && steemConnectSecret.v && steemConnectSecret.v.length > 0)) throw new Error("Missing SteemConnect client secret");
+        const steemConnectSecret: { v: string } = await this.vault.getSecret(
+            common.vault.secrets.steemConnectClientSecret
+        );
+        if (!(steemConnectSecret && steemConnectSecret.v && steemConnectSecret.v.length > 0))
+            throw new Error("Missing SteemConnect client secret");
 
-        passport.use(new OAuth2Strategy({
-                authorizationURL: this.oauth2Settings.baseAuthorizationUrl,
-                tokenURL: this.oauth2Settings.tokenUrl,
-                clientID: this.oauth2ClientId,
-                clientSecret: steemConnectSecret.v,
-                callbackURL: this.steemconnectCallbackUrl,
-                scope: [],
-                scopeSeparator: ",",
-                state: true,
-            } as any,
-            (accessToken: string, refreshToken: string, profile: any,  cb: (error: any, user: any) => void) => {
-                (async () => {
-                    try {
-                        const user: User = await this.performLogin(accessToken, refreshToken);
-                        return cb(undefined, user);
-                    }
-                    catch (error) {
-                        Log.log().logError("AuthManager.configure.passport.callback", error);
-                        return cb(error, undefined);
-                    }
-                })();
-            }
-        ));
+        passport.use(
+            new OAuth2Strategy(
+                {
+                    authorizationURL: this.oauth2Settings.baseAuthorizationUrl,
+                    tokenURL: this.oauth2Settings.tokenUrl,
+                    clientID: this.oauth2ClientId,
+                    clientSecret: steemConnectSecret.v,
+                    callbackURL: this.steemconnectCallbackUrl,
+                    scope: [],
+                    scopeSeparator: ",",
+                    state: true,
+                } as any,
+                (accessToken: string, refreshToken: string, profile: any, cb: (error: any, user: any) => void) => {
+                    (async () => {
+                        try {
+                            const user: User = await this.performLogin(accessToken, refreshToken);
+                            return cb(undefined, user);
+                        } catch (error) {
+                            Log.log().logError("AuthManager.configure.passport.callback", error);
+                            return cb(error, undefined);
+                        }
+                    })();
+                }
+            )
+        );
 
         passport.serializeUser(function(user, done) {
             done(null, user);
         });
 
-          passport.deserializeUser(function(user, done) {
+        passport.deserializeUser(function(user, done) {
             done(null, user);
         });
 
@@ -97,19 +114,20 @@ export class AuthManager {
     }
 
     public routes(app: express.Application) {
-        app.get(common.urls.api.auth.login.scope.empty,
-            passport.authenticate("oauth2", { scope: [ "login" ] })
+        app.get(common.urls.api.auth.login.scope.empty, passport.authenticate("oauth2", { scope: ["login"] }));
+
+        app.get(
+            common.urls.api.auth.login.scope.custom_json,
+            passport.authenticate("oauth2", { scope: ["custom_json"] })
         );
 
-        app.get(common.urls.api.auth.login.scope.custom_json,
-            passport.authenticate("oauth2", { scope: [ "custom_json" ] })
+        app.get(
+            common.urls.api.auth.login.scope.custom_json_vote_offline,
+            passport.authenticate("oauth2", { scope: ["custom_json", "vote", "offline"] })
         );
 
-        app.get(common.urls.api.auth.login.scope.custom_json_vote_offline,
-            passport.authenticate("oauth2", { scope: [ "custom_json", "vote", "offline" ] })
-        );
-
-        app.get(common.urls.api.auth.callback,
+        app.get(
+            common.urls.api.auth.callback,
             passport.authenticate("oauth2", {
                 failureRedirect: this.loginRedirectUrl + "?msg=" + encodeURIComponent("Login failed"),
                 successRedirect: this.loginRedirectUrl + "?msg=" + encodeURIComponent("Login succeeded"),
@@ -121,24 +139,19 @@ export class AuthManager {
             }
         );
 
-        app.get(common.urls.api.auth.test_login,
-            AuthManager.isUserAuthenticated,
-            (req, res) => {
-                res.send(JSON.stringify({ authorized: true }));
-            }
-        );
+        app.get(common.urls.api.auth.test_login, AuthManager.isUserAuthenticated, (req, res) => {
+            res.send(JSON.stringify({ authorized: true }));
+        });
 
-        app.get(common.urls.api.auth.logout,
-            AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq("api/auth/AuthManager.ts route logout", res, async () => {
+        app.get(common.urls.api.auth.logout, AuthManager.isUserAuthenticated, (req, res) =>
+            asyncReq("api/auth/AuthManager.ts route logout", res, async () => {
                 req.logout();
                 res.send(JSON.stringify({ logout: true, revoke_all: false }));
             })
         );
 
-        app.get(common.urls.api.auth.revoke_all,
-            AuthManager.isUserAuthenticated,
-            (req, res) => asyncReq("api/auth/AuthManager.ts route revoke_all", res, async () => {
+        app.get(common.urls.api.auth.revoke_all, AuthManager.isUserAuthenticated, (req, res) =>
+            asyncReq("api/auth/AuthManager.ts route revoke_all", res, async () => {
                 await this.usersManager.forgetUser(d(req.user));
                 req.logout();
                 res.send(JSON.stringify({ logout: true, revoke_all: true }));

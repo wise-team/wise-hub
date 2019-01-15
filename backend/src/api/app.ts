@@ -2,7 +2,7 @@ import * as _ from "lodash";
 import * as express from "express";
 import * as ExpressSession from "express-session";
 import * as bodyParser from "body-parser";
-import * as Redis from "ioredis";
+import * as IORedis from "ioredis";
 import * as connectRedis from "connect-redis";
 import { common } from "../common/common";
 import { Vault } from "../lib/vault/Vault";
@@ -16,16 +16,22 @@ import { Log } from "../lib/Log";
 import { DaemonRoutes } from "./routes/DaemonRoutes";
 import { RulesetsRoutes } from "./routes/RulesetsRoutes";
 import { AccountsRoutes } from "./routes/AccountsRoutes";
+import { stringify } from "querystring";
+import { Heartbeat } from "../lib/heartbeat/Heartbeat";
+import { HeartbeatImpl } from "../lib/heartbeat/HeartbeatImpl";
+import { Redis } from "../lib/redis/Redis";
+import { RedisImpl } from "../lib/redis/RedisImpl";
 
 export class App {
     public app: express.Application;
     private sessionOptions: any = {};
 
     private redisUrl: string;
-    private redis: Redis.Redis;
+    private ioredis: IORedis.Redis;
     private vault: Vault;
     private usersManager: UsersManager;
     private authManager: AuthManager;
+    private heartbeats: Map<string, Heartbeat>;
 
     private statusRoutes: StatusRoutes;
     private userRoutes: UserRoutes;
@@ -39,7 +45,7 @@ export class App {
         const redisUrl = process.env.REDIS_URL;
         if (!redisUrl) throw new Error("Env REDIS_URL is missing.");
         this.redisUrl = redisUrl;
-        this.redis = new Redis(redisUrl);
+        this.ioredis = new IORedis(redisUrl);
 
         const vaultAddr = process.env.WISE_VAULT_URL;
         if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
@@ -50,21 +56,25 @@ export class App {
 
         this.vault = new Vault(vaultAddr);
 
-        this.usersManager = new UsersManager(this.redis, this.vault, {
-            canIssueRefreshTokens: true
-        });
+        const redis = new RedisImpl(redisUrl);
+        this.heartbeats = new Map<string, Heartbeat>();
+        this.heartbeats.set("publisher", new HeartbeatImpl(redis, "publisher"));
+
+        this.usersManager = new UsersManager(this.ioredis, this.vault, { canIssueRefreshTokens: true });
         this.authManager = new AuthManager(this.vault, this.usersManager);
 
-        this.statusRoutes = new StatusRoutes(this.redis, this.vault);
-        this.accountsRoutes = new AccountsRoutes(this.redis, this.usersManager);
-        this.userRoutes = new UserRoutes(this.redis, this.usersManager);
-        this.daemonRoutes = new DaemonRoutes(this.redis);
-        this.rulesetsRoutes = new RulesetsRoutes(this.redis, this.usersManager);
+        this.statusRoutes = new StatusRoutes(this.ioredis, this.vault, this.heartbeats);
+        this.accountsRoutes = new AccountsRoutes(this.ioredis, this.usersManager);
+        this.userRoutes = new UserRoutes(this.ioredis, this.usersManager);
+        this.daemonRoutes = new DaemonRoutes(this.ioredis);
+        this.rulesetsRoutes = new RulesetsRoutes(this.ioredis, this.usersManager);
     }
 
     public async init() {
         Log.log().debug("Initialising vault connection");
-        const policies = /*§ §*/["wise-hub-api"]/*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
+        const policies = /*§ §*/ [
+                "wise-hub-api",
+            ] /*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
         await this.vault.init(vault => AppRole.login(vault, policies));
 
         await this.usersManager.init();
@@ -95,9 +105,7 @@ export class App {
             store: new RedisSessionStore({ url: this.redisUrl }),
             saveUninitialized: true,
             rolling: true,
-            cookie: {
-                maxAge: /*§ §*/604800000/*§ data.config.hub.api.cookie.maxAgeMs §.*/
-            }
+            cookie: { maxAge: /*§ §*/ 604800000 /*§ data.config.hub.api.cookie.maxAgeMs §.*/ },
         };
         const resolvedSessionOptions = _.merge({}, this.sessionOptions, sessionDynamicOpts);
 
@@ -124,14 +132,13 @@ export class App {
         this.app.get("/api/rules", async (req, res) => {
             const out: any = {};
 
-            const keys = await this.redis.keys(common.redis.rules + ":*");
+            const keys = await this.ioredis.keys(common.redis.rules + ":*");
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
                 if (key.indexOf("@") !== -1) {
-                    out[keys[i]] = await this.redis.get(keys[i]);
-                }
-                else {
-                    out[keys[i]] = await this.redis.hgetall(keys[i]);
+                    out[keys[i]] = await this.ioredis.get(keys[i]);
+                } else {
+                    out[keys[i]] = await this.ioredis.hgetall(keys[i]);
                 }
             }
 
@@ -139,9 +146,8 @@ export class App {
         });
 
         this.app.get("/api/test/delegator/", async (req, res) => {
-            const delegators = await this.redis.smembers(common.redis.delegators);
+            const delegators = await this.ioredis.smembers(common.redis.delegators);
             res.send("Delegators: " + delegators.join(", "));
         });
     }
-
 }

@@ -5,7 +5,7 @@ import { Redis } from "../../lib/redis/Redis";
 
 export class HeartbeatImpl implements Heartbeat {
     // it contains staticly generated UUIDv4 to clear keyspace and prevent collisions
-    private static KEY_BASE: string = "Heartbeat:1937d362-4a3d-482e-bc59-240e274f742d:";
+    private static KEY_BASE: string = "u1937d362-4a3d-482e-bc59-240e274f742d:heartbeat";
     private redis: Redis;
     private key: string;
     private logFn: (msg: string, error?: Error) => void;
