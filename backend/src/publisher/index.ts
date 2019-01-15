@@ -106,6 +106,7 @@ if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
                 },
                 onProcessFailure: async (job: PublisherQueue.JobEntry, error: Error) => {
                     await publisherLog.logJobFailure(job, error);
+                    await publisherQueue.finishJob(job);
                 },
             }
         );
