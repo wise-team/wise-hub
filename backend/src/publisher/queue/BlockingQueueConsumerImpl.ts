@@ -2,13 +2,13 @@ import * as BluebirdPromise from "bluebird";
 
 import { BlockingQueueConsumer } from "./BlockingQueueConsumer";
 
-export class BlockingQueueConsumerImpl<T> implements BlockingQueueConsumer<T> {
+export class BlockingQueueConsumerImpl<T, R> implements BlockingQueueConsumer<T, R> {
     private options: BlockingQueueConsumer.Options;
-    private callbacks: BlockingQueueConsumer.Callbacks<T>;
+    private callbacks: BlockingQueueConsumer.Callbacks<T, R>;
     private stopListeners: (() => void)[] = [];
     private running: boolean = false;
 
-    public constructor(options: BlockingQueueConsumer.Options, callbacks: BlockingQueueConsumer.Callbacks<T>) {
+    public constructor(options: BlockingQueueConsumer.Options, callbacks: BlockingQueueConsumer.Callbacks<T, R>) {
         BlockingQueueConsumer.Options.validate(options);
         BlockingQueueConsumer.Callbacks.validate(callbacks);
 
@@ -81,21 +81,21 @@ export class BlockingQueueConsumerImpl<T> implements BlockingQueueConsumer<T> {
     private processItemInSpawnedAsync(item: T) {
         (async () => {
             try {
-                await this.process(item);
-                await this.onProcessSuccess(item);
+                const result: R = await this.process(item);
+                await this.onProcessSuccess(item, result);
             } catch (error) {
                 await this.onProcessFailure(item, error);
             }
         })();
     }
 
-    private async process(item: T) {
-        await this.callbacks.process(item);
+    private async process(item: T): Promise<R> {
+        return await this.callbacks.process(item);
     }
 
-    private async onProcessSuccess(item: T) {
+    private async onProcessSuccess(item: T, result: R) {
         try {
-            await this.callbacks.onProcessSuccess(item);
+            await this.callbacks.onProcessSuccess(item, result);
         } catch (error) {
             await this.onError(error);
         }

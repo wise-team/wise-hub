@@ -1,6 +1,6 @@
 import ow from "ow";
 
-export interface BlockingQueueConsumer<T> {
+export interface BlockingQueueConsumer<T, R> {
     // constructor(options: BlockingQueueConsumer.Options, callbacks: BlockingQueueConsumer.Callbacks<T>);
     start(): void;
     stop(): Promise<void>;
@@ -21,19 +21,19 @@ export namespace BlockingQueueConsumer {
         }
     }
 
-    export interface Callbacks<T> {
+    export interface Callbacks<T, R> {
         init: () => Promise<void>;
         heartbeat: () => void;
         onError: (error: Error) => Promise<void>;
         fallbackLog: (msg: string, error?: Error) => void;
         take: () => Promise<T | undefined>;
-        process: (job: T) => Promise<void>;
-        onProcessSuccess: (job: T) => Promise<void>;
+        process: (job: T) => Promise<R>;
+        onProcessSuccess: (job: T, result: R) => Promise<void>;
         onProcessFailure: (job: T, error: Error) => Promise<void>;
     }
 
     export namespace Callbacks {
-        export function validate<T>(callbacks: Callbacks<T>) {
+        export function validate<T, R>(callbacks: Callbacks<T, R>) {
             ow(callbacks, ow.object.label("callbacks"));
             ow(callbacks.init, ow.function.label("callbacks.init"));
             ow(callbacks.heartbeat, ow.function.label("callbacks.heartbeat"));
