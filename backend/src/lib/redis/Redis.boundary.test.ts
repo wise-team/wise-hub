@@ -13,7 +13,7 @@ Log.log().initialize();
 
 import { Redis } from "../redis/Redis";
 import { RedisImpl } from "./RedisImpl";
-import { RedisMock } from "./RedisMock.test";
+import { RedisMock } from "./Redis.mock.test";
 
 describe("Redis", function() {
     this.timeout(10000);
