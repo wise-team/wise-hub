@@ -8,7 +8,7 @@ export class CustomError extends TsCustomError {
 
         if (cause) {
             this.cause = cause;
-            this.stack = (this.stack || "") + "Caused by: " + (cause.stack || cause);
+            this.stack = (this.stack || "") + "\n Caused by: " + (cause.stack || cause);
         }
     }
 }
