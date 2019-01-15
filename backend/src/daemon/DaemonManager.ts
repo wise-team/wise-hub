@@ -1,3 +1,6 @@
+import * as BluebirdPromise from "bluebird";
+import ow from "ow";
+
 import { Redis } from "ioredis";
 import { common } from "../common/common";
 import { DelegatorManager } from "../lib/DelegatorManager";
@@ -10,8 +13,7 @@ import { RulesManager } from "./rules/RulesManager";
 import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
 import { EffectuatedWiseOperation, SetRules, EffectuatedSetRules, RulePrototyper, Api } from "steem-wise-core";
 import { DaemonLog } from "./DaemonLog";
-import { BlockLoadingApi } from "./BlockLoadingApi";
-import * as BluebirdPromise from "bluebird";
+import { PublisherQueue } from "../publisher/queue/PublisherQueue";
 
 export class DaemonManager {
     private redis: Redis;
@@ -22,17 +24,35 @@ export class DaemonManager {
     private rulesManager: RulesManager;
     private daemonLog: DaemonLog;
     private blockLoadingApi: Api;
+    private publisherQueue: PublisherQueue;
 
-    public constructor(redis: Redis, delegatorManager: DelegatorManager, apiHelper: ApiHelper, daemonLog: DaemonLog) {
+    public constructor(
+        redis: Redis,
+        delegatorManager: DelegatorManager,
+        apiHelper: ApiHelper,
+        daemonLog: DaemonLog,
+        publisherQueue: PublisherQueue
+    ) {
         this.redis = redis;
         this.delegatorManager = delegatorManager;
         this.apiHelper = apiHelper;
         this.daemonLog = daemonLog;
 
+        ow(publisherQueue, ow.object.is(o => PublisherQueue.isPublisherQueue(o)).label("publisherQueue"));
+        this.publisherQueue = publisherQueue;
+
         this.api = this.apiHelper.constructApiForDaemon();
         this.blockLoadingApi = this.apiHelper.constructApiForDaemon(); // disable temp BlockLoadingApi (not supported by validator)
         this.rulesManager = new RulesManager(this.redis);
-        this.daemon = new Daemon(this.redis, this.delegatorManager, this.apiHelper, this.blockLoadingApi, this.rulesManager, this.daemonLog);
+        this.daemon = new Daemon(
+            this.redis,
+            this.delegatorManager,
+            this.apiHelper,
+            this.blockLoadingApi,
+            this.rulesManager,
+            this.daemonLog,
+            this.publisherQueue
+        );
     }
 
     public async run() {
@@ -73,43 +93,52 @@ export class DaemonManager {
             let dgp: DynamicGlobalProperties | undefined = undefined;
             while (!dgp) {
                 try {
-                   dgp = await this.apiHelper.getSteem().getDynamicGlobalPropertiesAsync();
-                }
-                catch (error) {
-                    Log.log().logError("daemon/Daemon.ts#DaemonManager.determineStartBlock Error while getting DynamicGlobalProperties, Retrying in 5 seconds",
-                        error);
+                    dgp = await this.apiHelper.getSteem().getDynamicGlobalPropertiesAsync();
+                } catch (error) {
+                    Log.log().logError(
+                        "daemon/Daemon.ts#DaemonManager.determineStartBlock Error while getting DynamicGlobalProperties, Retrying in 5 seconds",
+                        error
+                    );
                     await BluebirdPromise.delay(5000);
                 }
             }
             return parseInt(d(dgp).head_block_number + "", 10);
         }
 
-        const lastProcessedBlockFromRedis = await this.redis.hget(common.redis.daemonStatus.key, common.redis.daemonStatus.props.last_processed_block);
+        const lastProcessedBlockFromRedis = await this.redis.hget(
+            common.redis.daemonStatus.key,
+            common.redis.daemonStatus.props.last_processed_block
+        );
         if (lastProcessedBlockFromRedis) return parseInt(lastProcessedBlockFromRedis + "", 10);
 
         if (startBlockFromEnv.toLocaleLowerCase() === "head") {
             const dgp: DynamicGlobalProperties = await this.apiHelper.getSteem().getDynamicGlobalPropertiesAsync();
             return parseInt(dgp.head_block_number + "", 10);
-        }
-        else {
+        } else {
             return parseInt(startBlockFromEnv, 10);
         }
     }
 
-    private async preloadAllRulesets(moment: number): Promise<EffectuatedSetRules []> {
-        const ops: EffectuatedWiseOperation []
-            = await this.apiHelper.getWiseSQL("/rpc/all_rulesets", { moment: moment }, 99999999);
+    private async preloadAllRulesets(moment: number): Promise<EffectuatedSetRules[]> {
+        const ops: EffectuatedWiseOperation[] = await this.apiHelper.getWiseSQL(
+            "/rpc/all_rulesets",
+            { moment: moment },
+            99999999
+        );
         return ops.map((op: EffectuatedWiseOperation) => {
             const setRules = op.command;
-            if (!SetRules.isSetRules(setRules)) throw new Error("Operation is not an instance of SetRules: " + JSON.stringify(op));
+            if (!SetRules.isSetRules(setRules))
+                throw new Error("Operation is not an instance of SetRules: " + JSON.stringify(op));
 
-            const prototypedRulesets = setRules.rulesets.map(unprototypedRuleset => RulePrototyper.prototypeRuleset(unprototypedRuleset));
+            const prototypedRulesets = setRules.rulesets.map(unprototypedRuleset =>
+                RulePrototyper.prototypeRuleset(unprototypedRuleset)
+            );
 
             const out: EffectuatedSetRules = {
                 moment: op.moment,
                 voter: op.voter,
                 delegator: op.delegator,
-                rulesets: prototypedRulesets
+                rulesets: prototypedRulesets,
             };
             return out;
         });

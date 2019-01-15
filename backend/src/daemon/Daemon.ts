@@ -1,4 +1,5 @@
 import * as steemJs from "steem";
+import ow from "ow";
 import { Redis } from "ioredis";
 import { common } from "../common/common";
 import Wise, {
@@ -18,9 +19,11 @@ import { Log } from "../lib/Log";
 import { RulesManager } from "./rules/RulesManager";
 import { ValidationRunner } from "./ValidationRunner";
 import { StaticConfig } from "./StaticConfig";
-import { ToSendQueue } from "../publisher/ToSendQueue";
 import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
 import { DaemonLog } from "./DaemonLog";
+import { PublisherQueue } from "../publisher/queue/PublisherQueue";
+import { PublishJob } from "../publisher/entities/PublishJob";
+import { PublishableOperation } from "../publisher/entities/PublishableOperation";
 
 export class Daemon {
     private api: Api;
@@ -31,6 +34,7 @@ export class Daemon {
     private validationRunner: ValidationRunner;
     private apiHelper: ApiHelper;
     private daemonLog: DaemonLog;
+    private publisherQueue: PublisherQueue;
 
     public constructor(
         redis: Redis,
@@ -38,7 +42,8 @@ export class Daemon {
         apiHelper: ApiHelper,
         api: Api,
         rulesManager: RulesManager,
-        daemonLog: DaemonLog
+        daemonLog: DaemonLog,
+        publisherQueue: PublisherQueue
     ) {
         this.redis = redis;
         this.apiHelper = apiHelper;
@@ -46,6 +51,9 @@ export class Daemon {
         this.api = api;
         this.rulesManager = rulesManager;
         this.daemonLog = daemonLog;
+
+        ow(publisherQueue, ow.object.is(o => PublisherQueue.isPublisherQueue(o)).label("publisherQueue"));
+        this.publisherQueue = publisherQueue;
 
         this.delegatorManager.onDelegatorAdd(addedDelegator => {
             this.daemonLog.emit({ msg: "Enable wiseHUB daemon for delegator @" + addedDelegator }, addedDelegator);
@@ -267,7 +275,12 @@ export class Daemon {
     }
 
     private async sendOps(delegator: string, ops: steemJs.OperationWithDescriptor[]) {
-        await ToSendQueue.addToPublishQueue(this.redis, delegator, ops);
+        const job: PublishJob = {
+            ops: ops as PublishableOperation[],
+            delegator: delegator,
+        };
+        await this.publisherQueue.scheduleJob(job);
+
         this.daemonLog.emit(
             {
                 msg:
