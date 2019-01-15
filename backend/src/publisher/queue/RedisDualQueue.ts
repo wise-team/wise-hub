@@ -8,7 +8,6 @@ export interface RedisDualQueue {
     pushToWaitingQueue(entry: string): Promise<void>;
     popFromWaitingQueuePushToProcessingQueue(timeoutSeconds: number): Promise<string | undefined>;
     removeFromProcessingQueue(entry: string): Promise<void>;
-    removeFromProcessingQueueAndPushBackToWaitingQueue(entry: string): Promise<void>;
 }
 
 export namespace RedisDualQueue {
@@ -19,10 +18,10 @@ export namespace RedisDualQueue {
             o.isProcessingQueueEmpty !== undefined &&
             o.pushToWaitingQueue !== undefined &&
             o.popFromWaitingQueuePushToProcessingQueue !== undefined &&
-            o.removeFromProcessingQueue !== undefined &&
-            o.removeFromProcessingQueueAndPushBackToWaitingQueue !== undefined
+            o.removeFromProcessingQueue !== undefined
         );
     }
+
     export class RedisDualQueueError extends CustomError {
         public constructor(message?: string, cause?: Error) {
             super(message, cause);

@@ -29,7 +29,7 @@ export class RedisDualQueueImpl implements RedisDualQueue {
 
     public async isProcessingQueueEmpty(): Promise<boolean> {
         try {
-            const llen = await this.redis.llen(this.options.waitingQueueKey);
+            const llen = await this.redis.llen(this.options.processingQueueKey);
             return llen === 0;
         } catch (error) {
             throw new RedisDualQueue.RedisDualQueueError("Error in RedisDualQueueImpl.isProcessingQueueEmpty", error);
@@ -40,7 +40,7 @@ export class RedisDualQueueImpl implements RedisDualQueue {
         ow(entry, ow.string.nonEmpty.label("entry"));
 
         try {
-            await this.redis.lpush(this.options.waitingQueueKey, JSON.stringify(entry));
+            await this.redis.lpush(this.options.waitingQueueKey, entry);
         } catch (error) {
             throw new RedisDualQueue.RedisDualQueueError("Error in RedisDualQueueImpl.pushToWaitingQueue", error);
         }
@@ -71,7 +71,7 @@ export class RedisDualQueueImpl implements RedisDualQueue {
         ow(entry, ow.string.nonEmpty.label("entry"));
 
         try {
-            const numRemoved = await this.redis.lrem(this.options.processingQueueKey, entry);
+            const numRemoved = await this.redis.lremAll(this.options.processingQueueKey, entry);
             if (numRemoved === 0)
                 throw new RedisDualQueue.RedisDualQueueError("Item " + entry + " not found in processing queue");
         } catch (error) {
@@ -84,19 +84,13 @@ export class RedisDualQueueImpl implements RedisDualQueue {
         }
     }
 
-    public async removeFromProcessingQueueAndPushBackToWaitingQueue(entry: string): Promise<void> {
-        ow(entry, ow.string.nonEmpty.label("entry"));
-
-        try {
-            await this.removeFromProcessingQueue(entry);
-            await this.pushToWaitingQueue(entry);
-        } catch (error) {
-            if (error instanceof RedisDualQueue.RedisDualQueueError) throw error;
-            else
-                throw new RedisDualQueue.RedisDualQueueError(
-                    "Error in RedisDualQueueImpl.removeFromProcessingQueueAndPushBackToWaitingQueue",
-                    error
-                );
+    public async pushAllFromProcessingQueueToWaitingQueue(): Promise<void> {
+        let dirtyListElementsPresent = true;
+        let dirtyCount = 0;
+        while (dirtyListElementsPresent) {
+            const resp = await this.redis.rpoplpush(this.options.processingQueueKey, this.options.waitingQueueKey);
+            dirtyListElementsPresent = !!resp;
+            if (dirtyListElementsPresent) dirtyCount++;
         }
     }
 }
