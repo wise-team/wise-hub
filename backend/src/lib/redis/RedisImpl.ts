@@ -86,6 +86,17 @@ export class RedisImpl implements Redis {
         }
     }
 
+    public async rpoplpush(srcListKey: string, targetListKey: string): Promise<string> {
+        ow(srcListKey, ow.string.nonEmpty.label("srcListKey"));
+        ow(targetListKey, ow.string.nonEmpty.label("targetListKey"));
+
+        try {
+            return await this.ioredis.rpoplpush(srcListKey, targetListKey);
+        } catch (error) {
+            throw new Redis.RedisError("Error in .rpoplpush(): " + error, error);
+        }
+    }
+
     public async brpoplpush(srcListKey: string, targetListKey: string, timeoutSeconds: number): Promise<string> {
         ow(srcListKey, ow.string.nonEmpty.label("srcListKey"));
         ow(targetListKey, ow.string.nonEmpty.label("targetListKey"));

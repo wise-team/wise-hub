@@ -8,6 +8,7 @@ export interface Redis {
     llen(key: string): Promise<number>;
     lpush(key: string, entry: string): Promise<string>;
     lremAll(key: string, entry: string): Promise<number>;
+    rpoplpush(srcListKey: string, targetListKey: string): Promise<string>;
     brpoplpush(srcListKey: string, targetListKey: string, timeoutSeconds: number): Promise<string>;
     close(): Promise<void>;
 }
