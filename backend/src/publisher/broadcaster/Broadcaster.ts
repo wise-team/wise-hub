@@ -10,7 +10,7 @@ export interface Broadcaster {
 
 export namespace Broadcaster {
     export interface Params {
-        log: (msg: string, error?: Error) => void;
+        onWarning: (job: PublishJob, msg: string, error?: Error) => void;
         usersManager: UsersManagerI;
         retryDelaysSeconds: number[];
         broadcastScope: string[];
@@ -18,7 +18,7 @@ export namespace Broadcaster {
 
     export namespace Params {
         export function validate(params: Params) {
-            ow(params.log, ow.function.label("params.log"));
+            ow(params.onWarning, ow.function.label("params.onWarning"));
             ow(params.usersManager, ow.object.label("params.usersManager"));
             ow(params.retryDelaysSeconds, ow.array.ofType(ow.number.greaterThan(0)).label("params.retryDelaysSeconds"));
             ow(params.broadcastScope, ow.array.ofType(ow.string.nonEmpty).label("params.broadcastScope"));

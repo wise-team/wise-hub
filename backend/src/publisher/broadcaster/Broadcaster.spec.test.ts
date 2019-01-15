@@ -59,7 +59,7 @@ describe("Broadcaster", function() {
         const usersManager: UsersManagerI = new UsersManagerMock();
 
         const broadcasterParams: Broadcaster.Params = {
-            log: (msg: string, error?: Error) => Log.log().logError(msg, error),
+            onWarning: (job: PublishJob, msg: string, error?: Error) => Log.log().logError(msg, error),
             usersManager: usersManager,
             retryDelaysSeconds: [1, 2],
             broadcastScope: StaticConfig.BROADCAST_SCOPE,
@@ -130,7 +130,7 @@ describe("Broadcaster", function() {
             const { job, usersManager, response, broadcasterParams } = depsMock();
             const broadcastCallTimeDeltaMs: number[] = [];
             const broadcastCallCounter = { count: 0 };
-            const logSpy = sinon.fake();
+            const onWarningSpy = sinon.fake();
             let catchedError: Error | undefined = undefined;
             let returnedResponse: object | undefined = undefined;
 
@@ -149,7 +149,7 @@ describe("Broadcaster", function() {
 
                 const broadcaster: Broadcaster = new BroadcasterImpl({
                     ...broadcasterParams,
-                    log: logSpy,
+                    onWarning: onWarningSpy,
                 });
                 try {
                     returnedResponse = await broadcaster.broadcast(job);
@@ -176,8 +176,8 @@ describe("Broadcaster", function() {
             });
 
             it("logs each failure", async () => {
-                expect(logSpy.callCount).to.be.equal(broadcasterParams.retryDelaysSeconds.length);
-                expect(logSpy.lastCall.args[1]).to.be.instanceOf(Error);
+                expect(onWarningSpy.callCount).to.be.equal(broadcasterParams.retryDelaysSeconds.length);
+                expect(onWarningSpy.lastCall.args[1]).to.be.instanceOf(Error);
             });
 
             it("throws only last failure", async () => {
@@ -199,7 +199,10 @@ describe("Broadcaster", function() {
                 return response;
             };
 
-            const broadcaster: Broadcaster = new BroadcasterImpl({ ...broadcasterParams, log: () => {} });
+            const broadcaster: Broadcaster = new BroadcasterImpl({
+                ...broadcasterParams,
+                onWarning: () => {},
+            });
             const returnedResponse = await broadcaster.broadcast(job);
 
             const expectedResponse: Broadcaster.Result = {

@@ -76,6 +76,11 @@ describe("PublisherLog", () => {
             caller: async (publisherLog: PublisherLog, job: PublishJob) =>
                 await publisherLog.logJobFailure(job, new Error("some error")),
         },
+        {
+            fnName: "logBroadcasterWarning",
+            caller: async (publisherLog: PublisherLog, job: PublishJob) =>
+                await publisherLog.logBroadcasterWarning(job, "some desc to this error"),
+        },
     ].forEach(test =>
         describe(test.fnName, () => {
             it("populates message 'delegator' field", async () => {
@@ -210,6 +215,18 @@ describe("PublisherLog", () => {
             expect(mock.logSpy.firstCall.args[0].error)
                 .to.include(testError.name)
                 .and.include(testError.message);
+        });
+    });
+
+    describe("logBroadcasterWarning", () => {
+        it("puts supplied message into msg", async () => {
+            const mock = constructMock(),
+                job: PublishJob = sampleJob();
+            const testMsg = "some msg " + uuid();
+
+            await mock.publisherLog.logBroadcasterWarning(job, testMsg);
+
+            expect(mock.logSpy.firstCall.args[0].msg).to.include(testMsg);
         });
     });
 });

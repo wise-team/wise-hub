@@ -50,6 +50,24 @@ export class PublisherLogImpl implements PublisherLog {
             this.fallbackLog("Error in PublisherLog.logJobStart", error);
         }
     }
+
+    public async logBroadcasterWarning(job: PublishJob, msg: string): Promise<void> {
+        ow(job, ow.object.label("job"));
+        ow(msg, ow.string.nonEmpty.label("msg"));
+
+        try {
+            await this.log({
+                ...this.getCommonMessageForJob(job),
+                msg:
+                    `Broadcaster warning during broadcast to @${job.delegator} of operations ` +
+                    `(${this.getOpsDesc(job.ops)}) to blockchain: ${msg}`,
+                warning: msg + "",
+            });
+        } catch (error) {
+            this.fallbackLog("Error in PublisherLog.logJobStart", error);
+        }
+    }
+
     public async logJobFailure(job: PublishJob, error: Error): Promise<void> {
         ow(job, ow.object.label("job"));
 

@@ -1,4 +1,3 @@
-import * as fs from "fs";
 import { Log } from "../lib/Log";
 import * as IORedis from "ioredis";
 import { common } from "../common/common";
@@ -21,6 +20,7 @@ import { PublisherLog } from "./log/PublisherLog";
 import { PublisherLogImpl } from "./log/PublisherLogImpl";
 import { RedisDualQueueImpl } from "./queue/RedisDualQueueImpl";
 import { BroadcasterImpl } from "./broadcaster/BroadcasterImpl";
+import { spawnAsync } from "../lib/util";
 
 /******************
  ** INTIAL SETUP **
@@ -69,11 +69,15 @@ if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
                 processingQueueKey: common.redis.publishProcessingQueue,
             })
         );
+        const heartbeat: Heartbeat = new HeartbeatImpl(redis, StaticConfig.SERVICE_NAME);
         const broadcaster: Broadcaster = new BroadcasterImpl({
-            log: (msg: string, error?: Error) => Log.log().logError(msg, error),
             usersManager: usersManager,
             retryDelaysSeconds: StaticConfig.RETRIES_DELAYS_SECONDS,
             broadcastScope: StaticConfig.BROADCAST_SCOPE,
+            onWarning: (job: PublishJob, msg: string, error?: Error) => {
+                console.warn(msg, error);
+                spawnAsync(async () => await publisherLog.logBroadcasterWarning(job, msg + error || ""));
+            },
         });
 
         let jobConsumer: BlockingQueueConsumer<PublisherQueue.JobEntry, Broadcaster.Result>;

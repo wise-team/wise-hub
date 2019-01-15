@@ -24,11 +24,7 @@ export class BroadcasterImpl implements Broadcaster {
             );
         }
 
-        return {
-            transaction_id: result.id,
-            block_num: result.block_num,
-            transaction_num: result.trx_num,
-        };
+        return { transaction_id: result.id, block_num: result.block_num, transaction_num: result.trx_num };
     }
 
     private async doBroadcast(job: PublishJob, tryNum: number): Promise<Steemconnect.BroadcastResult> {
@@ -44,7 +40,7 @@ export class BroadcasterImpl implements Broadcaster {
                 const retryDelayMs = this.getRetryDelayMs(tryNum);
                 if (!retryDelayMs) throw error;
                 else {
-                    this.log("Failed to publish job, retrying after " + retryDelayMs + "ms. Error: ", error);
+                    this.emitRetryMsg(job, error, retryDelayMs);
                     await BluebirdPromise.delay(retryDelayMs);
                     return await this.doBroadcast(job, tryNum + 1);
                 }
@@ -58,11 +54,16 @@ export class BroadcasterImpl implements Broadcaster {
             : undefined;
     }
 
-    private log(msg: string, error?: Error) {
+    private emitRetryMsg(job: PublishJob, error: Error, retryDelayMs: number) {
+        const retryDelayS = Math.round(retryDelayMs / 1000);
+        this.emitWarning(job, "Failed to publish job, retrying after " + retryDelayS + "seconds. Error: ", error);
+    }
+
+    private emitWarning(job: PublishJob, msg: string, error?: Error) {
         try {
-            this.params.log(msg, error);
+            this.params.onWarning(job, msg, error);
         } catch (error) {
-            console.error("Error in BroadcasterImpl.log", error);
+            console.error("Error in BroadcasterImpl.onWarning", error);
         }
     }
 }

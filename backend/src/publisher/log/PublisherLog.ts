@@ -7,6 +7,7 @@ import { LogMessage as DaemonLogMessage } from "../../daemon/DaemonLog";
 export interface PublisherLog {
     logJobStart(job: PublishJob): Promise<void>;
     logJobSuccess(job: PublishJob, result: Broadcaster.Result): Promise<void>;
+    logBroadcasterWarning(job: PublishJob, msg: string): Promise<void>;
     logJobFailure(job: PublishJob, error: Error): Promise<void>;
 }
 
