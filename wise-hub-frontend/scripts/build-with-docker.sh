@@ -5,7 +5,7 @@ cd "${DIR}"
 
 
 #§ 'IMAGE="node:' + data.config.npm.node.version + '-slim"'
-IMAGE="node:10.12-slim"
+IMAGE="node:10.15-slim"
 
 docker run \
   -w "/app" \

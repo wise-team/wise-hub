@@ -22,7 +22,7 @@ fi
 DATA_VOLUME="hub_monitoring_data"
 CONTAINER_NAME="hub-monitoring"
 #§ 'IMAGE="node:' + data.config.npm.node.version + '-slim"'
-IMAGE="node:10.12-slim"
+IMAGE="node:10.15-slim"
 FAILURE_NOTIFICATION_INTERVAL_S="1800"
 
 

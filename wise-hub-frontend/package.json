@@ -3,7 +3,7 @@
   "version": "3.1.0",
   "description": "Cool & handy web interface for Wise: the frontend",
   "engines": {
-    "node": ">=10.12"
+    "node": ">=10.15"
   },
   "scripts": {
     "build": "rm -rf dist && webpack",
