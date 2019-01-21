@@ -46,7 +46,7 @@ services:
       START_FROM_BLOCK: HEAD
       RULESETS_LOADING_STRATEGY: "wisesql-preload"
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
-      STEEM_API_URL: "https://api.steemit.com,https://rpc.buildteam.io,https://anyx.io"
+      STEEM_API_URL: "https://api.steemit.com,https://anyx.io,https://rpc.usesteem.com/"
       #§ 'WISE_SQL_ENDPOINT_URL: ' + data.config.sql.url.staging
       WISE_SQL_ENDPOINT_URL: https://sql.staging.wise.vote/
       WISE_LOG_LEVEL: debug
