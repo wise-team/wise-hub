@@ -5,10 +5,7 @@
   "engines": {
     "node": ">=10.15"
   },
-  "scripts": {
-    "monitor": "ts-node src/index.ts",
-    "mocha": "TS_NODE_FILES=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha -r ts-node/register --reporter json-stream --recursive ./**/*.spec.ts"
-  },
+  "scripts": {},
   "dependencies": {
     "axios": "^0.18.0",
     "lodash": "^4.17.11",
