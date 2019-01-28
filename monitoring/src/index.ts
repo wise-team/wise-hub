@@ -1,6 +1,5 @@
 import * as Mocha from "mocha";
 import * as fs from "fs";
-import * as path from "path";
 import ow from "ow";
 import Axios from "axios";
 
@@ -19,59 +18,59 @@ ow(mentions, ow.string.nonEmpty.label("Env FAILURE_NOTIFICATION_INTERVAL_S"));
 
 // config
 const failureErrorTTLms = parseInt(failureNotificationIntervalS || "3600") * 1000;
-const testFiles: string [] = [
-    __dirname + "/monitoring.spec.ts"
-];
+const testFiles: string[] = [__dirname + "/monitoring.spec.ts"];
 const failuresTTLFilePath = "/data/failuresttl.json";
-const moduleName = "hub-" + wiseEnvironmentType;
-const failureLogMarker = "MONITORING_FAILURE_" + moduleName;
+const projectName = "hub-" + wiseEnvironmentType;
+const failureLogMarker = "MONITORING_FAILURE_" + projectName;
+const logMetadata = {
+    service: "monitoring",
+    environment: wiseEnvironmentType,
+    project: projectName,
+};
 
-
-
-
-
+//
 
 (async () => {
-    const failures: [string, string] [] = await runTestsReportFailures();
-    const failuresToNotify: [string, string] [] = processFailuresNotificationTTL(failures);
+    const failures = await runTestsReportFailures();
+    const failuresToNotify: [string, string][] = processFailuresNotificationTTL(failures);
     if (failuresToNotify.length > 0) {
         await sendSlackNotification(failuresToNotify);
+        log({
+            msg: projectName + " monitoring failed, slack notification sent",
+            severity: "info",
+        });
+    } else {
+        log({ msg: projectName + " monitoring done", severity: "info" });
     }
-    console.log(JSON.stringify({ service: "monitoring", environment: wiseEnvironmentType, module: moduleName,
-        message: moduleName + " monitoring done at " + (new Date()).toISOString(),
-        severity: "info", timestamp: Date.now(), isotime: (new Date()).toISOString()
-    }));
+    process.exit(0);
 })();
 
-
-
-
-
-
-function runTestsReportFailures(): Promise<[string, string] []> {
-    const failures: [string, string] [] = [];
+function runTestsReportFailures(): Promise<[string, string][]> {
+    const failures: [string, string][] = [];
     const mocha = new Mocha({
-        require: [ "ts-node/register" ],
-        reporter: function () { /* avoid logs */ },
-        
+        require: ["ts-node/register"],
+        reporter: function() {
+            /* avoid logs */
+        },
     } as any);
     testFiles.forEach(testFile => mocha.addFile(testFile));
-    
+
     const runner = mocha.run(function(failures) {
-        process.exitCode = failures ? -1 : 0;  // exit with non-zero status if there were failures
+        process.exitCode = failures ? -1 : 0; // exit with non-zero status if there were failures
     });
-    
-    // runner.on("start", () => { console.log(">>> start"); });
-    // runner.on("pass", (test) => { logTest(test.titlePath().join(" >> "), "pass", ""); });
-    runner.on("fail", (test, error) => { 
-        console.error(JSON.stringify({ 
-            service: "monitoring", name: failureLogMarker, environment: wiseEnvironmentType, module: moduleName,
-            test: test.titlePath().join(" >> "), error: error + "", severity: "error"
-        }));
-        failures.push([test.titlePath().join(" >> "), error + ""]); 
+
+    runner.on("fail", (test, error) => {
+        const testTitle = test.titlePath().join(" >> ");
+        log({
+            msg: "Monitoring test failed: " + testTitle,
+            test: testTitle,
+            marker: failureLogMarker,
+            error: error + "",
+            severity: "error",
+        });
+        failures.push([test.titlePath().join(" >> "), error + ""]);
     });
-    // runner.on("pending", (test) => { logTest(test.titlePath().join(" >> "), "pending", ""); });
-    
+
     return new Promise((resolve, reject) => {
         runner.on("end", () => {
             resolve(failures);
@@ -79,13 +78,15 @@ function runTestsReportFailures(): Promise<[string, string] []> {
     });
 }
 
+interface FailureTTL {
+    test: string;
+    until: number;
+}
 
-interface FailureTTL { test: string; until: number; };
-
-function loadFailureTTLs(): FailureTTL [] {
-    let failureTTLs: FailureTTL [] = [];
+function loadFailureTTLs(): FailureTTL[] {
+    let failureTTLs: FailureTTL[] = [];
     try {
-        let oldFailureTTLs: FailureTTL [] = [];
+        let oldFailureTTLs: FailureTTL[] = [];
         if (fs.existsSync(failuresTTLFilePath)) {
             oldFailureTTLs = JSON.parse(fs.readFileSync(failuresTTLFilePath, "UTF-8"));
             ow(failureTTLs, ow.array.label("failureTTLs").ofType(ow.object.hasKeys("test", "until")));
@@ -93,50 +94,66 @@ function loadFailureTTLs(): FailureTTL [] {
         oldFailureTTLs.forEach(oldFailureTTL => {
             if (oldFailureTTL.until > Date.now()) failureTTLs.push(oldFailureTTL);
         });
-    }
-    catch (error) {
-        console.error(JSON.stringify({ 
-            service: "monitoring", name: failureLogMarker, environment: wiseEnvironmentType, module: moduleName,
-            test: "loadFailureTTLs()", error: error + "", severity: "error"
-        }));
+    } catch (error) {
+        log({ msg: "Could not load failures ttls", error: error, severity: "error" });
     }
     return failureTTLs;
 }
 
-function saveFailureTTLs(failureTTLs: FailureTTL []) {
+function saveFailureTTLs(failureTTLs: FailureTTL[]) {
     try {
         fs.writeFileSync(failuresTTLFilePath, JSON.stringify(failureTTLs));
-    }
-    catch (error) {
-        console.error(JSON.stringify({ 
-            service: "monitoring", name: failureLogMarker, environment: wiseEnvironmentType, module: moduleName,
-            test: "saveFailureTTLs()", error: error + "", severity: "error"
-        }));
+    } catch (error) {
+        log({ msg: "Could not save failures ttls", error: error, severity: "error" });
     }
 }
 
-function processFailuresNotificationTTL(failures: [string, string] []): [string, string] [] {
-    const failureTTLs: FailureTTL [] = loadFailureTTLs();
+function processFailuresNotificationTTL(failures: [string, string][]): [string, string][] {
+    const failureTTLs: FailureTTL[] = loadFailureTTLs();
     const failuresToNotify: [string, string][] = [];
 
-    const deniedFailures: string [] = failureTTLs.map(failureTTLElem => failureTTLElem.test);
+    const deniedFailures: string[] = failureTTLs.map(failureTTLElem => failureTTLElem.test);
     failures.forEach(failure => {
         if (deniedFailures.indexOf(failure[0]) === -1) {
             failuresToNotify.push(failure);
             failureTTLs.push({ test: failure[0], until: Date.now() + failureErrorTTLms });
         }
     });
-    
+
     saveFailureTTLs(failureTTLs);
     return failuresToNotify;
 }
 
-async function sendSlackNotification(failures: [string, string] []) {
-    const slackMessage = {
-        text: moduleName + "monitofing failed " + mentions  + ": " + failures.map(failure => {
-            return "[[[ " + failure[0] + " ]]]: " + failure[1] + "\n"
+async function sendSlackNotification(failures: [string, string][]) {
+    const failuresListedText = failures.map(failure => {
+        return "[[[ " + failure[0] + " ]]]: " + failure[1] + "\n";
+    });
+    const slackText = projectName + " monitofing failed " + mentions + ": " + failuresListedText;
+    const slackMessage = { text: slackText };
+    try {
+        const response = await Axios.post(slackWebhookUrl + "", slackMessage);
+    } catch (error) {
+        log({
+            error: error,
+            severity: "error",
+            msg: "Could not send slack notification",
+            slackResponse: error.response
+                ? { data: error.response.data, status: error.response.status }
+                : "no response",
+        });
+    }
+}
+
+function log(msg: { error?: Error | string; msg: string; severity: string; [x: string]: any }) {
+    console.error(
+        JSON.stringify({
+            message: msg.msg,
+            ...(msg.error ? { error: msg.error + "" } : {}),
+            ...(msg.error instanceof Error ? { stack: msg.error.stack + "" } : {}),
+            severity: msg.severity,
+            timestamp: Date.now(),
+            isotime: new Date().toISOString(),
+            ...logMetadata,
         })
-    };
-    const response = await Axios.post(slackWebhookUrl + "", slackMessage);
-    process.exit(0);
+    );
 }
