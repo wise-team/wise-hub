@@ -35,7 +35,7 @@ DATA_VOLUME="hub-monitoring-datavolume"
 docker run --rm \
     --name "hub-monitoring" \
     -e "SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}" \
-    -e "ENVIRONMENT_TYPE=localtest" \
+    -e "ENVIRONMENT_TYPE=${WISE_ENVIRONMENT_TYPE}" \
     -e "SLACK_MENTIONS=${SLACK_MENTIONS}" \
     -e "PROJECT_NAME=wise-hub" \
     -e "FAILURE_NOTIFICATION_INTERVAL_S=${FAILURE_NOTIFICATION_INTERVAL_S}" \
@@ -43,24 +43,3 @@ docker run --rm \
     -v "${DATA_VOLUME}:/data" \
     -e "WISE_HUB_URL=${WISE_HUB_URL}" \
     wiseteam/dockerized-mocha-slack-service-monitoring
-
-
-
-DATA_VOLUME="hub_monitoring_data"
-CONTAINER_NAME="hub-monitoring"
-#§ 'IMAGE="node:' + data.config.npm.node.version + '-slim"'
-IMAGE="node:10.15-slim"
-FAILURE_NOTIFICATION_INTERVAL_S="1800"
-
-
-docker run --rm\
-  --name "${CONTAINER_NAME}" \
-  -v "${PWD}:/app" \
-  -w /app \
-  -e "SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}" \
-  -e "WISE_ENVIRONMENT_TYPE=${WISE_ENVIRONMENT_TYPE}" \
-  -e "SLACK_MENTIONS=${SLACK_MENTIONS}" \
-  -e "WISE_HUB_URL=${WISE_HUB_URL}" \
-  -e "FAILURE_NOTIFICATION_INTERVAL_S=${FAILURE_NOTIFICATION_INTERVAL_S}" \
-  -v "${DATA_VOLUME}:/data" \
-  "${IMAGE}" sh -c "npm install > /dev/null && npm run --silent monitor"
