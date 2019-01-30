@@ -21,6 +21,7 @@ import { PublisherLogImpl } from "./log/PublisherLogImpl";
 import { RedisDualQueueImpl } from "./queue/RedisDualQueueImpl";
 import { BroadcasterImpl } from "./broadcaster/BroadcasterImpl";
 import { spawnAsync } from "../lib/util";
+import { Watchdogs } from "./Watchdogs";
 
 /******************
  ** INTIAL SETUP **
@@ -70,6 +71,9 @@ if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
             })
         );
         const heartbeat: Heartbeat = new HeartbeatImpl(redis, StaticConfig.SERVICE_NAME);
+        const watchdogs = new Watchdogs();
+        await watchdogs.start();
+
         const broadcaster: Broadcaster = new BroadcasterImpl({
             usersManager: usersManager,
             retryDelaysSeconds: StaticConfig.RETRIES_DELAYS_SECONDS,
@@ -88,7 +92,10 @@ if (!vaultAddr) throw new Error("Env WISE_VAULT_URL does not exist.");
             },
             {
                 init: () => publisherQueue.resetProcessingQueue(),
-                heartbeat: () => heartbeat.beat(StaticConfig.HEARTBEAT_TTL_SECONDS),
+                heartbeat: () => {
+                    heartbeat.beat(StaticConfig.HEARTBEAT_TTL_SECONDS);
+                    watchdogs.heartbeatBeatSeconds(StaticConfig.HEARTBEAT_TTL_SECONDS);
+                },
                 onError: async (error: Error) => Log.log().logError("Error in publisher job consumer", error),
                 fallbackLog: (msg: string, error?: Error) => console.error(msg, error),
                 //

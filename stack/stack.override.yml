@@ -21,6 +21,7 @@ services:
       #§ '- ' + data.config.hub.docker.services.api.secrets.appRoleSecret
       - hub-api-approle-secret
     environment:
+      WISE_ENVIRONMENT_TYPE: development
       #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.api.appRole.role
       VAULT_APPROLE_NAME: wise-hub-api
       #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.api.secrets.appRoleId
@@ -40,6 +41,7 @@ services:
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
     environment:
+      WISE_ENVIRONMENT_TYPE: development
       START_FROM_BLOCK: HEAD_RESET
       RULESETS_LOADING_STRATEGY: "wisesql-preload"
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
@@ -56,6 +58,7 @@ services:
       #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
       - hub-publisher-approle-secret
     environment:
+      WISE_ENVIRONMENT_TYPE: development
       #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.publisher.appRole.role
       VAULT_APPROLE_NAME: wise-hub-publisher
       #§ 'VAULT_APPROLE_ID_FILE: /run/secrets/' + data.config.hub.docker.services.publisher.secrets.appRoleId
@@ -66,6 +69,11 @@ services:
       WISE_VAULT_URL: "http://host.docker.internal:8200"
       #§ 'OAUTH2_CLIENT_ID: ' + JSON.stringify(data.config.steemconnect.app.staging.settings.client_id)
       OAUTH2_CLIENT_ID: "wisevote.staging"
+
+  #§ d(data.config.hub.docker.services.realtime.name) + ':'
+  realtime:
+    environment:
+      WISE_ENVIRONMENT_TYPE: development
 
 secrets:
   #§ data.config.hub.docker.services.api.secrets.appRoleId + ':'

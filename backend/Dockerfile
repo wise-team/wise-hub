@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     iproute2 \
     curl \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 
 ADD package.json package-lock.json /app/
@@ -18,6 +18,8 @@ RUN npm run build
 
 COPY entrypoint.sh / 
 ENTRYPOINT ["/entrypoint.sh"]
+
+HEALTHCHECK --interval=30s --timeout=15s --start-period=30s --retries=2 CMD [ "node", "container-healthcheck.js" ]
 
 ##§ '\n' + data.config.docker.generateDockerfileFrontMatter(data) + '\n' §##
 LABEL maintainer="The Wise Team (https://wise-team.io/) <contact@wiseteam.io>"

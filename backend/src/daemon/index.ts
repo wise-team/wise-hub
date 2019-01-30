@@ -14,6 +14,7 @@ import { PublisherQueueImpl } from "../publisher/queue/PublisherQueueImpl";
 import { RedisDualQueueImpl } from "../publisher/queue/RedisDualQueueImpl";
 import { Redis } from "../lib/redis/Redis";
 import { RedisImpl } from "../lib/redis/RedisImpl";
+import { Watchdogs } from "./Watchdogs";
 
 /******************
  ** INTIAL SETUP **
@@ -36,6 +37,8 @@ if (!redisUrl) throw new Error("Env REDIS_URL is missing.");
 const ioredis = new IORedis(redisUrl);
 const redis: Redis = new RedisImpl(redisUrl);
 
+const watchdogs = new Watchdogs();
+
 const daemonLog = new DaemonLog(ioredis);
 
 const delegatorManager = new DelegatorManager(ioredis);
@@ -48,7 +51,7 @@ const publisherQueue: PublisherQueue = new PublisherQueueImpl(
     })
 );
 
-const daemonManager = new DaemonManager(ioredis, delegatorManager, apiHelper, daemonLog, publisherQueue);
+const daemonManager = new DaemonManager(ioredis, delegatorManager, apiHelper, daemonLog, publisherQueue, watchdogs);
 
 process.on("SIGTERM", () => {
     daemonManager.stop();
@@ -61,6 +64,7 @@ process.on("SIGTERM", () => {
     try {
         Log.log().info("Initialising daemon....");
         daemonLog.emit({ msg: "Initialising daemon..." });
+        await watchdogs.start();
 
         await apiHelper.init();
         await delegatorManager.init(redisUrl);

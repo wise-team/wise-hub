@@ -24,6 +24,7 @@ import { DaemonLog } from "./DaemonLog";
 import { PublisherQueue } from "../publisher/queue/PublisherQueue";
 import { PublishJob } from "../publisher/entities/PublishJob";
 import { PublishableOperation } from "../publisher/entities/PublishableOperation";
+import { Watchdogs } from "./Watchdogs";
 
 export class Daemon {
     private api: Api;
@@ -35,6 +36,7 @@ export class Daemon {
     private apiHelper: ApiHelper;
     private daemonLog: DaemonLog;
     private publisherQueue: PublisherQueue;
+    private watchdogs: Watchdogs;
 
     public constructor(
         redis: Redis,
@@ -43,7 +45,8 @@ export class Daemon {
         api: Api,
         rulesManager: RulesManager,
         daemonLog: DaemonLog,
-        publisherQueue: PublisherQueue
+        publisherQueue: PublisherQueue,
+        watchdogs: Watchdogs
     ) {
         this.redis = redis;
         this.apiHelper = apiHelper;
@@ -51,6 +54,7 @@ export class Daemon {
         this.api = api;
         this.rulesManager = rulesManager;
         this.daemonLog = daemonLog;
+        this.watchdogs = watchdogs;
 
         ow(publisherQueue, ow.object.is(o => PublisherQueue.isPublisherQueue(o)).label("publisherQueue"));
         this.publisherQueue = publisherQueue;
@@ -101,6 +105,7 @@ export class Daemon {
     }
 
     private async onBlockProcessingFinished(blockNum: number) {
+        this.watchdogs.loopHeartbeatBeatSeconds(4);
         if (blockNum % 30 == 0) Log.log().info("Finished processing block " + blockNum);
         this.daemonLog.emit({
             msg: "Processed block " + blockNum,

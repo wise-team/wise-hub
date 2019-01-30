@@ -14,6 +14,7 @@ import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
 import { EffectuatedWiseOperation, SetRules, EffectuatedSetRules, RulePrototyper, Api } from "steem-wise-core";
 import { DaemonLog } from "./DaemonLog";
 import { PublisherQueue } from "../publisher/queue/PublisherQueue";
+import { Watchdogs } from "./Watchdogs";
 
 export class DaemonManager {
     private redis: Redis;
@@ -25,18 +26,21 @@ export class DaemonManager {
     private daemonLog: DaemonLog;
     private blockLoadingApi: Api;
     private publisherQueue: PublisherQueue;
+    private watchdogs: Watchdogs;
 
     public constructor(
         redis: Redis,
         delegatorManager: DelegatorManager,
         apiHelper: ApiHelper,
         daemonLog: DaemonLog,
-        publisherQueue: PublisherQueue
+        publisherQueue: PublisherQueue,
+        watchdogs: Watchdogs
     ) {
         this.redis = redis;
         this.delegatorManager = delegatorManager;
         this.apiHelper = apiHelper;
         this.daemonLog = daemonLog;
+        this.watchdogs = watchdogs;
 
         ow(publisherQueue, ow.object.is(o => PublisherQueue.isPublisherQueue(o)).label("publisherQueue"));
         this.publisherQueue = publisherQueue;
@@ -51,7 +55,8 @@ export class DaemonManager {
             this.blockLoadingApi,
             this.rulesManager,
             this.daemonLog,
-            this.publisherQueue
+            this.publisherQueue,
+            this.watchdogs
         );
     }
 

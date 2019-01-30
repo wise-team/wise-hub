@@ -39,7 +39,7 @@ docker run --rm \
     -e "SLACK_MENTIONS=${SLACK_MENTIONS}" \
     -e "PROJECT_NAME=wise-hub" \
     -e "FAILURE_NOTIFICATION_INTERVAL_S=${FAILURE_NOTIFICATION_INTERVAL_S}" \
-    -v "$PWD:/spec" \
+    -v "${DIR}:/spec" \
     -v "${DATA_VOLUME}:/data" \
     -e "WISE_HUB_URL=${WISE_HUB_URL}" \
     wiseteam/dockerized-mocha-slack-service-monitoring

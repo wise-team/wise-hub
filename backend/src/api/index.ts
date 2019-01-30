@@ -3,6 +3,7 @@ import { App } from "./app";
 import { Log } from "../lib/Log";
 import { Vault } from "../lib/vault/Vault";
 import { AppRole } from "../lib/AppRole";
+import { Watchdogs } from "./Watchdogs";
 
 /******************
  ** INTIAL SETUP **
@@ -30,6 +31,9 @@ const PORT = 3000;
 
 (async () => {
     try {
+        const watchdogs = new Watchdogs();
+        await watchdogs.start();
+
         const app = new App();
         await app.init();
 
@@ -46,6 +50,7 @@ const PORT = 3000;
         });
     }
     catch (error) {
+    } catch (error) {
         Log.log().logError("api/index.ts async runner", error);
     }
  })();

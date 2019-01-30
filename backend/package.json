@@ -25,6 +25,7 @@
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.11",
     "morgan": "^1.9.1",
+    "node-docker-watchdog": "^1.2.3",
     "ow": "^0.8.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",

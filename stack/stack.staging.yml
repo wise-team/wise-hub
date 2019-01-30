@@ -21,6 +21,7 @@ services:
       #§ '- ' + data.config.hub.docker.services.api.secrets.appRoleSecret
       - hub-api-approle-secret
     environment:
+      WISE_ENVIRONMENT_TYPE: staging
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.api.appRole.role
       VAULT_APPROLE_NAME: wise-hub-api
@@ -43,6 +44,7 @@ services:
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
     environment:
+      WISE_ENVIRONMENT_TYPE: staging
       START_FROM_BLOCK: HEAD
       RULESETS_LOADING_STRATEGY: "wisesql-preload"
       #§ "STEEM_API_URL: \"" + data.config.steem.apis.filter(api => api.get_block === true).map(api => api.url).join(",") + "\""
@@ -60,6 +62,7 @@ services:
       #§ '- ' + data.config.hub.docker.services.publisher.secrets.appRoleSecret
       - hub-publisher-approle-secret
     environment:
+      WISE_ENVIRONMENT_TYPE: staging
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       #§ 'VAULT_APPROLE_NAME: ' + data.config.hub.docker.services.publisher.appRole.role
       VAULT_APPROLE_NAME: wise-hub-publisher
@@ -77,6 +80,8 @@ services:
   #§ d(data.config.hub.docker.services.realtime.name) + ':'
   realtime:
     restart: always
+    environment:
+      WISE_ENVIRONMENT_TYPE: staging
 
 
 secrets:

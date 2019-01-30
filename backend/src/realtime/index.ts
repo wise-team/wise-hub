@@ -5,6 +5,7 @@ import { Log } from "../lib/Log";
 import * as Redis from "ioredis";
 import { common } from "../common/common";
 import * as socket_io from "socket.io";
+import { Watchdogs } from "./Watchdogs";
 /******************
  **    CONFIG    **
  ******************/
@@ -15,6 +16,8 @@ const PORT = /*§ §*/8099/*§ data.config.hub.docker.services.realtime.port §.
  ** INTIAL SETUP **
  ******************/
 Log.log().initialize();
+const watchdogs = new Watchdogs();
+watchdogs.start();
 
 process.on("unhandledRejection", (err) => {
     console.error("Unhandled promise");
@@ -50,6 +53,7 @@ subRedis.subscribe(common.redis.channels.realtimeKey, (error: any, count: number
 });
 subRedis.on("message", function (channel: string, message: string) {
     try {
+        watchdogs.redisMessageBeatHours(5);
         io.to(common.socketio.rooms.general).emit("msg", message);
         Log.log().debug("io.to(" + common.socketio.rooms.general + ").emit(msg, " + message + ")");
 
@@ -115,6 +119,7 @@ process.on("SIGTERM", function () {
 function hartbeat() {
     (async () => {
         try {
+            watchdogs.heartbeatBeatSeconds(12);
             await redis.set(common.redis.realtimeHartbeat, "ALIVE", "EX", 10);
         }
         catch (error) {
