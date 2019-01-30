@@ -50,7 +50,6 @@ const PORT = 3000;
         });
     }
     catch (error) {
-    } catch (error) {
         Log.log().logError("api/index.ts async runner", error);
     }
  })();
