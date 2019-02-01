@@ -1,0 +1,11 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "backend/package.json",
+        "monitoring/package.json",
+        "wise-hub-frontend/package.json"
+      ]
+    }
+  }
+}
