@@ -14,11 +14,7 @@ export class Log extends AbstractUniverseLog {
             (window as any).WISE_LOG_LEVEL,
             "info"
         ]);
-        Wise.getLog().init([
-            (window as any).WISE_CORE_LOG_LEVEL,
-            (window as any).WISE_LOG_LEVEL,
-            "info"
-        ]);
+        Wise.getLog().init();
     }
 
     public static log(): Log {
