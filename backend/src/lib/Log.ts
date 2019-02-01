@@ -1,7 +1,7 @@
-import { AbstractLog } from "steem-wise-core";
+import { AbstractUniverseLog } from "universe-log";
 import * as serializeError from "serialize-error";
 
-export class Log extends AbstractLog {
+export class Log extends AbstractUniverseLog {
     private static INSTANCE: Log = new Log();
 
     private constructor() {

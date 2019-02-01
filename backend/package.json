@@ -36,6 +36,7 @@
     "steem-wise-core": "^3.1.1",
     "steemconnect": "^2.0.1",
     "ts-custom-error": "^2.2.2",
+    "universe-log": "^0.1.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
