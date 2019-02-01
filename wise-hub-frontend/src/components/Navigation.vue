@@ -61,7 +61,7 @@ export default Vue.extend({
         return {
             uuid: uniqueId(),
             manualUrl: /*§ §*/ "https://docs.wise.vote/introduction" /*§ ' "' + data.config.manual.url.production + '" ' §.*/,
-            votingPageUrl: "/voting-page"
+            votingPageUrl: "/voting-page/"
         };
     },
     methods: {
