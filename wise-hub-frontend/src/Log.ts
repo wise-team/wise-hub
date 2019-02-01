@@ -1,6 +1,7 @@
-import { AbstractLog, Wise } from "steem-wise-core";
+import { AbstractUniverseLog } from "universe-log";
+import { Wise } from "steem-wise-core";
 
-export class Log extends AbstractLog {
+export class Log extends AbstractUniverseLog {
     private static INSTANCE: Log = new Log();
 
     private constructor() {
