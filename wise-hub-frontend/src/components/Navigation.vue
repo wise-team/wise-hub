@@ -15,11 +15,6 @@
                     <b-dropdown-item :to="'/rulesets/for/@' + username" exact>Rulesets for you</b-dropdown-item>
                     <b-dropdown-item :to="'/@' + username + '/daemon'" exact>Daemon</b-dropdown-item>
                 </b-nav-item-dropdown>
-               <!--<li class="nav-item" v-if="username.length > 0">
-                    <router-link class="nav-link" :to="'/@' + username">
-                        <em><span class="d-inline-block">@</span>{{ username }}</em>
-                    </router-link>
-                </li>-->
                 <li class="nav-item">
                     <router-link class="nav-link t-navlink-history" to="/" exact>
                         <font-awesome-icon :icon="trendingIcon" /> History
@@ -30,19 +25,14 @@
                         <font-awesome-icon :icon="peopleIcon" /> People
                     </router-link>
                 </li>
-                <!--<li class="nav-item">
-                    <router-link class="nav-link" :to="'/@' + username + '/daemon'">
-                        <font-awesome-icon :icon="delegateIcon" /> Delegate
-                    </router-link>
-                </li>-->
                 <li class="nav-item">
-                    <a class="nav-link t-navlink-votingpage" :href="votingpageUrl" target="_blank" rel="nofollow noopener">
+                    <a class="nav-link t-navlink-votingpage" :href="votingPageUrl" target="_blank" rel="nofollow noopener">
                         <font-awesome-icon :icon="voteIcon" /> Vote
                     </a>
                 </li>
                 <li class="nav-item">
                     <a :href="manualUrl" class="nav-link t-navlink-manual" target="_blank" rel="nofollow noopener">
-                        <font-awesome-icon :icon="manualIcon" /> Manual <!--<sup><font-awesome-icon :icon="externalLinkIcon" /></sup>-->
+                        <font-awesome-icon :icon="manualIcon" /> Manual
                     </a>
                 </li>
                 <li class="nav-item">
@@ -71,7 +61,7 @@ export default Vue.extend({
         return {
             uuid: uniqueId(),
             manualUrl: /*§ §*/ "https://docs.wise.vote/introduction" /*§ ' "' + data.config.manual.url.production + '" ' §.*/,
-            votingpageUrl: /*§ §*/ "https://wise.vote/voting-page/" /*§ ' "' + data.config.votingPage.url.production + '" ' §.*/,
+            votingPageUrl: "/voting-page"
         };
     },
     methods: {
