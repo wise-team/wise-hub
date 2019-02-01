@@ -72,9 +72,9 @@ export class App {
 
     public async init() {
         Log.log().debug("Initialising vault connection");
-        const policies = /*§ §*/ [
-                "wise-hub-api",
-            ] /*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
+        // prettier-ignore
+        const policies = /*§ §*/["wise-hub-api"]/*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
+
         await this.vault.init(vault => AppRole.login(vault, policies));
 
         await this.usersManager.init();
@@ -105,7 +105,8 @@ export class App {
             store: new RedisSessionStore({ url: this.redisUrl }),
             saveUninitialized: true,
             rolling: true,
-            cookie: { maxAge: /*§ §*/ 604800000 /*§ data.config.hub.api.cookie.maxAgeMs §.*/ },
+            // prettier-ignore
+            cookie: { maxAge: /*§ §*/604800000/*§ data.config.hub.api.cookie.maxAgeMs §.*/ }
         };
         const resolvedSessionOptions = _.merge({}, this.sessionOptions, sessionDynamicOpts);
 

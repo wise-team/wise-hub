@@ -23,7 +23,7 @@ HEALTHCHECK --interval=30s --timeout=15s --start-period=30s --retries=2 CMD [ "n
 
 ##§ '\n' + data.config.docker.generateDockerfileFrontMatter(data) + '\n' §##
 LABEL maintainer="The Wise Team (https://wise-team.io/) <contact@wiseteam.io>"
-LABEL vote.wise.wise-version="3.1.0"
+LABEL vote.wise.wise-version="3.1.1"
 LABEL vote.wise.license="MIT"
 LABEL vote.wise.repository="wise-hub"
 ##§ §.##

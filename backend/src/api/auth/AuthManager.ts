@@ -17,11 +17,12 @@ import { Steemconnect } from "../../lib/Steemconnect";
 
 // TODO: Move process.env management to root file and pass only arguments
 export class AuthManager {
-    private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/ {
-        baseAuthorizationUrl: "https://steemconnect.com/oauth2/authorize",
-        tokenUrl: "https://steemconnect.com/api/oauth2/token",
-        tokenRevocationUrl: "https://steemconnect.com/api/oauth2/token/revoke",
-    } /*§ §.*/;
+    // prettier-ignore
+    private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/{
+  "baseAuthorizationUrl": "https://steemconnect.com/oauth2/authorize",
+  "tokenUrl": "https://steemconnect.com/api/oauth2/token",
+  "tokenRevocationUrl": "https://steemconnect.com/api/oauth2/token/revoke"
+}/*§ §.*/;
 
     private steemconnectCallbackUrl: string;
     private loginRedirectUrl: string;
