@@ -1,10 +1,11 @@
 import ow from "ow";
+import { VoteOperation } from "steem";
 
-import { PublisherLog } from "./PublisherLog";
-import { PublishJob } from "../entities/PublishJob";
 import { Broadcaster } from "../broadcaster/Broadcaster";
 import { PublishableOperation } from "../entities/PublishableOperation";
-import { VoteOperation } from "steem";
+import { PublishJob } from "../entities/PublishJob";
+
+import { PublisherLog } from "./PublisherLog";
 
 export class PublisherLogImpl implements PublisherLog {
     private params: PublisherLog.Params;
@@ -116,7 +117,9 @@ export class PublisherLogImpl implements PublisherLog {
         try {
             this.params.fallbackLog(msg, error);
         } catch (error) {
+            // tslint:disable no-console
             console.error("Error in PublisherLogImpl.fallbackLog", error);
+            // tslint:enable no-console
         }
     }
 }

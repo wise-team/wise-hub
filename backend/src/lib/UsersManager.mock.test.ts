@@ -1,6 +1,7 @@
-import ow from "ow";
-import { User, UserSettings } from "../common/model/User";
 import { OperationWithDescriptor } from "steem";
+
+import { User, UserSettings } from "../common/model/User";
+
 import { Steemconnect } from "./Steemconnect";
 import { UsersManagerI } from "./UsersManagerI";
 
@@ -20,7 +21,7 @@ export class UsersManagerMock implements UsersManagerI {
     public async broadcast(
         username: string,
         scope: string[],
-        ops: OperationWithDescriptor[]
+        ops: OperationWithDescriptor[],
     ): Promise<Steemconnect.BroadcastResult> {
         throw new Error("Unmocked method");
     }

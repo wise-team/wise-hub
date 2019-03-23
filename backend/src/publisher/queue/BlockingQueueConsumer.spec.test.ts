@@ -1,9 +1,9 @@
+// tslint:disable no-empty
+import * as BluebirdPromise from "bluebird";
 import { expect, use as chaiUse } from "chai";
 import * as chaiAsPromised from "chai-as-promised";
 import "mocha";
 import * as sinon from "sinon";
-import * as BluebirdPromise from "bluebird";
-import * as _ from "lodash";
 chaiUse(chaiAsPromised);
 
 import { Log } from "../../lib/Log";
@@ -48,7 +48,7 @@ describe("BlockingQueueConsumer", () => {
     async function delayedFnMock(
         spyFn: () => void,
         delayMs: number = 5,
-        returningFn: () => any = () => undefined
+        returningFn: () => any = () => undefined,
     ): Promise<any> {
         spyFn();
         await BluebirdPromise.delay(delayMs);
@@ -71,23 +71,23 @@ describe("BlockingQueueConsumer", () => {
     describe(".isRunning()", () => {
         it("returns false if not started", () => {
             bqConsumer = new BlockingQueueConsumerImpl<TestJob, TestJobResult>(defaultOptions, emptyCallbacks);
-            expect(bqConsumer.isRunning()).to.be.false;
+            expect(bqConsumer.isRunning()).to.be.equal(false);
         });
 
         it("returns true immediately after started", async () => {
             bqConsumer = new BlockingQueueConsumerImpl<TestJob, TestJobResult>(defaultOptions, emptyCallbacks);
             bqConsumer.start();
-            expect(bqConsumer.isRunning()).to.be.true;
+            expect(bqConsumer.isRunning()).to.be.equal(true);
         });
 
         it("returns false when stopped", async () => {
             bqConsumer = new BlockingQueueConsumerImpl<TestJob, TestJobResult>(defaultOptions, emptyCallbacks);
             bqConsumer.start();
-            expect(bqConsumer.isRunning()).to.be.true;
+            expect(bqConsumer.isRunning()).to.be.equal(true);
             await BluebirdPromise.delay(20);
             bqConsumer.stop();
             await BluebirdPromise.delay(20);
-            expect(bqConsumer.isRunning()).to.be.false;
+            expect(bqConsumer.isRunning()).to.be.equal(false);
         });
     });
 
@@ -99,12 +99,12 @@ describe("BlockingQueueConsumer", () => {
                 take: () => returningTakeMock(() => takeCounter.count++),
             });
             bqConsumer.start();
-            expect(bqConsumer.isRunning()).to.be.true;
+            expect(bqConsumer.isRunning()).to.be.equal(true);
             await BluebirdPromise.delay(20);
             const countBeforeStop = takeCounter.count;
             bqConsumer.stop();
             await BluebirdPromise.delay(20);
-            expect(bqConsumer.isRunning()).to.be.false;
+            expect(bqConsumer.isRunning()).to.be.equal(false);
             expect(takeCounter.count).to.be.equal(countBeforeStop);
         });
     });
@@ -115,7 +115,7 @@ describe("BlockingQueueConsumer", () => {
                 const takeSpy = sinon.fake();
                 bqConsumer = new BlockingQueueConsumerImpl<TestJob, TestJobResult>(
                     { sleepAfterErrorMs: 40, sleepBeforeNextTakeMs: 5 },
-                    { ...emptyCallbacks, take: () => throwingTakeMock(takeSpy) }
+                    { ...emptyCallbacks, take: () => throwingTakeMock(takeSpy) },
                 );
                 bqConsumer.start();
                 await BluebirdPromise.delay(30);
@@ -129,7 +129,7 @@ describe("BlockingQueueConsumer", () => {
                 const takeSpy = sinon.fake();
                 bqConsumer = new BlockingQueueConsumerImpl<TestJob, TestJobResult>(
                     { sleepAfterErrorMs: 5, sleepBeforeNextTakeMs: 40 },
-                    { ...emptyCallbacks, take: () => returningTakeMock(takeSpy) }
+                    { ...emptyCallbacks, take: () => returningTakeMock(takeSpy) },
                 );
                 bqConsumer.start();
                 await BluebirdPromise.delay(30);
@@ -142,7 +142,7 @@ describe("BlockingQueueConsumer", () => {
                 const takeSpy = sinon.fake();
                 bqConsumer = new BlockingQueueConsumerImpl<TestJob, TestJobResult>(
                     { sleepAfterErrorMs: 5, sleepBeforeNextTakeMs: 40 },
-                    { ...emptyCallbacks, take: () => emptyTakeMock(takeSpy) }
+                    { ...emptyCallbacks, take: () => emptyTakeMock(takeSpy) },
                 );
                 bqConsumer.start();
                 await BluebirdPromise.delay(30);
@@ -176,7 +176,7 @@ describe("BlockingQueueConsumer", () => {
                     // error is expected
                 }
                 await BluebirdPromise.delay(30);
-                expect(bqConsumer.isRunning()).to.be.false;
+                expect(bqConsumer.isRunning()).to.be.equal(false);
             });
 
             it("calls .onError when .init throws error", async () => {
@@ -393,7 +393,8 @@ describe("BlockingQueueConsumer", () => {
                     ...emptyCallbacks,
                     take: async () => job,
                     process: async () => result,
-                    onProcessSuccess: (job: TestJob, result: TestJobResult) => onProcessSuccessSpy(job, result),
+                    onProcessSuccess: (successJob: TestJob, successJobResult: TestJobResult) =>
+                        onProcessSuccessSpy(successJob, successJobResult),
                 });
                 bqConsumer.start();
                 await BluebirdPromise.delay(40);
@@ -415,7 +416,7 @@ describe("BlockingQueueConsumer", () => {
                 bqConsumer.start();
                 await BluebirdPromise.delay(40);
                 expect(onErrorSpy.callCount).to.be.greaterThan(1);
-                expect(bqConsumer.isRunning()).to.be.true;
+                expect(bqConsumer.isRunning()).to.be.equal(true);
             });
         });
 
@@ -436,7 +437,7 @@ describe("BlockingQueueConsumer", () => {
                 bqConsumer.start();
                 await BluebirdPromise.delay(40);
                 expect(onErrorSpy.callCount).to.be.greaterThan(1);
-                expect(bqConsumer.isRunning()).to.be.true;
+                expect(bqConsumer.isRunning()).to.be.equal(true);
             });
         });
     });

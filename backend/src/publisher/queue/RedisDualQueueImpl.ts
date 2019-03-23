@@ -1,8 +1,9 @@
-import * as steemJs from "steem";
 import ow from "ow";
 
-import { RedisDualQueue } from "./RedisDualQueue";
+import { Log } from "../../lib/Log";
 import { Redis } from "../../lib/redis/Redis";
+
+import { RedisDualQueue } from "./RedisDualQueue";
 
 export class RedisDualQueueImpl implements RedisDualQueue {
     private redis: Redis;
@@ -53,7 +54,7 @@ export class RedisDualQueueImpl implements RedisDualQueue {
             const resp = await this.redis.brpoplpush(
                 this.options.waitingQueueKey,
                 this.options.processingQueueKey,
-                timeoutSeconds
+                timeoutSeconds,
             );
             if (!resp) return undefined;
             else {
@@ -62,7 +63,7 @@ export class RedisDualQueueImpl implements RedisDualQueue {
         } catch (error) {
             throw new RedisDualQueue.RedisDualQueueError(
                 "Error in RedisDualQueueImpl.popFromWaitingQueuePushToProcessingQueue",
-                error
+                error,
             );
         }
     }
@@ -72,15 +73,17 @@ export class RedisDualQueueImpl implements RedisDualQueue {
 
         try {
             const numRemoved = await this.redis.lremAll(this.options.processingQueueKey, entry);
-            if (numRemoved === 0)
+            if (numRemoved === 0) {
                 throw new RedisDualQueue.RedisDualQueueError("Item " + entry + " not found in processing queue");
+            }
         } catch (error) {
             if (error instanceof RedisDualQueue.RedisDualQueueError) throw error;
-            else
+            else {
                 throw new RedisDualQueue.RedisDualQueueError(
                     "Error in RedisDualQueueImpl.removeFromProcessingQueue",
-                    error
+                    error,
                 );
+            }
         }
     }
 
@@ -92,6 +95,7 @@ export class RedisDualQueueImpl implements RedisDualQueue {
             dirtyListElementsPresent = !!resp;
             if (dirtyListElementsPresent) dirtyCount++;
         }
+        Log.log().debug({ method: "pushAllFromProcessingQueueToWaitingQueue", dirtyCount });
     }
 }
 

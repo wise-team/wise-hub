@@ -1,4 +1,4 @@
-import { CustomError } from "../../lib/CustomError";
+import { CustomError } from "universe-log";
 
 export interface Redis {
     set(key: string, value: string): Promise<string>;
@@ -16,11 +16,11 @@ export interface Redis {
 export namespace Redis {
     export function isRedis(o: any): o is Redis {
         return (
-            (<Redis>o).set !== undefined &&
-            (<Redis>o).setWithTTL !== undefined &&
-            (<Redis>o).get !== undefined &&
-            (<Redis>o).exists !== undefined &&
-            (<Redis>o).close !== undefined
+            (o as Redis).set !== undefined &&
+            (o as Redis).setWithTTL !== undefined &&
+            (o as Redis).get !== undefined &&
+            (o as Redis).exists !== undefined &&
+            (o as Redis).close !== undefined
         );
     }
 

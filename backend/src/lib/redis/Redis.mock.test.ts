@@ -1,7 +1,9 @@
 import { Redis } from "./Redis";
 
 export class RedisMock implements Redis {
-    public constructor() {}
+    public constructor() {
+        //
+    }
 
     public async set(key: string, value: string): Promise<string> {
         throw new Error("Unmocked method called");

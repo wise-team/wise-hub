@@ -1,5 +1,7 @@
 import ow from "ow";
+
 import { ow_catch } from "../../lib/util";
+
 import { PublishableOperation } from "./PublishableOperation";
 
 export interface PublishJob {
@@ -13,7 +15,7 @@ export namespace PublishJob {
             job.ops,
             ow.array
                 .label("job.ops")
-                .ofType(ow.array.is(o => ow_catch(() => PublishableOperation.validatePublishableOperation(o as any))))
+                .ofType(ow.array.is(o => ow_catch(() => PublishableOperation.validatePublishableOperation(o as any)))),
         );
         ow(job.delegator, ow.string.minLength(3).label("job.delegator"));
     }

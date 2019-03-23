@@ -1,8 +1,9 @@
-import { Broadcaster } from "./Broadcaster";
-import { UsersManager } from "../../lib/UsersManager";
-import { PublishJob } from "../entities/PublishJob";
-import { Steemconnect } from "../../lib/Steemconnect";
 import * as BluebirdPromise from "bluebird";
+
+import { Steemconnect } from "../../lib/Steemconnect";
+import { PublishJob } from "../entities/PublishJob";
+
+import { Broadcaster } from "./Broadcaster";
 
 export class BroadcasterImpl implements Broadcaster {
     private params: Broadcaster.Params;
@@ -20,7 +21,7 @@ export class BroadcasterImpl implements Broadcaster {
 
         if (!Steemconnect.BroadcastResult.isBroadcastResult(result)) {
             throw new Broadcaster.BroadcastError(
-                "Bad response from steemconnect: " + JSON.stringify(result).substring(0, 400)
+                "Bad response from steemconnect: " + JSON.stringify(result).substring(0, 400),
             );
         }
 
@@ -34,7 +35,7 @@ export class BroadcasterImpl implements Broadcaster {
             if (error.name === "SDKError" && (error as any).error === "server_error") {
                 throw new Broadcaster.BroadcastError(
                     "Steemconnect error: " + (error as any).error_description || "bad error response from steemconnect",
-                    error
+                    error,
                 );
             } else {
                 const retryDelayMs = this.getRetryDelayMs(tryNum);
@@ -63,6 +64,7 @@ export class BroadcasterImpl implements Broadcaster {
         try {
             this.params.onWarning(job, msg, error);
         } catch (error) {
+            // tslint:disable no-console
             console.error("Error in BroadcasterImpl.onWarning", error);
         }
     }

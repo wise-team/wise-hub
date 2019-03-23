@@ -1,19 +1,13 @@
-import { expect, use as chaiUse } from "chai";
-import * as chaiAsPromised from "chai-as-promised";
-chaiUse(chaiAsPromised);
-import "mocha";
-import * as sinon from "sinon";
-import * as Docker from "dockerode";
-import * as _ from "lodash";
-import * as uuid from "uuid/v4";
+// tslint:disable no-console no-unused-expression
 import * as BluebirdPromise from "bluebird";
-import { exec, ChildProcess } from "child_process";
-import { Log } from "../Log";
-Log.log().initialize();
+import { expect } from "chai";
+import * as Docker from "dockerode";
+import "mocha";
+import * as uuid from "uuid/v4";
 
 import { Redis } from "../redis/Redis";
+
 import { RedisImpl } from "./RedisImpl";
-import { RedisMock } from "./Redis.mock.test";
 
 describe("Redis", function() {
     this.timeout(10000);

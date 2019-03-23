@@ -1,4 +1,4 @@
-import { CustomError } from "../../lib/CustomError";
+import { CustomError } from "universe-log";
 
 export interface RedisDualQueue {
     isWaitingQueueEmpty(): Promise<boolean>;
@@ -12,7 +12,7 @@ export interface RedisDualQueue {
 
 export namespace RedisDualQueue {
     export function isRedisDualQueue(obj: any): obj is RedisDualQueue {
-        const o = <RedisDualQueue>obj;
+        const o = obj as RedisDualQueue;
         return (
             o.isWaitingQueueEmpty !== undefined &&
             o.isProcessingQueueEmpty !== undefined &&

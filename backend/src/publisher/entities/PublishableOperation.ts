@@ -1,6 +1,7 @@
-import * as steem from "steem";
-import { ow_catch } from "../../lib/util";
 import ow from "ow";
+import * as steem from "steem";
+
+import { ow_catch } from "../../lib/util";
 
 interface VoteOp {
     voter: string;
@@ -49,8 +50,8 @@ export namespace PublishableOperation {
             po,
             ow.any(
                 ow.array.is(o => ow_catch(() => validateVoteDesc(o as any))), ///
-                ow.array.is(o => ow_catch(() => validateCustomJsonDesc(o as any))) ///
-            )
+                ow.array.is(o => ow_catch(() => validateCustomJsonDesc(o as any))), ///
+            ),
         );
     }
 }
@@ -59,12 +60,13 @@ export namespace PublishableOperation {
  * The reason of the below code is to warn the compiler and prevent compilation
  * in case when PublishableOperation is incompatible with steemJs.OperationWithDescriptor
  */
+// tslint:disable no-unused-variable
 
 function a(): PublishableOperation {
     return {} as any;
 }
 
-function b(param: steem.OperationWithDescriptor) {}
+function b(param: steem.OperationWithDescriptor) { /* */ }
 b(a());
 
 const cjExampleOWD: steem.OperationWithDescriptor = [

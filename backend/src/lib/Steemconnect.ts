@@ -1,11 +1,12 @@
-import * as sc2 from "steemconnect";
 import ow from "ow";
 import { AccountInfo, OperationWithDescriptor } from "steem";
+import * as sc2 from "steemconnect";
+
+import { Log } from "./Log";
 
 export class Steemconnect {
     private oauth2ClientId: string;
     private callbackUrl: string;
-    // private scope: string [];
 
     public constructor(oauth2ClientId: string, callbackUrl: string) {
         ow(oauth2ClientId, ow.string.nonEmpty.label("oauth2ClientId"));
@@ -18,39 +19,44 @@ export class Steemconnect {
     public async me(accessToken: string): Promise<Steemconnect.Me> {
         ow(accessToken, ow.string.nonEmpty.label("accessToken"));
 
-        const sc2 = this.constructSC2([]);
-        sc2.setAccessToken(accessToken);
-        return await new Promise<Steemconnect.Me>((resolve, reject) => {
-            sc2.me((error, result) => {
+        const sc2Instance = this.constructSC2([]);
+        sc2Instance.setAccessToken(accessToken);
+
+        const steemconnectResponse = await new Promise<Steemconnect.Me>((resolve, reject) => {
+            sc2Instance.me((error, result) => {
                 if (error) reject(this.transformSC2Error(error));
                 else resolve(result as any);
             });
-        }).then(res => {
-            ow(res.account, ow.object.label("lib/Steemconnect.ts sc2.me().response.account"));
-            ow(res.user_metadata, ow.object.label("lib/Steemconnect.ts sc2.me().response.user_metadata"));
-            ow(res.scope, ow.array.ofType(ow.string).label("lib/Steemconnect.ts sc2.me().response.scope"));
-            ow(res.name, ow.string.label("lib/Steemconnect.ts sc2.me().response.name"));
-            return res;
         });
+        Log.log().debug("steemconnect_me_response", { response: steemconnectResponse });
+        ow(steemconnectResponse.account, ow.object.label("lib/Steemconnect.ts sc2.me().response.account"));
+        ow(
+            steemconnectResponse.user_metadata,
+            ow.any(ow.object.label("lib/Steemconnect.ts sc2.me().response.user_metadata"), ow.undefined),
+        );
+        ow(steemconnectResponse.scope, ow.array.ofType(ow.string).label("lib/Steemconnect.ts sc2.me().response.scope"));
+        ow(steemconnectResponse.name, ow.string.label("lib/Steemconnect.ts sc2.me().response.name"));
+
+        return steemconnectResponse;
     }
 
     public async broadcast(
         account: string,
         scope: string[],
         ops: OperationWithDescriptor[],
-        accessToken: string
+        accessToken: string,
     ): Promise<Steemconnect.BroadcastResult> {
         ow(account, ow.string.nonEmpty.label("account"));
         ow(scope, ow.array.nonEmpty.ofType(ow.string).label("scope"));
         ow(ops, ow.array.nonEmpty.ofType(ow.object).label("ops"));
         ow(accessToken, ow.string.nonEmpty.label("accessToken"));
 
-        const sc2 = this.constructSC2(scope);
-        sc2.setAccessToken(accessToken);
+        const sc2Instance = this.constructSC2(scope);
+        sc2Instance.setAccessToken(accessToken);
         const resp = await new Promise<any>((resolve, reject) => {
-            sc2.broadcast(ops, (error, result) => {
+            sc2Instance.broadcast(ops, (error, broadcastResult) => {
                 if (error) reject(this.transformSC2Error(error));
-                else resolve(result);
+                else resolve(broadcastResult);
             });
         });
 
@@ -66,12 +72,12 @@ export class Steemconnect {
     public async revokeToken(accessToken: string): Promise<any> {
         ow(accessToken, ow.string.nonEmpty.label("accessToken"));
 
-        const sc2 = this.constructSC2([]);
-        sc2.setAccessToken(accessToken);
+        const sc2Instance = this.constructSC2([]);
+        sc2Instance.setAccessToken(accessToken);
         return await new Promise<any>((resolve, reject) => {
-            sc2.revokeToken((error, result) => {
+            sc2Instance.revokeToken((error, revokeResult) => {
                 if (error) reject(this.transformSC2Error(error));
-                else resolve(result);
+                else resolve(revokeResult);
             });
         });
     }
@@ -82,7 +88,7 @@ export class Steemconnect {
         return sc2.Initialize({
             app: this.oauth2ClientId,
             callbackURL: this.callbackUrl,
-            scope: scope,
+            scope,
         });
     }
 
@@ -95,7 +101,7 @@ export class Steemconnect {
                     ": " +
                     (error.error ? error.error : "") +
                     " " +
-                    error.error_description
+                    error.error_description,
             );
             err.name = error.name;
             if (error.error) (err as any).error = error.error;
@@ -109,7 +115,7 @@ export class Steemconnect {
 export namespace Steemconnect {
     export interface Me {
         account: AccountInfo;
-        user_metadata: object;
+        user_metadata?: any;
         scope: string[];
         name: string;
     }
@@ -123,9 +129,9 @@ export namespace Steemconnect {
     export namespace BroadcastResult {
         export function isBroadcastResult(o: any): o is BroadcastResult {
             return (
-                (<BroadcastResult>o).id !== undefined &&
-                (<BroadcastResult>o).block_num !== undefined &&
-                (<BroadcastResult>o).trx_num !== undefined
+                (o as BroadcastResult).id !== undefined &&
+                (o as BroadcastResult).block_num !== undefined &&
+                (o as BroadcastResult).trx_num !== undefined
             );
         }
     }

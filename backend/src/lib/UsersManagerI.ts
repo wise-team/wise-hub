@@ -1,6 +1,7 @@
-import ow from "ow";
-import { User, UserSettings } from "../common/model/User";
 import { OperationWithDescriptor } from "steem";
+
+import { User, UserSettings } from "../common/model/User";
+
 import { Steemconnect } from "./Steemconnect";
 
 export interface UsersManagerI {

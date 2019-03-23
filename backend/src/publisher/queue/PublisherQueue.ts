@@ -1,9 +1,8 @@
 import ow from "ow";
-import { ow_catch } from "../../lib/util";
+import { CustomError } from "universe-log";
 
-import { RedisDualQueue } from "./RedisDualQueue";
+import { ow_catch } from "../../lib/util";
 import { PublishJob } from "../entities/PublishJob";
-import { CustomError } from "../../lib/CustomError";
 
 export interface PublisherQueue {
     resetProcessingQueue(): Promise<void>;
@@ -14,7 +13,7 @@ export interface PublisherQueue {
 
 export namespace PublisherQueue {
     export function isPublisherQueue(obj: any): obj is PublisherQueue {
-        const o = <PublisherQueue>obj;
+        const o = obj as PublisherQueue;
         return (
             o.resetProcessingQueue !== undefined &&
             o.scheduleJob !== undefined &&
@@ -30,7 +29,7 @@ export namespace PublisherQueue {
             ow(jobEntry, ow.object.is(o => ow_catch(() => PublishJob.validate(o as JobEntry))).label("JobEntry"));
             ow(
                 jobEntry.redisStringifiedEntry,
-                ow.string.nonEmpty.startsWith("{").label("JobEntry.redisStringifiedEntry")
+                ow.string.nonEmpty.startsWith("{").label("JobEntry.redisStringifiedEntry"),
             );
         }
     }

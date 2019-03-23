@@ -1,24 +1,19 @@
-import { expect, use as chaiUse } from "chai";
-import * as chaiAsPromised from "chai-as-promised";
+import { expect } from "chai";
 import "mocha";
 import * as sinon from "sinon";
-import * as BluebirdPromise from "bluebird";
-import * as _ from "lodash";
+import { CustomError } from "universe-log";
 import * as uuid from "uuid/v4";
-chaiUse(chaiAsPromised);
 
 import { Log } from "../../lib/Log";
-Log.log().initialize();
-
+import { Steemconnect } from "../../lib/Steemconnect";
 import { UsersManagerMock } from "../../lib/UsersManager.mock.test";
 import { UsersManagerI } from "../../lib/UsersManagerI";
-import { Broadcaster } from "./Broadcaster";
-import { BroadcasterImpl } from "./BroadcasterImpl";
-import { StaticConfig } from "../StaticConfig";
 import { PublishableOperation } from "../entities/PublishableOperation";
 import { PublishJob } from "../entities/PublishJob";
-import { Steemconnect } from "../../lib/Steemconnect";
-import { CustomError } from "../../lib/CustomError";
+import { StaticConfig } from "../StaticConfig";
+
+import { Broadcaster } from "./Broadcaster";
+import { BroadcasterImpl } from "./BroadcasterImpl";
 
 describe("Broadcaster", function() {
     function sampleJob() {
@@ -31,7 +26,8 @@ describe("Broadcaster", function() {
                     required_posting_auths: [account],
                     id: "wise",
                     json:
-                        '["v2:confirm_vote",{"voter":"steemprojects1","tx_id":"fc9efa1bbfde56d0562d77abc8395cd9567dd0a7","accepted":true,"msg":""}]',
+                        '["v2:confirm_vote",{"voter":"steemprojects1","tx_id":' +
+                        '"fc9efa1bbfde56d0562d77abc8395cd9567dd0a7","accepted":true,"msg":""}]',
                 },
             ],
             [
@@ -45,7 +41,7 @@ describe("Broadcaster", function() {
             ],
         ];
 
-        return { delegator: "delegator-" + uuid(), ops: ops };
+        return { delegator: "delegator-" + uuid(), ops };
     }
 
     function depsMock() {
@@ -59,8 +55,8 @@ describe("Broadcaster", function() {
         const usersManager: UsersManagerI = new UsersManagerMock();
 
         const broadcasterParams: Broadcaster.Params = {
-            onWarning: (job: PublishJob, msg: string, error?: Error) => Log.log().logError(msg, error),
-            usersManager: usersManager,
+            onWarning: (jobInWarning: PublishJob, msg: string, error?: Error) => Log.log().error(msg, error),
+            usersManager,
             retryDelaysSeconds: [1, 2],
             broadcastScope: StaticConfig.BROADCAST_SCOPE,
         };
@@ -118,7 +114,7 @@ describe("Broadcaster", function() {
         });
 
         it("throws error when response from steemconnect is invalid", async () => {
-            const { job, usersManager, response, broadcasterParams } = depsMock();
+            const { job, usersManager, broadcasterParams } = depsMock();
             usersManager.broadcast = sinon.fake.resolves({ not_a_response: "hehe" });
 
             const broadcaster: Broadcaster = new BroadcasterImpl({ ...broadcasterParams });
@@ -127,12 +123,12 @@ describe("Broadcaster", function() {
         });
 
         describe("retries", () => {
-            const { job, usersManager, response, broadcasterParams } = depsMock();
+            const { job, usersManager, broadcasterParams } = depsMock();
             const broadcastCallTimeDeltaMs: number[] = [];
             const broadcastCallCounter = { count: 0 };
             const onWarningSpy = sinon.fake();
-            let catchedError: Error | undefined = undefined;
-            let returnedResponse: object | undefined = undefined;
+            let catchedError: Error | undefined;
+            let returnedResponse: object | undefined;
 
             before(async function() {
                 this.timeout(10000);
@@ -166,7 +162,7 @@ describe("Broadcaster", function() {
                     expectedCumulativeDelayMs += delayS * 1000;
                     expect(broadcastCallTimeDeltaMs[i + 1]).to.be.within(
                         expectedCumulativeDelayMs - 100,
-                        expectedCumulativeDelayMs + 100
+                        expectedCumulativeDelayMs + 100,
                     );
                 });
             });
@@ -181,7 +177,7 @@ describe("Broadcaster", function() {
             });
 
             it("throws only last failure", async () => {
-                expect(returnedResponse).to.be.undefined;
+                expect(returnedResponse).to.be.equal(undefined);
                 expect(catchedError)
                     .to.instanceOf(Error)
                     .that.has.property("no")
@@ -201,7 +197,9 @@ describe("Broadcaster", function() {
 
             const broadcaster: Broadcaster = new BroadcasterImpl({
                 ...broadcasterParams,
-                onWarning: () => {},
+                onWarning: () => {
+                    /* */
+                },
             });
             const returnedResponse = await broadcaster.broadcast(job);
 
@@ -214,7 +212,7 @@ describe("Broadcaster", function() {
         });
 
         it("does not retry on SDKError with .error=server_error", async () => {
-            const { job, usersManager, response, broadcasterParams } = depsMock();
+            const { job, usersManager, broadcasterParams } = depsMock();
 
             class SDKError extends CustomError {
                 public error = "server_error";

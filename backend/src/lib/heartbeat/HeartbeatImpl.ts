@@ -1,7 +1,8 @@
 import ow from "ow";
 
-import { Heartbeat } from "./Heartbeat";
 import { Redis } from "../../lib/redis/Redis";
+
+import { Heartbeat } from "./Heartbeat";
 
 export class HeartbeatImpl implements Heartbeat {
     // it contains staticly generated UUIDv4 to clear keyspace and prevent collisions
@@ -13,7 +14,9 @@ export class HeartbeatImpl implements Heartbeat {
     public constructor(
         redis: Redis,
         name: string,
-        logFn: (msg: string, error?: Error) => void = (msg: string, error?: Error) => console.error(msg, error)
+        // tslint:disable no-console
+        logFn: (msg: string, error?: Error) => void = (msg: string, error?: Error) => console.error(msg, error),
+        // tslint:enable no-console
     ) {
         ow(redis, ow.object.label("redis"));
         ow(name, ow.string.nonEmpty.label("name"));
@@ -49,7 +52,9 @@ export class HeartbeatImpl implements Heartbeat {
         try {
             this.logFn(msg, error);
         } catch (error) {
+            // tslint:disable no-console
             console.error("Error in HeartbeatImpl.log()", error);
+            // tslint:enable no-console
         }
     }
 }

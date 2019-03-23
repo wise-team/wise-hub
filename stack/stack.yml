@@ -35,6 +35,9 @@ services:
     environment:
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.name + ':6379/'
       REDIS_URL: redis://redis:6379/
+      LOG_FORMAT: json
+      WISE_LOG_LEVEL: debug
+      LOG_METADATA: '{ "project": "wise-hub", "service": "backend/api" }'
 
   #§ d(data.config.hub.docker.services.daemon.name) + ':'
   daemon:
@@ -44,7 +47,9 @@ services:
     environment:
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.name + ':6379/'
       REDIS_URL: redis://redis:6379/
+      LOG_FORMAT: json
       WISE_LOG_LEVEL: debug
+      LOG_METADATA: '{ "project": "wise-hub", "service": "backend/daemon" }'
 
   #§ d(data.config.hub.docker.services.publisher.name) + ':'
   publisher:
@@ -59,6 +64,9 @@ services:
     environment:
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.name + ':6379/'
       REDIS_URL: redis://redis:6379/
+      LOG_FORMAT: json
+      WISE_LOG_LEVEL: debug
+      LOG_METADATA: '{ "project": "wise-hub", "service": "backend/publisher" }'
 
   #§ d(data.config.hub.docker.services.realtime.name) + ':'
   realtime:
@@ -71,6 +79,9 @@ services:
     environment:
       #§ 'REDIS_URL: redis://' + data.config.hub.docker.services.redis.name + ':6379/'
       REDIS_URL: redis://redis:6379/
+      LOG_FORMAT: json
+      WISE_LOG_LEVEL: debug
+      LOG_METADATA: '{ "project": "wise-hub", "service": "backend/realtime" }'
 
 
 volumes:

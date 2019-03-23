@@ -1,59 +1,83 @@
-import Wise, { DisabledApi, EffectuatedWiseOperation, UnifiedSteemTransaction, Protocol } from "steem-wise-core";
-import * as steem from "steem";
 import * as BluebirdPromise from "bluebird";
+import * as steemJs from "steem";
+import Wise, { DisabledApi, EffectuatedWiseOperation, Protocol, UnifiedSteemTransaction } from "steem-wise-core";
 
 export class BlockLoadingApi extends DisabledApi {
-    private steem: steem.api.Steem;
+    private steem: steemJs.api.Steem;
     private protocol: Protocol = Wise.constructDefaultProtocol();
 
-    public constructor(steem: steem.api.Steem) {
+    public constructor(steem: steemJs.api.Steem) {
         super();
         this.steem = steem;
     }
 
     public async getWiseOperationsRelatedToDelegatorInBlock(
-        delegator: string, blockNum: number, skipDelegatorCheck: boolean = false,
-        delayOnNoBlockMs: number = /*§ data.config.steem.waitForNextHeadBlockDelayMs §*/3100/*§ §.*/
-    ): Promise<EffectuatedWiseOperation []> {
-        const block: steem.GetBlock.Block = await this.steem.getBlockAsync(blockNum);
+        delegator: string,
+        blockNum: number,
+        skipDelegatorCheck: boolean = false,
+        delayOnNoBlockMs: number = /*§ data.config.steem.waitForNextHeadBlockDelayMs §*/ 3100 /*§ §.*/,
+    ): Promise<EffectuatedWiseOperation[]> {
+        const block: steemJs.GetBlock.Block = await this.steem.getBlockAsync(blockNum);
 
         if (!block) {
             await BluebirdPromise.delay(delayOnNoBlockMs);
             return await this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, skipDelegatorCheck);
-        }
-        else {
-            return await this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, skipDelegatorCheck);
+        } else {
+            return await this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(
+                delegator,
+                blockNum,
+                block,
+                skipDelegatorCheck,
+            );
         }
     }
 
-    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: steem.GetBlock.Block, skipDelegatorCheck: boolean): EffectuatedWiseOperation [] {
-        let out: EffectuatedWiseOperation [] = [];
+    public async getAllWiseOperationsInBlock(blockNum: number): Promise<EffectuatedWiseOperation[]> {
+        return await this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, true /* skip delegator check */);
+    }
 
-        const block_num = blockNum;
+    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(
+        delegator: string,
+        blockNum: number,
+        block: steemJs.GetBlock.Block,
+        skipDelegatorCheck: boolean,
+    ): EffectuatedWiseOperation[] {
+        let out: EffectuatedWiseOperation[] = [];
+
         const timestampUtc = block.timestamp;
-        for (let transaction_num = 0; transaction_num < block.transactions.length; transaction_num++) {
-            const transaction = block.transactions[transaction_num];
+        for (let transactionNum = 0; transactionNum < block.transactions.length; transactionNum++) {
+            const transaction = block.transactions[transactionNum];
 
-            out = out.concat(this.getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
-                delegator, blockNum, transaction_num, transaction,
-                new Date(timestampUtc + "Z" /* this is UTC date */), skipDelegatorCheck
-            ));
+            out = out.concat(
+                this.getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
+                    delegator,
+                    blockNum,
+                    transactionNum,
+                    transaction,
+                    new Date(timestampUtc + "Z" /* this is UTC date */),
+                    skipDelegatorCheck,
+                ),
+            );
         }
 
         return out;
     }
 
     private getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
-        delegator: string, blockNum: number, transactionNum: number, transaction: steem.GetBlock.Transaction,
-        timestamp: Date, skipDelegatorCheck: boolean
-    ): EffectuatedWiseOperation [] {
-        const out: EffectuatedWiseOperation [] = [];
+        delegator: string,
+        blockNum: number,
+        transactionNum: number,
+        transaction: steemJs.GetBlock.Transaction,
+        timestamp: Date,
+        skipDelegatorCheck: boolean,
+    ): EffectuatedWiseOperation[] {
+        const out: EffectuatedWiseOperation[] = [];
         const steemTx: UnifiedSteemTransaction = {
             block_num: blockNum,
             transaction_num: transactionNum,
             transaction_id: transaction.transaction_id,
-            timestamp: timestamp,
-            ops: transaction.operations
+            timestamp,
+            ops: transaction.operations,
         };
         const handleResult = this.protocol.handleOrReject(steemTx);
 
@@ -64,9 +88,5 @@ export class BlockLoadingApi extends DisabledApi {
         }
 
         return out;
-    }
-
-    public async getAllWiseOperationsInBlock(blockNum: number): Promise<EffectuatedWiseOperation []> {
-        return await this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, true /* skip delegator check */);
     }
 }

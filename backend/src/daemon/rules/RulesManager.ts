@@ -1,12 +1,9 @@
-import * as BluebirdPromise from "bluebird";
-import * as _ from "lodash";
 import { Redis } from "ioredis";
-import { ApiHelper } from "../ApiHelper";
-import { common } from "../../common/common";
-import { Api, EffectuatedSetRules, SteemOperationNumber, RulePrototyper, Ruleset } from "steem-wise-core";
-import { StaticConfig } from "../StaticConfig";
-import { Log } from "../../lib/Log";
+import * as _ from "lodash";
+import { EffectuatedSetRules, RulePrototyper, Ruleset, SteemOperationNumber } from "steem-wise-core";
 
+import { common } from "../../common/common";
+import { Log } from "../../lib/Log";
 
 export class RulesManager {
     private redis: Redis;
@@ -16,6 +13,7 @@ export class RulesManager {
     }
 
     public async init() {
+        //
     }
 
     /*public async loadAllRules(delegator: string, moment: SteemOperationNumber) {
@@ -30,7 +28,11 @@ export class RulesManager {
         await this.redis.set(common.redis.rules + ":" + delegator + ":@loading", "no");
     }*/
 
-    public async getRules(delegator: string, voter: string, moment: SteemOperationNumber): Promise<EffectuatedSetRules> {
+    public async getRules(
+        delegator: string,
+        voter: string,
+        moment: SteemOperationNumber,
+    ): Promise<EffectuatedSetRules> {
         /*while (true) {
             const ready = await this.redis.get(common.redis.rules + ":" + delegator + ":@ready");
             if (ready === "yes") break;
@@ -47,26 +49,38 @@ export class RulesManager {
         }*/
 
         const redisKey = common.redis.rules + ":" + delegator + ":" + voter;
-        const rulesFromRedis: { [x: string]: string; } = await this.redis.hgetall(redisKey);
-        console.log("rulesJsonFromRedis=" + JSON.stringify(rulesFromRedis, undefined, 2));
+        const rulesFromRedis: {
+            [x: string]: string;
+        } = await this.redis.hgetall(redisKey);
+        Log.log().debug("rulesJsonFromRedis=", rulesFromRedis);
 
         let newest: EffectuatedSetRules = {
             rulesets: [],
-            delegator: delegator,
-            voter: voter,
-            moment: SteemOperationNumber.NEVER
+            delegator,
+            voter,
+            moment: SteemOperationNumber.NEVER,
         };
 
         const blockNums = _.keys(rulesFromRedis);
+        // tslint:disable prefer-for-of
         for (let i = 0; i < blockNums.length; i++) {
-            const blockNum = parseInt(blockNums[i]);
-            console.log("blockNum:" + blockNum + " <= " + "moment.blockNum:" + moment.blockNum + ".... = " + (blockNum <= moment.blockNum));
+            const blockNum = parseInt(blockNums[i], 10);
+            Log.log().debug(
+                "blockNum:" +
+                    blockNum +
+                    " <= " +
+                    "moment.blockNum:" +
+                    moment.blockNum +
+                    ".... = " +
+                    (blockNum <= moment.blockNum),
+            );
             if (blockNum <= moment.blockNum) {
                 if (!newest || blockNum > newest.moment.blockNum) {
                     newest = JSON.parse(rulesFromRedis[blockNums[i]]);
                 }
             }
         }
+        // tslint:enable prefer-for-of
 
         newest.rulesets = newest.rulesets.map((ruleset: Ruleset) => RulePrototyper.prototypeRuleset(ruleset));
 
@@ -88,7 +102,8 @@ export class RulesManager {
         if (keys.length > 0) {
             if (keys.length > 500) Log.log().warn("Deleting " + keys.length + " keys!");
             const removedCount = await this.redis.del(...keys);
-            if (removedCount !== keys.length) throw new Error("Not all keys were removed (keys.length=" + keys.length + ",removedCount=" + removedCount);
+            if (removedCount !== keys.length) throw new Error("Not all keys were removed
+             (keys.length=" + keys.length + ",removedCount=" + removedCount);
             const ellapsedMs = Date.now() - startMs;
             if (ellapsedMs > 20) Log.log().warn("Deleting delegator keys from redis took " + ellapsedMs + "ms");
         }

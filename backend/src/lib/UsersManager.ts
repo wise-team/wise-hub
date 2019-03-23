@@ -1,26 +1,28 @@
-import ow from "ow";
-import { Vault } from "./vault/Vault";
+import Axios from "axios";
 import { Redis } from "ioredis";
-import { User, defaultUserSettings, UserSettings } from "../common/model/User";
-import { common } from "../common/common";
-import { d } from "./util";
 import * as jwt_decode from "jwt-decode";
 import * as _ from "lodash";
+import ow from "ow";
+import { OperationWithDescriptor } from "steem";
+
+import { common } from "../common/common";
+import { defaultUserSettings, User, UserSettings } from "../common/model/User";
+
 import { DelegatorManager } from "./DelegatorManager";
-import Axios from "axios";
 import { Log } from "./Log";
 import { Steemconnect } from "./Steemconnect";
-import { OperationWithDescriptor } from "steem";
 import { UsersManagerI } from "./UsersManagerI";
+import { d } from "./util";
+import { Vault } from "./vault/Vault";
 
 // TODO: Move process.env management to root file and pass only arguments
 export class UsersManager implements UsersManagerI {
     private oauth2ClientId: string;
-    private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/{
-  "baseAuthorizationUrl": "https://steemconnect.com/oauth2/authorize",
-  "tokenUrl": "https://steemconnect.com/api/oauth2/token",
-  "tokenRevocationUrl": "https://steemconnect.com/api/oauth2/token/revoke"
-}/*§ §.*/;
+    private oauth2Settings = /*§ JSON.stringify(data.config.steemconnect.oauth2Settings, undefined, 2) §*/ {
+        baseAuthorizationUrl: "https://steemconnect.com/oauth2/authorize",
+        tokenUrl: "https://steemconnect.com/api/oauth2/token",
+        tokenRevocationUrl: "https://steemconnect.com/api/oauth2/token/revoke",
+    } /*§ §.*/;
 
     private options: UsersManagerOptions;
     private vault: Vault;
@@ -40,8 +42,10 @@ export class UsersManager implements UsersManagerI {
     }
 
     public async init() {
+        //
     }
 
+    // tslint:disable cyclomatic-complexity
     public async login(accessToken: string, refreshToken?: string): Promise<User> {
         if (!accessToken) throw new Error("Access token is missing");
 
@@ -51,19 +55,9 @@ export class UsersManager implements UsersManagerI {
         const getUser: User | undefined = await this.getUser(username);
         const user: User = {
             account: username,
-            profile:
-                   me
-                || (getUser ? getUser.profile : {} as any),
-            scope: _.union(
-                [],
-                me.scope || [],
-                (getUser ? getUser.scope : [])
-            ),
-            settings: _.merge(
-                {},
-                defaultUserSettings,
-                (getUser ? getUser.settings : {}),
-            )
+            profile: me || (getUser ? getUser.profile : ({} as any)),
+            scope: _.union([], me.scope || [], getUser ? getUser.scope : []),
+            settings: _.merge({}, defaultUserSettings, getUser ? getUser.settings : {}),
         };
 
         if (accessToken) {
@@ -74,8 +68,7 @@ export class UsersManager implements UsersManagerI {
         if (refreshToken) {
             const tokenPayload = await this.setRefreshToken(username, refreshToken);
             user.scope = _.merge(user.scope || [], tokenPayload.scope);
-        }
-        else {
+        } else {
             // do not let narrower scoped access token override previous wide scope access token
             // instead, we get wider scoped access token by refreshing old access token
             const gotRefreshToken = await this.getRefreshToken(username);
@@ -88,9 +81,12 @@ export class UsersManager implements UsersManagerI {
 
         await this.setUser(username, user);
 
-        Log.log().info("Logged in @" + me.name + " with retrived scope = " + me.scope + ", and escalated scope = " + user.scope);
+        Log.log().info(
+            "Logged in @" + me.name + " with retrived scope = " + me.scope + ", and escalated scope = " + user.scope,
+        );
         return user;
     }
+    // tslint:enable cyclomatic-complexity
 
     public async forgetUser(user: User) {
         const username = d(user.account);
@@ -104,13 +100,17 @@ export class UsersManager implements UsersManagerI {
         await this.deleteRefreshToken(username);
     }
 
-    public async broadcast(username: string, scope: string [], ops: OperationWithDescriptor []): Promise<Steemconnect.BroadcastResult> {
+    public async broadcast(
+        username: string,
+        scope: string[],
+        ops: OperationWithDescriptor[],
+    ): Promise<Steemconnect.BroadcastResult> {
         ow(username, ow.string.nonEmpty.label("username"));
         ow(scope, ow.array.nonEmpty.ofType(ow.string).label("scope"));
         ow(ops, ow.array.nonEmpty.ofType(ow.object).label("ops"));
 
         let accessToken = await this.getAccessToken(username);
-        if (!accessToken) throw new Error("User \"" + username + "\"'s access token not found in vault!");
+        if (!accessToken) throw new Error('User "' + username + "\"'s access token not found in vault!");
 
         scope.forEach(requiredScopeElem => {
             if (d(accessToken).payload.scope.indexOf(requiredScopeElem) === -1) {
@@ -118,42 +118,16 @@ export class UsersManager implements UsersManagerI {
             }
         });
 
-        if ((Date.now() / 1000) >= accessToken.payload.exp || this.options.debug_refreshAccessTokenOnEverySCConstruct) {
+        if (Date.now() / 1000 >= accessToken.payload.exp || this.options.debug_refreshAccessTokenOnEverySCConstruct) {
             accessToken = await this.refreshAccessToken(username, scope);
         }
 
         return await this.steemconnect.broadcast(username, scope, ops, accessToken.token);
     }
 
-    private async refreshAccessToken(username: string, scope: string []): Promise<{ token: string, payload: AccessTokenJWTPayload }> {
-        if (!this.options.canIssueRefreshTokens) throw new Error("This users manager has canIssueRefreshTokens set to false.");
-        const refreshToken = await this.getRefreshToken(username);
-        if (!refreshToken) throw new Error("User " + username + " does not have a refresh token");
-
-        scope.forEach(requiredScopeElem => {
-            if (refreshToken.payload.scope.indexOf(requiredScopeElem) === -1) {
-                throw new Error("This refresh token does not allow " + requiredScopeElem + " in its scope");
-            }
-        });
-
-        const steemConnectSecret: { v: string } = await this.vault.getSecret(common.vault.secrets.steemConnectClientSecret);
-        if (!steemConnectSecret) throw new Error("Could not get SteemConnect client secret");
-
-        const resp = await Axios.post(this.oauth2Settings.tokenUrl, {
-            refresh_token: refreshToken.token,
-            client_id: this.oauth2ClientId,
-            client_secret: d(steemConnectSecret.v),
-            scope: refreshToken.payload.scope.join(",")
-        });
-        const data: { access_token: string } = d(resp.data);
-        const accessToken = d(data.access_token);
-        await this.setAccessToken(username, accessToken);
-        return d(await this.getAccessToken(username));
-    }
-
     public async saveUserSettings(username: string, settings: UserSettings): Promise<User> {
         const user: User | undefined = await this.getUser(username);
-        if (!user) throw new Error("User \"" + username + "\" does not exist");
+        if (!user) throw new Error('User "' + username + '" does not exist');
         user.settings = settings;
 
         await this.setUser(username, user);
@@ -163,7 +137,40 @@ export class UsersManager implements UsersManagerI {
     public async getUser(username: string): Promise<User | undefined> {
         const secretKey = common.vault.secrets.hub.userProfiles + "/" + username;
         const resp: { v: User } | undefined = await this.vault.getSecret(secretKey);
-        return (resp ? resp.v : undefined);
+        return resp ? resp.v : undefined;
+    }
+
+    private async refreshAccessToken(
+        username: string,
+        scope: string[],
+    ): Promise<{ token: string; payload: AccessTokenJWTPayload }> {
+        if (!this.options.canIssueRefreshTokens) {
+            throw new Error("This users manager has canIssueRefreshTokens set to false.");
+        }
+        const refreshToken = await this.getRefreshToken(username);
+        if (!refreshToken) throw new Error("User " + username + " does not have a refresh token");
+
+        scope.forEach(requiredScopeElem => {
+            if (refreshToken.payload.scope.indexOf(requiredScopeElem) === -1) {
+                throw new Error("This refresh token does not allow " + requiredScopeElem + " in its scope");
+            }
+        });
+
+        const steemConnectSecret: { v: string } = await this.vault.getSecret(
+            common.vault.secrets.steemConnectClientSecret,
+        );
+        if (!steemConnectSecret) throw new Error("Could not get SteemConnect client secret");
+
+        const resp = await Axios.post(this.oauth2Settings.tokenUrl, {
+            refresh_token: refreshToken.token,
+            client_id: this.oauth2ClientId,
+            client_secret: d(steemConnectSecret.v),
+            scope: refreshToken.payload.scope.join(","),
+        });
+        const data: { access_token: string } = d(resp.data);
+        const accessToken = d(data.access_token);
+        await this.setAccessToken(username, accessToken);
+        return d(await this.getAccessToken(username));
     }
 
     private async setUser(username: string, user: User) {
@@ -178,13 +185,14 @@ export class UsersManager implements UsersManagerI {
 
         if (user.settings && user.settings.daemonEnabled) {
             await DelegatorManager.addDelegator(this.redis, username);
-        }
-        else {
+        } else {
             await DelegatorManager.removeDelegator(this.redis, username);
         }
     }
 
-    private async getAccessToken(username: string): Promise<{ token: string, payload: AccessTokenJWTPayload } | undefined> {
+    private async getAccessToken(
+        username: string,
+    ): Promise<{ token: string; payload: AccessTokenJWTPayload } | undefined> {
         const secretKey = common.vault.secrets.hub.accessTokens + "/" + username;
         const resp: { v: string } | undefined = await this.vault.getSecret(secretKey);
         if (!resp) return undefined;
@@ -208,14 +216,15 @@ export class UsersManager implements UsersManagerI {
         try {
             const secretKey = common.vault.secrets.hub.accessTokens + "/" + username;
             await this.vault.deleteSecret(secretKey);
-        }
-        catch (error) {
+        } catch (error) {
             if (error.response.status === 404) return undefined;
             else throw error;
         }
     }
 
-    private async getRefreshToken(username: string): Promise<{ token: string, payload: RefreshTokenJWTPayload } | undefined> {
+    private async getRefreshToken(
+        username: string,
+    ): Promise<{ token: string; payload: RefreshTokenJWTPayload } | undefined> {
         const secretKey = common.vault.secrets.hub.refreshTokens + "/" + username;
         const resp: { v: string } | undefined = await this.vault.getSecret(secretKey);
         if (!resp) return undefined;
@@ -239,8 +248,7 @@ export class UsersManager implements UsersManagerI {
         try {
             const secretKey = common.vault.secrets.hub.refreshTokens + "/" + username;
             await this.vault.deleteSecret(secretKey);
-        }
-        catch (error) {
+        } catch (error) {
             if (error.response.status === 404) return undefined;
             else throw error;
         }
@@ -264,7 +272,7 @@ interface AccessTokenJWTPayload {
     role: string; // =app
     proxy: string; // =wisevote.app
     user: string;
-    scope: string [];
+    scope: string[];
     iat: number;
     exp: number;
 }
@@ -273,21 +281,23 @@ interface AccessTokenJWTPayload {
  * This is an TS 1.6+ TypeGuard as described here: https://www.typescriptlang.org/docs/handbook/advanced-types.html
  */
 function isAccessTokenJWTPayload(o: object): o is AccessTokenJWTPayload {
-    return (<AccessTokenJWTPayload>o).role !== undefined
-    && (<AccessTokenJWTPayload>o).role === "app"
-    && (<AccessTokenJWTPayload>o).proxy !== undefined
-    && (<AccessTokenJWTPayload>o).user !== undefined
-    && (<AccessTokenJWTPayload>o).scope !== undefined
-    && Array.isArray((<AccessTokenJWTPayload>o).scope)
-    && (<AccessTokenJWTPayload>o).iat !== undefined
-    && (<AccessTokenJWTPayload>o).exp !== undefined;
+    return (
+        (o as AccessTokenJWTPayload).role !== undefined &&
+        (o as AccessTokenJWTPayload).role === "app" &&
+        (o as AccessTokenJWTPayload).proxy !== undefined &&
+        (o as AccessTokenJWTPayload).user !== undefined &&
+        (o as AccessTokenJWTPayload).scope !== undefined &&
+        Array.isArray((o as AccessTokenJWTPayload).scope) &&
+        (o as AccessTokenJWTPayload).iat !== undefined &&
+        (o as AccessTokenJWTPayload).exp !== undefined
+    );
 }
 
 interface RefreshTokenJWTPayload {
     role: string; // =app
     proxy: string; // =wisevote.app
     user: string;
-    scope: string [];
+    scope: string[];
     iat: number;
 }
 
@@ -295,12 +305,14 @@ interface RefreshTokenJWTPayload {
  * This is an TS 1.6+ TypeGuard as described here: https://www.typescriptlang.org/docs/handbook/advanced-types.html
  */
 function isRefreshTokenJWTPayload(o: object): o is RefreshTokenJWTPayload {
-    return (<RefreshTokenJWTPayload>o).role !== undefined
-    && (<AccessTokenJWTPayload>o).role === "refresh"
-    && (<RefreshTokenJWTPayload>o).proxy !== undefined
-    && (<RefreshTokenJWTPayload>o).user !== undefined
-    && (<RefreshTokenJWTPayload>o).scope !== undefined
-    && Array.isArray((<RefreshTokenJWTPayload>o).scope)
-    && (<RefreshTokenJWTPayload>o).iat !== undefined
-    && (<AccessTokenJWTPayload>o).exp /* !!! */ === /* !!! */ undefined;
+    return (
+        (o as RefreshTokenJWTPayload).role !== undefined &&
+        (o as AccessTokenJWTPayload).role === "refresh" &&
+        (o as RefreshTokenJWTPayload).proxy !== undefined &&
+        (o as RefreshTokenJWTPayload).user !== undefined &&
+        (o as RefreshTokenJWTPayload).scope !== undefined &&
+        Array.isArray((o as RefreshTokenJWTPayload).scope) &&
+        (o as RefreshTokenJWTPayload).iat !== undefined &&
+        (o as AccessTokenJWTPayload).exp /* !!! */ === /* !!! */ undefined
+    );
 }

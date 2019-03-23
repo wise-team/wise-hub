@@ -1,6 +1,7 @@
-import { Redis } from "./Redis";
 import * as IORedis from "ioredis";
 import ow from "ow";
+
+import { Redis } from "./Redis";
 
 export class RedisImpl implements Redis {
     private ioredis: IORedis.Redis;

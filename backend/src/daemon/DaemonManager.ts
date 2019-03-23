@@ -1,19 +1,20 @@
 import * as BluebirdPromise from "bluebird";
-import ow from "ow";
-
 import { Redis } from "ioredis";
+import ow from "ow";
+import { DynamicGlobalProperties } from "steem";
+import { Api, EffectuatedSetRules, EffectuatedWiseOperation, RulePrototyper, SetRules } from "steem-wise-core";
+
 import { common } from "../common/common";
 import { DelegatorManager } from "../lib/DelegatorManager";
-import { Daemon } from "./Daemon";
-import { ApiHelper } from "./ApiHelper";
-import { DynamicGlobalProperties } from "steem";
 import { Log } from "../lib/Log";
 import { d } from "../lib/util";
-import { RulesManager } from "./rules/RulesManager";
-import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
-import { EffectuatedWiseOperation, SetRules, EffectuatedSetRules, RulePrototyper, Api } from "steem-wise-core";
-import { DaemonLog } from "./DaemonLog";
 import { PublisherQueue } from "../publisher/queue/PublisherQueue";
+
+import { ApiHelper } from "./ApiHelper";
+import { Daemon } from "./Daemon";
+import { DaemonLog } from "./DaemonLog";
+import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
+import { RulesManager } from "./rules/RulesManager";
 import { Watchdogs } from "./Watchdogs";
 
 export class DaemonManager {
@@ -21,7 +22,6 @@ export class DaemonManager {
     private delegatorManager: DelegatorManager;
     private apiHelper: ApiHelper;
     private daemon: Daemon;
-    private api: Api;
     private rulesManager: RulesManager;
     private daemonLog: DaemonLog;
     private blockLoadingApi: Api;
@@ -34,7 +34,7 @@ export class DaemonManager {
         apiHelper: ApiHelper,
         daemonLog: DaemonLog,
         publisherQueue: PublisherQueue,
-        watchdogs: Watchdogs
+        watchdogs: Watchdogs,
     ) {
         this.redis = redis;
         this.delegatorManager = delegatorManager;
@@ -45,8 +45,7 @@ export class DaemonManager {
         ow(publisherQueue, ow.object.is(o => PublisherQueue.isPublisherQueue(o)).label("publisherQueue"));
         this.publisherQueue = publisherQueue;
 
-        this.api = this.apiHelper.constructApiForDaemon();
-        this.blockLoadingApi = this.apiHelper.constructApiForDaemon(); // disable temp BlockLoadingApi (not supported by validator)
+        this.blockLoadingApi = this.apiHelper.constructApiForDaemon();
         this.rulesManager = new RulesManager(this.redis);
         this.daemon = new Daemon(
             this.redis,
@@ -56,7 +55,7 @@ export class DaemonManager {
             this.rulesManager,
             this.daemonLog,
             this.publisherQueue,
-            this.watchdogs
+            this.watchdogs,
         );
     }
 
@@ -73,8 +72,7 @@ export class DaemonManager {
             this.daemonLog.emit({ msg: "Preloading rulesets from wiseSQL" });
 
             const setRulesArr = await this.preloadAllRulesets(startBlock);
-            for (let i = 0; i < setRulesArr.length; i++) {
-                const setRules = setRulesArr[i];
+            for (const setRules of setRulesArr) {
                 await this.rulesManager.saveRules(setRules.delegator, setRules.voter, setRules);
             }
             await RulesLoadedUpToBlock.set(this.redis, startBlock);
@@ -95,14 +93,15 @@ export class DaemonManager {
 
         if (startBlockFromEnv.toLocaleLowerCase() === "head_reset") {
             Log.log().warn("DaemonManager SKIPPING BLOCKS (mode=HEAD_RESET)");
-            let dgp: DynamicGlobalProperties | undefined = undefined;
+            let dgp: DynamicGlobalProperties | undefined;
             while (!dgp) {
                 try {
                     dgp = await this.apiHelper.getSteem().getDynamicGlobalPropertiesAsync();
                 } catch (error) {
-                    Log.log().logError(
-                        "daemon/Daemon.ts#DaemonManager.determineStartBlock Error while getting DynamicGlobalProperties, Retrying in 5 seconds",
-                        error
+                    Log.log().error(
+                        "daemon/Daemon.ts#DaemonManager.determineStartBlock" +
+                            "Error while getting DynamicGlobalProperties, Retrying in 5 seconds",
+                        error,
                     );
                     await BluebirdPromise.delay(5000);
                 }
@@ -112,7 +111,7 @@ export class DaemonManager {
 
         const lastProcessedBlockFromRedis = await this.redis.hget(
             common.redis.daemonStatus.key,
-            common.redis.daemonStatus.props.last_processed_block
+            common.redis.daemonStatus.props.last_processed_block,
         );
         if (lastProcessedBlockFromRedis) return parseInt(lastProcessedBlockFromRedis + "", 10);
 
@@ -127,16 +126,17 @@ export class DaemonManager {
     private async preloadAllRulesets(moment: number): Promise<EffectuatedSetRules[]> {
         const ops: EffectuatedWiseOperation[] = await this.apiHelper.getWiseSQL(
             "/rpc/all_rulesets",
-            { moment: moment },
-            99999999
+            { moment },
+            99999999,
         );
         return ops.map((op: EffectuatedWiseOperation) => {
             const setRules = op.command;
-            if (!SetRules.isSetRules(setRules))
+            if (!SetRules.isSetRules(setRules)) {
                 throw new Error("Operation is not an instance of SetRules: " + JSON.stringify(op));
+            }
 
             const prototypedRulesets = setRules.rulesets.map(unprototypedRuleset =>
-                RulePrototyper.prototypeRuleset(unprototypedRuleset)
+                RulePrototyper.prototypeRuleset(unprototypedRuleset),
             );
 
             const out: EffectuatedSetRules = {

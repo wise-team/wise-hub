@@ -1,19 +1,17 @@
-import { expect, use as chaiUse } from "chai";
-import * as chaiAsPromised from "chai-as-promised";
-import "mocha";
-import * as uuid from "uuid/v4";
-import * as sinon from "sinon";
 import * as BluebirdPromise from "bluebird";
-import * as _ from "lodash";
-chaiUse(chaiAsPromised);
+import { expect } from "chai";
+import "mocha";
+import * as sinon from "sinon";
+import { CustomError } from "universe-log";
+import * as uuid from "uuid/v4";
 
-import { CustomError } from "../../lib/CustomError";
+import { Log } from "../../lib/Log";
+import { Broadcaster } from "../broadcaster/Broadcaster";
+import { PublishableOperation } from "../entities/PublishableOperation";
 import { PublishJob } from "../entities/PublishJob";
+
 import { PublisherLog } from "./PublisherLog";
 import { PublisherLogImpl } from "./PublisherLogImpl";
-import { Log } from "../../lib/Log";
-import { PublishableOperation } from "../entities/PublishableOperation";
-import { Broadcaster } from "../broadcaster/Broadcaster";
 Log.log().initialize();
 
 describe("PublisherLog", () => {
@@ -40,7 +38,8 @@ describe("PublisherLog", () => {
                     required_posting_auths: [account],
                     id: "wise",
                     json:
-                        '["v2:confirm_vote",{"voter":"steemprojects1","tx_id":"fc9efa1bbfde56d0562d77abc8395cd9567dd0a7","accepted":true,"msg":""}]',
+                        '["v2:confirm_vote",{"voter":"steemprojects1","tx_id":' +
+                        '"fc9efa1bbfde56d0562d77abc8395cd9567dd0a7","accepted":true,"msg":""}]',
                 },
             ],
             [
@@ -54,7 +53,7 @@ describe("PublisherLog", () => {
             ],
         ];
 
-        return { delegator: "delegator-" + uuid(), ops: ops };
+        return { delegator: "delegator-" + uuid(), ops };
     }
 
     [
@@ -84,8 +83,8 @@ describe("PublisherLog", () => {
     ].forEach(test =>
         describe(test.fnName, () => {
             it("populates message 'delegator' field", async () => {
-                const mock = constructMock(),
-                    job: PublishJob = sampleJob();
+                const mock = constructMock();
+                const job: PublishJob = sampleJob();
 
                 await test.caller(mock.publisherLog, job);
 
@@ -94,8 +93,8 @@ describe("PublisherLog", () => {
             });
 
             it("puts @delegator into msg", async () => {
-                const mock = constructMock(),
-                    job: PublishJob = sampleJob();
+                const mock = constructMock();
+                const job: PublishJob = sampleJob();
 
                 await test.caller(mock.publisherLog, job);
 
@@ -103,8 +102,8 @@ describe("PublisherLog", () => {
             });
 
             it("populates message 'time' field", async () => {
-                const mock = constructMock(),
-                    job: PublishJob = sampleJob();
+                const mock = constructMock();
+                const job: PublishJob = sampleJob();
 
                 await test.caller(mock.publisherLog, job);
 
@@ -112,8 +111,8 @@ describe("PublisherLog", () => {
             });
 
             it("puts transaction type list into msg", async () => {
-                const mock = constructMock(),
-                    job: PublishJob = sampleJob();
+                const mock = constructMock();
+                const job: PublishJob = sampleJob();
 
                 await test.caller(mock.publisherLog, job);
 
@@ -123,8 +122,8 @@ describe("PublisherLog", () => {
             });
 
             it("puts vote permlink, author and weight into msg", async () => {
-                const mock = constructMock(),
-                    job: PublishJob = sampleJob();
+                const mock = constructMock();
+                const job: PublishJob = sampleJob();
 
                 await test.caller(mock.publisherLog, job);
 
@@ -149,13 +148,13 @@ describe("PublisherLog", () => {
                 expect(fallbackLogSpy.callCount).to.be.greaterThan(1);
                 expect(fallbackLogSpy.lastCall.args[1]).to.be.instanceOf(Error);
             });
-        })
+        }),
     );
 
     describe("logJobSuccess", () => {
         it("puts transaction data (trx_id, trx_num, block_num) into msg", async () => {
-            const mock = constructMock(),
-                job: PublishJob = sampleJob();
+            const mock = constructMock();
+            const job: PublishJob = sampleJob();
             const result: Broadcaster.Result = {
                 transaction_id: "trxId" + uuid(),
                 transaction_num: Math.floor(Math.random() * 200000),
@@ -170,8 +169,8 @@ describe("PublisherLog", () => {
         });
 
         it("populates message 'transaction' field", async () => {
-            const mock = constructMock(),
-                job: PublishJob = sampleJob();
+            const mock = constructMock();
+            const job: PublishJob = sampleJob();
             const result: Broadcaster.Result = {
                 transaction_id: "trxId" + uuid(),
                 transaction_num: Math.floor(Math.random() * 200000),
@@ -194,8 +193,8 @@ describe("PublisherLog", () => {
         }
 
         it("puts error name and error message into msg", async () => {
-            const mock = constructMock(),
-                job: PublishJob = sampleJob();
+            const mock = constructMock();
+            const job: PublishJob = sampleJob();
             const testError: TestCustomError = new TestCustomError("some msg");
 
             await mock.publisherLog.logJobFailure(job, testError);
@@ -206,8 +205,8 @@ describe("PublisherLog", () => {
         });
 
         it("populates message 'error' field", async () => {
-            const mock = constructMock(),
-                job: PublishJob = sampleJob();
+            const mock = constructMock();
+            const job: PublishJob = sampleJob();
             const testError: TestCustomError = new TestCustomError("some msg");
 
             await mock.publisherLog.logJobFailure(job, testError);
@@ -220,8 +219,8 @@ describe("PublisherLog", () => {
 
     describe("logBroadcasterWarning", () => {
         it("puts supplied message into msg", async () => {
-            const mock = constructMock(),
-                job: PublishJob = sampleJob();
+            const mock = constructMock();
+            const job: PublishJob = sampleJob();
             const testMsg = "some msg " + uuid();
 
             await mock.publisherLog.logBroadcasterWarning(job, testMsg);

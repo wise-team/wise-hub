@@ -1,26 +1,26 @@
-import * as _ from "lodash";
+import * as bodyParser from "body-parser";
+import * as connectRedis from "connect-redis";
 import * as express from "express";
 import * as ExpressSession from "express-session";
-import * as bodyParser from "body-parser";
-import * as IORedis from "ioredis";
-import * as connectRedis from "connect-redis";
-import { common } from "../common/common";
-import { Vault } from "../lib/vault/Vault";
-import { AppRole } from "../lib/AppRole";
-import { AuthManager } from "./auth/AuthManager";
-import { UsersManager } from "../lib/UsersManager";
-import { StatusRoutes } from "./routes/StatusRoutes";
-import { UserRoutes } from "./routes/UserRoutes";
 import * as helmet from "helmet";
-import { Log } from "../lib/Log";
-import { DaemonRoutes } from "./routes/DaemonRoutes";
-import { RulesetsRoutes } from "./routes/RulesetsRoutes";
-import { AccountsRoutes } from "./routes/AccountsRoutes";
-import { stringify } from "querystring";
+import * as IORedis from "ioredis";
+import * as _ from "lodash";
+
+import { common } from "../common/common";
+import { AppRole } from "../lib/AppRole";
 import { Heartbeat } from "../lib/heartbeat/Heartbeat";
 import { HeartbeatImpl } from "../lib/heartbeat/HeartbeatImpl";
-import { Redis } from "../lib/redis/Redis";
+import { Log } from "../lib/Log";
 import { RedisImpl } from "../lib/redis/RedisImpl";
+import { UsersManager } from "../lib/UsersManager";
+import { Vault } from "../lib/vault/Vault";
+
+import { AuthManager } from "./auth/AuthManager";
+import { AccountsRoutes } from "./routes/AccountsRoutes";
+import { DaemonRoutes } from "./routes/DaemonRoutes";
+import { RulesetsRoutes } from "./routes/RulesetsRoutes";
+import { StatusRoutes } from "./routes/StatusRoutes";
+import { UserRoutes } from "./routes/UserRoutes";
 
 export class App {
     public app: express.Application;
@@ -64,16 +64,18 @@ export class App {
         this.authManager = new AuthManager(this.vault, this.usersManager);
 
         this.statusRoutes = new StatusRoutes(this.ioredis, this.vault, this.heartbeats);
-        this.accountsRoutes = new AccountsRoutes(this.ioredis, this.usersManager);
-        this.userRoutes = new UserRoutes(this.ioredis, this.usersManager);
+        this.accountsRoutes = new AccountsRoutes(this.usersManager);
+        this.userRoutes = new UserRoutes(this.usersManager);
         this.daemonRoutes = new DaemonRoutes(this.ioredis);
-        this.rulesetsRoutes = new RulesetsRoutes(this.ioredis, this.usersManager);
+        this.rulesetsRoutes = new RulesetsRoutes(this.usersManager);
     }
 
     public async init() {
         Log.log().debug("Initialising vault connection");
         // prettier-ignore
-        const policies = /*§ §*/["wise-hub-api"]/*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
+        const policies = /*§ §*/
+            ["wise-hub-api"]
+        /*§ JSON.stringify(data.config.hub.docker.services.api.appRole.policies(data.config)) §.*/;
 
         await this.vault.init(vault => AppRole.login(vault, policies));
 
@@ -106,7 +108,9 @@ export class App {
             saveUninitialized: true,
             rolling: true,
             // prettier-ignore
-            cookie: { maxAge: /*§ §*/604800000/*§ data.config.hub.api.cookie.maxAgeMs §.*/ }
+            cookie: {
+                maxAge: /*§ §*/ 604800000, /*§ data.config.hub.api.cookie.maxAgeMs §.*/
+            },
         };
         const resolvedSessionOptions = _.merge({}, this.sessionOptions, sessionDynamicOpts);
 
@@ -134,12 +138,11 @@ export class App {
             const out: any = {};
 
             const keys = await this.ioredis.keys(common.redis.rules + ":*");
-            for (let i = 0; i < keys.length; i++) {
-                const key = keys[i];
+            for (const key of keys) {
                 if (key.indexOf("@") !== -1) {
-                    out[keys[i]] = await this.ioredis.get(keys[i]);
+                    out[key] = await this.ioredis.get(key);
                 } else {
-                    out[keys[i]] = await this.ioredis.hgetall(keys[i]);
+                    out[key] = await this.ioredis.hgetall(key);
                 }
             }
 

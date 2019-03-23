@@ -1,18 +1,16 @@
-import { expect, use as chaiUse } from "chai";
-import * as chaiAsPromised from "chai-as-promised";
+// tslint:disable no-unused-expression
+import { expect } from "chai";
 import "mocha";
-import * as uuid from "uuid/v4";
 import * as sinon from "sinon";
-import * as BluebirdPromise from "bluebird";
-import * as _ from "lodash";
-chaiUse(chaiAsPromised);
+import * as uuid from "uuid/v4";
 
-import { RedisDualQueue } from "./RedisDualQueue";
-import { RedisDualQueueMock } from "./RedisDualQueue.mock.test";
-import { PublisherQueue } from "./PublisherQueue";
-import { PublisherQueueImpl } from "./PublisherQueueImpl";
 import { Log } from "../../lib/Log";
 import { PublishableOperation } from "../entities/PublishableOperation";
+
+import { PublisherQueue } from "./PublisherQueue";
+import { PublisherQueueImpl } from "./PublisherQueueImpl";
+import { RedisDualQueue } from "./RedisDualQueue";
+import { RedisDualQueueMock } from "./RedisDualQueue.mock.test";
 Log.log().initialize();
 
 describe("PublisherQueue", () => {
@@ -26,7 +24,8 @@ describe("PublisherQueue", () => {
                     required_posting_auths: [account],
                     id: "wise",
                     json:
-                        '["v2:confirm_vote",{"voter":"steemprojects1","tx_id":"fc9efa1bbfde56d0562d77abc8395cd9567dd0a7","accepted":true,"msg":""}]',
+                        '["v2:confirm_vote",{"voter":"steemprojects1","tx_id":' +
+                        '"fc9efa1bbfde56d0562d77abc8395cd9567dd0a7","accepted":true,"msg":""}]',
                 },
             ],
             [
@@ -40,7 +39,7 @@ describe("PublisherQueue", () => {
             ],
         ];
 
-        return { delegator: "delegator-" + uuid(), ops: ops };
+        return { delegator: "delegator-" + uuid(), ops };
     }
 
     describe("resetProcessingQueue", () => {
@@ -51,7 +50,9 @@ describe("PublisherQueue", () => {
 
             await publisherQueue.resetProcessingQueue();
 
-            expect((redisDualQueue.pushAllFromProcessingQueueToWaitingQueue as sinon.SinonSpy).calledOnce).to.be.true;
+            expect((redisDualQueue.pushAllFromProcessingQueueToWaitingQueue as sinon.SinonSpy).calledOnce).to.be.equal(
+                true,
+            );
         });
     });
 
@@ -63,7 +64,7 @@ describe("PublisherQueue", () => {
 
             await publisherQueue.scheduleJob(sampleJob());
 
-            expect((redisDualQueue.pushToWaitingQueue as sinon.SinonSpy).calledOnce).to.be.true;
+            expect((redisDualQueue.pushToWaitingQueue as sinon.SinonSpy).calledOnce).to.be.equal(true);
             expect(() => JSON.parse((redisDualQueue.pushToWaitingQueue as sinon.SinonSpy).lastCall.args[0])).to.not
                 .throw;
         });
@@ -77,9 +78,11 @@ describe("PublisherQueue", () => {
             redisDualQueue.popFromWaitingQueuePushToProcessingQueue = sinon.fake.resolves(jobModifiedStr);
             const publisherQueue: PublisherQueue = new PublisherQueueImpl(redisDualQueue);
 
-            const returned = await publisherQueue.takeJob(1);
+            await publisherQueue.takeJob(1);
 
-            expect((redisDualQueue.popFromWaitingQueuePushToProcessingQueue as sinon.SinonSpy).calledOnce).to.be.true;
+            expect((redisDualQueue.popFromWaitingQueuePushToProcessingQueue as sinon.SinonSpy).calledOnce).to.be.equal(
+                true,
+            );
         });
 
         it("attaches redisStringifiedEntry to returned JobEntry and freezes the object", async () => {
@@ -94,7 +97,7 @@ describe("PublisherQueue", () => {
 
             expect(() => JSON.parse(returned.redisStringifiedEntry)).to.throw;
             expect(returned.redisStringifiedEntry).to.be.equal(jobModifiedStr);
-            expect(Object.isFrozen(returned)).to.be.true;
+            expect(Object.isFrozen(returned)).to.be.equal(true);
         });
     });
 
@@ -112,7 +115,7 @@ describe("PublisherQueue", () => {
 
             await publisherQueue.finishJob(jobEntry);
 
-            expect((redisDualQueue.removeFromProcessingQueue as sinon.SinonSpy).calledOnce).to.be.true;
+            expect((redisDualQueue.removeFromProcessingQueue as sinon.SinonSpy).calledOnce).to.be.equal(true);
             expect(() => JSON.parse((redisDualQueue.removeFromProcessingQueue as sinon.SinonSpy).lastCall.args[0])).to
                 .not.throw;
         });

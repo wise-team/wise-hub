@@ -6,11 +6,15 @@
     "node": ">=10.15"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc",
-    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "check": "if echo \"$(node --version)\" | grep -q \"$(cat .nvmrc)\"; then echo \"Node version correct\"; else echo \"Node version does not match that in .nvmrc\" && exit 1; fi",
+    "build:cleanbefore": "rm -rf dist",
+    "build:lint": "tslint -c tslint.json -p tsconfig.lint.json",
+    "build:node": "tsc",
+    "build": "npm run check && npm run build:cleanbefore && npm run build:node && npm run build:lint",
     "test": "mocha -r ts-node/register --require source-map-support/register --recursive 'src/**/*.spec.test.ts'",
     "boundarytest": "mocha -r ts-node/register --require source-map-support/register --recursive 'src/**/*.boundary.test.ts'",
-    "test-with-coverage": "TS_NODE_FILES=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc npm run test"
+    "test-with-coverage": "TS_NODE_FILES=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc npm run test",
+    "lint-fix": "tslint --fix -c tslint.json -p tsconfig.lint.json"
   },
   "dependencies": {
     "@types/steem-js-alpha": "https://github.com/wise-team/types-for-steem-js/raw/master/bin/types-steem-js-alpha-3.1.2.tgz",
@@ -30,13 +34,11 @@
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "passport-oauth2": "^1.4.0",
-    "serialize-error": "^3.0.0",
     "socket.io": "^2.1.1",
     "socket.io-redis": "^5.2.0",
     "steem-wise-core": "^4.0.0",
     "steemconnect": "^2.0.1",
-    "ts-custom-error": "^2.2.2",
-    "universe-log": "^0.1.0",
+    "universe-log": "^1.4.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
@@ -69,11 +71,12 @@
     "dockerode": "^2.5.8",
     "mocha": "^5.2.0",
     "nock": "^10.0.2",
-    "nyc": "^13.1.0",
+    "nyc": "^13.3.0",
     "sinon": "^7.2.2",
     "ts-node": "^6.2.0",
     "tslint": "^5.11.0",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "wise-tslint-configuration": "^0.2.0"
   },
   "nyc": {
     "extension": [

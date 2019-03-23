@@ -3,8 +3,8 @@ export function d<T>(input: T | undefined): T {
     else throw new Error("Input value is undefined (d() fn)");
 }
 
-export function i<T, R>(i: T | undefined, fn: ($: T) => R): R {
-    return d(fn(d(i)));
+export function i<T, R>(inputForFn: T | undefined, fn: ($: T) => R): R {
+    return d(fn(d(inputForFn)));
 }
 
 export function assertString<T>(input: T | undefined): T {
@@ -21,6 +21,7 @@ export function ow_catch(fn: () => void): boolean | string {
     }
 }
 
+// tslint:disable no-console
 export function spawnAsync(fn: () => Promise<any>, log: (error: Error) => void = console.error) {
     (async () => {
         try {

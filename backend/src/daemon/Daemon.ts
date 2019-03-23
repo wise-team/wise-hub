@@ -1,29 +1,31 @@
-import * as steemJs from "steem";
-import ow from "ow";
 import { Redis } from "ioredis";
-import { common } from "../common/common";
+import ow from "ow";
+import * as steemJs from "steem";
 import Wise, {
-    UniversalSynchronizer,
     Api,
-    SteemOperationNumber,
-    SetRules,
+    ConfirmVote,
+    EffectuatedSetRules,
     EffectuatedWiseOperation,
     SendVoteorder,
-    EffectuatedSetRules,
-    ConfirmVote,
+    SetRules,
+    SteemOperationNumber,
+    UniversalSynchronizer,
     WiseOperation,
 } from "steem-wise-core";
+
+import { common } from "../common/common";
 import { DelegatorManager } from "../lib/DelegatorManager";
-import { ApiHelper } from "./ApiHelper";
 import { Log } from "../lib/Log";
-import { RulesManager } from "./rules/RulesManager";
-import { ValidationRunner } from "./ValidationRunner";
-import { StaticConfig } from "./StaticConfig";
-import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
-import { DaemonLog } from "./DaemonLog";
-import { PublisherQueue } from "../publisher/queue/PublisherQueue";
-import { PublishJob } from "../publisher/entities/PublishJob";
 import { PublishableOperation } from "../publisher/entities/PublishableOperation";
+import { PublishJob } from "../publisher/entities/PublishJob";
+import { PublisherQueue } from "../publisher/queue/PublisherQueue";
+
+import { ApiHelper } from "./ApiHelper";
+import { DaemonLog } from "./DaemonLog";
+import { RulesLoadedUpToBlock } from "./rules/RulesLoadedUpToBlock";
+import { RulesManager } from "./rules/RulesManager";
+import { StaticConfig } from "./StaticConfig";
+import { ValidationRunner } from "./ValidationRunner";
 import { Watchdogs } from "./Watchdogs";
 
 export class Daemon {
@@ -46,7 +48,7 @@ export class Daemon {
         rulesManager: RulesManager,
         daemonLog: DaemonLog,
         publisherQueue: PublisherQueue,
-        watchdogs: Watchdogs
+        watchdogs: Watchdogs,
     ) {
         this.redis = redis;
         this.apiHelper = apiHelper;
@@ -66,7 +68,7 @@ export class Daemon {
             this.daemonLog.emit({ msg: "Disable wiseHUB daemon for delegator @" + deletedDelegator }, deletedDelegator);
         });
 
-        this.validationRunner = new ValidationRunner(this.redis, this.api);
+        this.validationRunner = new ValidationRunner(this.api);
 
         this.synchronizer = new UniversalSynchronizer(this.api, Wise.constructDefaultProtocol(), {
             onSetRules: (setRules, wiseOp) => this.onSetRules(setRules, wiseOp),
@@ -106,7 +108,7 @@ export class Daemon {
 
     private async onBlockProcessingFinished(blockNum: number) {
         this.watchdogs.loopHeartbeatBeatSeconds(4);
-        if (blockNum % 30 == 0) Log.log().info("Finished processing block " + blockNum);
+        if (blockNum % 30 === 0) Log.log().info("Finished processing block " + blockNum);
         this.daemonLog.emit({
             msg: "Processed block " + blockNum,
             key: "block_processing_finished",
@@ -116,13 +118,13 @@ export class Daemon {
         await this.redis.hset(
             common.redis.daemonStatus.key,
             common.redis.daemonStatus.props.last_processed_block,
-            blockNum + ""
+            blockNum + "",
         );
         await RulesLoadedUpToBlock.set(this.redis, blockNum);
     }
 
     private onError(error: Error, proceeding: boolean) {
-        Log.log().logError("daemon/Daemon.ts#Daemon.onError", error, { proceeding: proceeding });
+        Log.log().error("daemon/Daemon.ts#Daemon.onError", error, { proceeding });
         if (!proceeding) Log.log().error("This is an irreversible error!");
         this.daemonLog.emit({ msg: "Daemon error", error: error + "" });
     }
@@ -168,7 +170,7 @@ export class Daemon {
     private onVoteorder(
         cmd: SendVoteorder,
         op: EffectuatedWiseOperation,
-        errorTimeout: number = StaticConfig.DAEMON_ON_VOTEORDER_ERROR_REPEAT_AFTER_S
+        errorTimeout: number = StaticConfig.DAEMON_ON_VOTEORDER_ERROR_REPEAT_AFTER_S,
     ) {
         if (this.delegatorManager.hasDelegator(op.delegator)) {
             this.safeAsyncCall(async () => {
@@ -176,7 +178,7 @@ export class Daemon {
                     const esr: EffectuatedSetRules = await this.rulesManager.getRules(
                         op.delegator,
                         op.voter,
-                        op.moment
+                        op.moment,
                     );
                     if (esr.rulesets.length === 0) {
                         Log.log().warn(
@@ -189,7 +191,7 @@ export class Daemon {
                                 op.voter +
                                 ' asked to vote with ruleset"' +
                                 cmd.rulesetName +
-                                '".'
+                                '".',
                         );
                         return;
                     }
@@ -202,9 +204,9 @@ export class Daemon {
                             this.onVoteorder(
                                 cmd,
                                 op,
-                                Math.max(errorTimeout * StaticConfig.DAEMON_ON_VOTEORDER_ERROR_MULTI, 3600 * 3)
+                                Math.max(errorTimeout * StaticConfig.DAEMON_ON_VOTEORDER_ERROR_MULTI, 3600 * 3),
                             ),
-                        timeout
+                        timeout,
                     );
                 }
             });
@@ -229,11 +231,11 @@ export class Daemon {
 
     private async voteorderCommit(cmd: SendVoteorder, op: EffectuatedWiseOperation, verdict: ValidationRunner.Verdict) {
         if (verdict.pass) {
-            Log.log().cheapDebug(() => "PASS VOTEORDER: " + JSON.stringify(op, undefined, 2));
+            Log.log().debugGen(() => ["PASS VOTEORDER: " + JSON.stringify(op, undefined, 2)]);
         } else {
-            Log.log().cheapDebug(
-                () => "REJECT VOTEORDER(msg=" + verdict.msg + "): " + JSON.stringify(op, undefined, 2)
-            );
+            Log.log().debugGen(() => [
+                "REJECT VOTEORDER(msg=" + verdict.msg + "): " + JSON.stringify(op, undefined, 2),
+            ]);
         }
         this.daemonLog.emit({
             msg:
@@ -271,10 +273,10 @@ export class Daemon {
             }
             this.safeAsyncCall(async () => await this.sendOps(op.delegator, opsToSend));
         } catch (error) {
-            Log.log().logError("daemon/Daemon.ts#Daemon.voteorderCommit", error, {
-                cmd: cmd,
-                op: op,
-                verdict: verdict,
+            Log.log().error("daemon/Daemon.ts#Daemon.voteorderCommit", error, {
+                cmd,
+                op,
+                verdict,
             });
         }
     }
@@ -282,7 +284,7 @@ export class Daemon {
     private async sendOps(delegator: string, ops: steemJs.OperationWithDescriptor[]) {
         const job: PublishJob = {
             ops: ops as PublishableOperation[],
-            delegator: delegator,
+            delegator,
         };
         await this.publisherQueue.scheduleJob(job);
 
@@ -294,9 +296,9 @@ export class Daemon {
                     delegator +
                     " account: " +
                     ops.map(op => op[0]).join(", "),
-                ops: ops,
+                ops,
             },
-            delegator
+            delegator,
         );
     }
 
@@ -310,7 +312,7 @@ export class Daemon {
             try {
                 await fn();
             } catch (error) {
-                Log.log().logError("daemon/Daemon.ts#Daemon.safeAsyncCall Unhandled error in Daemon callback", error);
+                Log.log().error("daemon/Daemon.ts#Daemon.safeAsyncCall Unhandled error in Daemon callback", error);
             }
         })();
     }

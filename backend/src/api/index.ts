@@ -1,8 +1,7 @@
-import * as fs from "fs";
-import { App } from "./app";
+// tslint:disable no-console
 import { Log } from "../lib/Log";
-import { Vault } from "../lib/vault/Vault";
-import { AppRole } from "../lib/AppRole";
+
+import { App } from "./app";
 import { Watchdogs } from "./Watchdogs";
 
 /******************
@@ -10,7 +9,7 @@ import { Watchdogs } from "./Watchdogs";
  ******************/
 Log.log().initialize();
 
-process.on("unhandledRejection", (err) => {
+process.on("unhandledRejection", err => {
     console.error("Unhandled promise");
     Log.log().error("UNHANDLED PROMISE -> aborting exit");
     Log.log().error(err);
@@ -18,12 +17,10 @@ process.on("unhandledRejection", (err) => {
     // process.exit(1);
 });
 
-
 /***************
  ** CONFIGURE **
  ***************/
 const PORT = 3000;
-
 
 /*****************
  **     RUN     **
@@ -42,14 +39,13 @@ const PORT = 3000;
             Log.log().info("Express server listening on port " + PORT);
         });
 
-        process.on("SIGTERM", function () {
-            srv.close(function () {
+        process.on("SIGTERM", function() {
+            srv.close(function() {
                 Log.log().info("Graceful shutdown");
                 process.exit(0);
             });
         });
+    } catch (error) {
+        Log.log().error("api/index.ts async runner", error);
     }
-    catch (error) {
-        Log.log().logError("api/index.ts async runner", error);
-    }
- })();
+})();

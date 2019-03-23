@@ -1,8 +1,8 @@
 import ow from "ow";
+import { CustomError } from "universe-log";
 
-import { PublishJob } from "../entities/PublishJob";
 import { UsersManagerI } from "../../lib/UsersManagerI";
-import { CustomError } from "../../lib/CustomError";
+import { PublishJob } from "../entities/PublishJob";
 
 export interface Broadcaster {
     broadcast(job: PublishJob): Promise<Broadcaster.Result>;

@@ -1,16 +1,15 @@
 /* tslint:disable no-console */
-import Wise, { EffectuatedSetRules } from "steem-wise-core";
-import { d } from "./util/util";
+import Wise from "steem-wise-core";
 import { Log } from "./Log";
 import { BuildContext } from "./BuildContext";
 import { WindowContext } from "./WindowContext";
 import { SessionRedirect } from "./api/SessionRedirect";
 
-
 /**
  * Configuration
  */
-const repoUrl = /*§ §*/ "wise-team/wise-hub" /*§ ' "' + data.config.repository.github.organization + '/' + data.repository.name + '" ' §.*/;
+const repoUrl =
+        /*§ §*/ "wise-team/wise-hub" /*§ ' "' + data.config.repository.github.organization + '/' + data.repository.name + '" ' §.*/;
 console.log("Steem-wise-hub. This is open source software: https://github.com/" + repoUrl);
 BuildContext.failIfMissing();
 WindowContext.failIfMissing();
@@ -23,9 +22,6 @@ if (window.location.hostname === "localhost") {
     console.log("Localhost detected. Setting window.WISE_LOG_LEVEL=" + (window as any).WISE_LOG_LEVEL);
 }
 Log.log().init();
-
-
-
 
 /**
  * Import Vue & dependencies
@@ -64,9 +60,8 @@ Vue.use(VueRouter);
 Vue.use(VueNotification);
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
-
 // Error handling:
-Vue.config.errorHandler = function (err, vm, info) {
+Vue.config.errorHandler = function(err, vm, info) {
     console.error(err);
     Vue.notify({ title: "Error", type: "error", text: err + "" });
 };
@@ -75,27 +70,27 @@ Vue.config.errorHandler = function (err, vm, info) {
  * Start app
  */
 const router = new VueRouter({
-    mode: (window.location.hostname === "localhost" ? "hash" : "history"),
+    mode: window.location.hostname === "localhost" ? "hash" : "history",
     routes: [
         // history
-        { path: '/', component: HistoryView },
+        { path: "/", component: HistoryView },
         // { path: '/history/:moment?', component: ReadView },
-        { path: '/daemon', component: DaemonView },
+        { path: "/daemon", component: DaemonView },
         //account views
-        { path: '/@:account', component: AccountView }, // => account history, and links to daemon and rulesets
-        { path: '/@:account/daemon', component: DelegateView }, // => account daemon
+        { path: "/@:account", component: AccountView }, // => account history, and links to daemon and rulesets
+        { path: "/@:account/daemon", component: DelegateView }, // => account daemon
 
         // { path: '/delegate', component: DelegateView }
-        { path: '/@:delegator/rulesets', component: RulesetsView },
-        { path: '/@:delegator/rulesets/for/@:voter', component: RulesetsView },
-        { path: '/rulesets/for/@:voter', component: RulesetsView },
-        { path: '/people', component: PeopleView }, // => list of wise users
-        
-        { path: '*', component: NotFoundView }
+        { path: "/@:delegator/rulesets", component: RulesetsView },
+        { path: "/@:delegator/rulesets/for/@:voter", component: RulesetsView },
+        { path: "/rulesets/for/@:voter", component: RulesetsView },
+        { path: "/people", component: PeopleView }, // => list of wise users
+
+        { path: "*", component: NotFoundView },
     ],
-    scrollBehavior (to, from, savedPosition) {
-        return { x: 0, y: 0 }
-    }
+    scrollBehavior(to, from, savedPosition) {
+        return { x: 0, y: 0 };
+    },
 });
 
 const v = new Vue({
@@ -103,14 +98,13 @@ const v = new Vue({
     store: store,
     router: router,
     render: h => h(App),
-    mounted: function () {
+    mounted: function() {
         this.$nextTick(() => {
             const redirect = SessionRedirect.getCurrentRedirect();
             if (redirect) router.push({ path: redirect.path, query: redirect.query });
         });
     },
 });
-
 
 // initialize steemconnect & eventually login automatically
 v.$store.dispatch(Actions.initialize);

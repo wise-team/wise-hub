@@ -1,4 +1,4 @@
-import { CustomError } from "../../lib/CustomError";
+import { CustomError } from "universe-log";
 
 export interface Heartbeat {
     beat(ttlSeconds: number): void; // logs HartbeatError but does not throw
@@ -7,7 +7,7 @@ export interface Heartbeat {
 
 export namespace Heartbeat {
     export function isHartbeat(o: any): o is Heartbeat {
-        return (<Heartbeat>o).beat !== undefined && (<Heartbeat>o).isAlive !== undefined;
+        return (o as Heartbeat).beat !== undefined && (o as Heartbeat).isAlive !== undefined;
     }
 
     export class HeartbeatError extends CustomError {

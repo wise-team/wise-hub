@@ -1,8 +1,9 @@
-import ow, { ObjectPredicate } from "ow";
+import ow from "ow";
+
+import { PublishJob } from "../entities/PublishJob";
 
 import { PublisherQueue } from "./PublisherQueue";
 import { RedisDualQueue } from "./RedisDualQueue";
-import { PublishJob } from "../entities/PublishJob";
 
 export class PublisherQueueImpl implements PublisherQueue {
     private redisDualQueue: RedisDualQueue;
@@ -19,7 +20,7 @@ export class PublisherQueueImpl implements PublisherQueue {
         } catch (error) {
             throw new PublisherQueue.PublisherQueueError(
                 "Error in PublisherQueueImpl.resetProcessingQueue(): " + error,
-                error
+                error,
             );
         }
     }

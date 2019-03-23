@@ -1,12 +1,12 @@
-import ow from "ow";
-import { Redis } from "ioredis";
 import * as BluebirdPromise from "bluebird";
 import * as express from "express";
-import { UsersManager } from "../../lib/UsersManager";
-import { Vault } from "../../lib/vault/Vault";
+import { Redis } from "ioredis";
+import ow from "ow";
+
 import { common } from "../../common/common";
-import { asyncReq } from "../lib/util";
 import { Heartbeat } from "../../lib/heartbeat/Heartbeat";
+import { Vault } from "../../lib/vault/Vault";
+import { asyncReq } from "../lib/util";
 
 export class StatusRoutes {
     private redis: Redis;
@@ -22,12 +22,14 @@ export class StatusRoutes {
             ow.map
                 .keysOfType(ow.string)
                 .valuesOfType(ow.object.is(o => Heartbeat.isHartbeat(o)))
-                .label("heartbeats")
+                .label("heartbeats"),
         );
         this.heartbeats = heartbeats;
     }
 
-    public async init() {}
+    public async init() {
+        //
+    }
 
     public routes(app: express.Application) {
         app.get("/api/status", (req, res) =>
@@ -35,7 +37,7 @@ export class StatusRoutes {
                 const payload: StatusResponsePayload = await this.getStatus();
 
                 res.send(JSON.stringify(payload));
-            })
+            }),
         );
 
         app.get("/api/publisher/queue", (req, res) =>
@@ -47,17 +49,22 @@ export class StatusRoutes {
                     JSON.stringify({
                         to_publish: toPublishQueue,
                         processing: publishProcessingQueue,
-                    })
+                    }),
                 );
-            })
+            }),
         );
     }
 
     private async getStatus(): Promise<StatusResponsePayload> {
-        await BluebirdPromise.delay(100); // This is heavy request (~1500ms), so in order to prevent DDoS we include this small delay
+        // This is heavy request (~1500ms), so in order to prevent DDoS we include this small delay
+        await BluebirdPromise.delay(100);
         const sTime = Date.now();
-        let publicSecret: any = undefined;
-        const vaultStatus: { initialized?: boolean; sealed?: boolean; error?: string } = {};
+        let publicSecret: any;
+        const vaultStatus: {
+            initialized?: boolean;
+            sealed?: boolean;
+            error?: string;
+        } = {};
         try {
             const vaultStatusResp = await this.vault.getStatus();
             vaultStatus.initialized = vaultStatusResp.initialized;
@@ -70,7 +77,9 @@ export class StatusRoutes {
 
         const daemon = await this.redis.hgetall(common.redis.daemonStatus.key);
 
-        const alive: { [x: string]: boolean } = {
+        const alive: {
+            [x: string]: boolean;
+        } = {
             daemon: (await this.redis.exists(common.redis.daemonHartbeat)) > 0,
             realtime: (await this.redis.exists(common.redis.realtimeHartbeat)) > 0,
         };
@@ -91,19 +100,24 @@ export class StatusRoutes {
         const payload: StatusResponsePayload = {
             vault: vaultStatus,
             alive: alive as any,
-            publicSecret: publicSecret,
-            daemon: daemon,
-            publisher: publisher,
-            took: took,
-            verdict: { type: "VERDICT_UNHEALTHY", msg: "Verdict not yet processed" },
+            publicSecret,
+            daemon,
+            publisher,
+            took,
+            verdict: {
+                type: "VERDICT_UNHEALTHY",
+                msg: "Verdict not yet processed",
+            },
         };
         payload.verdict = this.getStatusVerdict(payload);
         return payload;
     }
 
+    // tslint:disable cyclomatic-complexity
     private getStatusVerdict(s: StatusResponsePayload): { type: "VERDICT_UNHEALTHY" | "VERDICT_HEALTHY"; msg: string } {
-        if (s.vault.error && s.vault.error.length > 0)
+        if (s.vault.error && s.vault.error.length > 0) {
             return { type: "VERDICT_UNHEALTHY", msg: "Vault error: " + s.vault.error };
+        }
 
         if (!s.vault.initialized) return { type: "VERDICT_UNHEALTHY", msg: "Vault not initialized" };
 
@@ -123,6 +137,7 @@ export class StatusRoutes {
 
         return { type: "VERDICT_HEALTHY", msg: "" };
     }
+    // tslint:enable cyclomatic-complexity
 }
 
 export interface StatusResponsePayload {

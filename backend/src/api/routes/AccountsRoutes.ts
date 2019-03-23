@@ -1,37 +1,33 @@
-import { Redis } from "ioredis";
 import * as express from "express";
+
+import { common } from "../../common/common";
+import { User } from "../../common/model/User";
 import { UsersManager } from "../../lib/UsersManager";
 import { asyncReq, d } from "../lib/util";
-import { AuthManager } from "../auth/AuthManager";
-import { User, isUserSettings } from "../../common/model/User";
-import { common } from "../../common/common";
 
 export class AccountsRoutes {
-    private redis: Redis;
     private usersManager: UsersManager;
 
-    public constructor(redis: Redis, usersManager: UsersManager) {
-        this.redis = redis;
+    public constructor(usersManager: UsersManager) {
         this.usersManager = usersManager;
     }
 
     public async init() {
-
+        //
     }
 
     public routes(app: express.Application) {
-        app.get(common.urls.api.accounts.base + "/:account/settings",
-            (req, res) => asyncReq("api/routes/AccountRoutes.ts.ts route account settings", res, async () => {
+        app.get(common.urls.api.accounts.base + "/:account/settings", (req, res) =>
+            asyncReq("api/routes/AccountRoutes.ts.ts route account settings", res, async () => {
                 const accountName = d(req.params.account, "req.params.account");
                 const user: User | undefined = await this.usersManager.getUser(accountName);
                 if (!user) {
                     res.status(404);
                     res.send("Not found.");
-                }
-                else {
+                } else {
                     res.send(JSON.stringify(user.settings));
                 }
-            })
+            }),
         );
     }
 }

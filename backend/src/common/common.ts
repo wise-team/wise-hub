@@ -1,29 +1,29 @@
 // prettier-ignore
 export const common = {
     urls: /*§ §*/{
-  "api": {
-    "base": "/api",
-    "auth": {
-      "login": {
-        "scope": {
-          "empty": "/api/auth/login/scope/empty",
-          "custom_json": "/api/auth/login/scope/custom_json",
-          "custom_json_vote_offline": "/api/auth/login/scope/custom_json/vote/offline"
-        }
+  api: {
+    base: "/api",
+    auth: {
+      login: {
+        scope: {
+          empty: "/api/auth/login/scope/empty",
+          custom_json: "/api/auth/login/scope/custom_json",
+          custom_json_vote_offline: "/api/auth/login/scope/custom_json/vote/offline",
+        },
       },
-      "callback": "/api/auth/callback",
-      "logout": "/api/auth/logout",
-      "revoke_all": "/api/auth/revoke_all",
-      "test_login": "/api/auth/test_login"
+      callback: "/api/auth/callback",
+      logout: "/api/auth/logout",
+      revoke_all: "/api/auth/revoke_all",
+      test_login: "/api/auth/test_login",
     },
-    "user": {
-      "base": "/api/user",
-      "settings": "/api/user/settings"
+    user: {
+      base: "/api/user",
+      settings: "/api/user/settings",
     },
-    "accounts": {
-      "base": "/api/accounts"
-    }
-  }
+    accounts: {
+      base: "/api/accounts",
+    },
+  },
 }/*§ JSON.stringify(d(data.config.hub.urls), undefined, 2) §.*/,
     redis: {
         daemonStatus: {
@@ -66,14 +66,18 @@ export const common = {
     vault: {
         secrets: {
             sessionSecret:
-                /*§ §*/ "/generated/session/salt" /*§ ' "' + data.config.vault.secrets.generated.sessionSalt + '" ' §.*/,
+                /*§ §*/
+                "/generated/session/salt"
+                /*§ ' "' + data.config.vault.secrets.generated.sessionSalt + '" ' §.*/,
             steemConnectClientSecret:
-                /*§ §*/ "/human/steemconnect/client_id" /*§ ' "' + data.config.vault.secrets.humanEnter.steemConnectClientId.key + '" ' §.*/,
+                /*§ §*/
+                "/human/steemconnect/client_id"
+                /*§ ' "' + data.config.vault.secrets.humanEnter.steemConnectClientId.key + '" ' §.*/,
             hub: /*§ §*/{
-  "users": "/hub/steemconnect/users",
-  "userProfiles": "/hub/steemconnect/users/profiles",
-  "accessTokens": "/hub/steemconnect/users/access_tokens",
-  "refreshTokens": "/hub/steemconnect/users/refresh_tokens"
+  users: "/hub/steemconnect/users",
+  userProfiles: "/hub/steemconnect/users/profiles",
+  accessTokens: "/hub/steemconnect/users/access_tokens",
+  refreshTokens: "/hub/steemconnect/users/refresh_tokens",
 }/*§ JSON.stringify(d(data.config.hub.vault.secrets), undefined, 2) §.*/,
         },
     },

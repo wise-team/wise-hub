@@ -5,7 +5,7 @@ import { BlockingQueueConsumer } from "./BlockingQueueConsumer";
 export class BlockingQueueConsumerImpl<T, R> implements BlockingQueueConsumer<T, R> {
     private options: BlockingQueueConsumer.Options;
     private callbacks: BlockingQueueConsumer.Callbacks<T, R>;
-    private stopListeners: (() => void)[] = [];
+    private stopListeners: Array<() => void> = [];
     private running: boolean = false;
 
     public constructor(options: BlockingQueueConsumer.Options, callbacks: BlockingQueueConsumer.Callbacks<T, R>) {
@@ -117,7 +117,9 @@ export class BlockingQueueConsumerImpl<T, R> implements BlockingQueueConsumer<T,
         try {
             this.callbacks.fallbackLog(msg, error);
         } catch (error) {
+            // tslint:disable no-console
             console.error("Error in BlockingQueueConsumer.fallbackLog", error);
+            // tslint:enable no-console
         }
     }
 }

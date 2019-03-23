@@ -1,15 +1,14 @@
-import * as steemJs from "steem";
-import Wise, { WiseSQLProtocol, EffectuatedWiseOperation, WiseSQLApi, DirectBlockchainApi, Protocol, Api } from "steem-wise-core";
-import { Log } from "../lib/Log";
-import { Redis } from "ioredis";
-import { common } from "../common/common";
 import Axios from "axios";
+import * as steemJs from "steem";
+import Wise, { Api, DirectBlockchainApi, EffectuatedWiseOperation, Protocol, WiseSQLProtocol } from "steem-wise-core";
+
 import { d } from "../lib/util";
+
 import { BlockLoadingApi } from "./BlockLoadingApi";
 
 export class ApiHelper {
     private protocol: Protocol = Wise.constructDefaultProtocol();
-    private steemApis: string [];
+    private steemApis: string[];
     private steem: steemJs.api.Steem;
     private wiseSQLUrl: string;
 
@@ -26,6 +25,7 @@ export class ApiHelper {
     }
 
     public async init() {
+        //
     }
 
     public getSteem(): steemJs.api.Steem {
@@ -40,13 +40,13 @@ export class ApiHelper {
         return this.wiseSQLUrl;
     }
 
-    public async getWiseSQL(path: string, params: any, limit: number): Promise<EffectuatedWiseOperation []> {
+    public async getWiseSQL(path: string, params: any, limit: number): Promise<EffectuatedWiseOperation[]> {
         return WiseSQLProtocol.Handler.query({
             endpointUrl: this.wiseSQLUrl,
-            path: path,
+            path,
             method: "get",
-            limit: limit,
-            params: params
+            limit,
+            params,
         });
     }
 
@@ -61,8 +61,7 @@ export class ApiHelper {
 
     public async getWiseSQLBlockNumber(): Promise<number> {
         const resp = await Axios.get(this.wiseSQLUrl + "/properties");
-        const p =  d(resp.data)
-            .filter((prop: { key: string, value: string }) => d(prop.key) === "last_processed_block");
+        const p = d(resp.data).filter((prop: { key: string; value: string }) => d(prop.key) === "last_processed_block");
         return parseInt(d(p[0].value), 10);
     }
 

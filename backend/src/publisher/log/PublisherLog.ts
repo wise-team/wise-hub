@@ -1,8 +1,8 @@
 import ow from "ow";
 
-import { PublishJob } from "../entities/PublishJob";
-import { Broadcaster } from "../broadcaster/Broadcaster";
 import { LogMessage as DaemonLogMessage } from "../../daemon/DaemonLog";
+import { Broadcaster } from "../broadcaster/Broadcaster";
+import { PublishJob } from "../entities/PublishJob";
 
 export interface PublisherLog {
     logJobStart(job: PublishJob): Promise<void>;

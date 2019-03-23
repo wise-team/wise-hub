@@ -1,7 +1,8 @@
 import * as Redis from "ioredis";
+import { EffectuatedWiseOperation } from "steem-wise-core";
+
 import { common } from "../common/common";
 import { Log } from "../lib/Log";
-import { EffectuatedWiseOperation } from "steem-wise-core";
 // import { d } from "../lib/util";
 
 export class DaemonLog {
@@ -17,14 +18,11 @@ export class DaemonLog {
                 msg.time = Date.now();
                 if (msg.delegator) {
                     await this._emit(msg, delegator || msg.delegator);
-                }
-                else if (msg.wiseOp) {
+                } else if (msg.wiseOp) {
                     await this._emit(msg, delegator || msg.wiseOp.delegator);
-                }
-                else await this._emit(msg, delegator);
-            }
-            catch (error) {
-                Log.log().logError("daemon/Daemon.ts#DaemonLog.emit", error, { logMessage: msg, delegator: delegator });
+                } else await this._emit(msg, delegator);
+            } catch (error) {
+                Log.log().error("daemon/Daemon.ts#DaemonLog.emit", error, { logMessage: msg, delegator });
             }
         })();
     }
@@ -35,10 +33,10 @@ export class DaemonLog {
         const msgStr = JSON.stringify(msg);
 
         if (delegator) {
-            const key = common.redis.daemonLogFor + ":" + delegator;
-            // Log.log().debug("Push to " + key);
-            await this.redis.lpush(key, msgStr);
-            await this.redis.ltrim(key, 0, common.daemonLog.maxHistoryLength);
+            const delegatorKey = common.redis.daemonLogFor + ":" + delegator;
+            Log.log().debug({ module: "daemon-log" }, "Push to " + delegatorKey);
+            await this.redis.lpush(delegatorKey, msgStr);
+            await this.redis.ltrim(delegatorKey, 0, common.daemonLog.maxHistoryLength);
         }
 
         if (msg.wiseOp) {
@@ -73,5 +71,5 @@ export interface LogMessage {
     };
     key?: string;
     wiseOp?: EffectuatedWiseOperation;
-    [ x: string ]: any;
+    [x: string]: any;
 }

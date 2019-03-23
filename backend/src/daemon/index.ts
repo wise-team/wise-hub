@@ -1,20 +1,20 @@
-import * as fs from "fs";
-import { Log } from "../lib/Log";
+// tslint:disable no-console
 import * as IORedis from "ioredis";
+
 import { common } from "../common/common";
-import { Daemon } from "./Daemon";
 import { DelegatorManager } from "../lib/DelegatorManager";
-import { AppRole } from "../lib/AppRole";
-import { DaemonManager } from "./DaemonManager";
-import { ApiHelper } from "./ApiHelper";
-import { DaemonLog } from "./DaemonLog";
-import { WiseOperationsLog } from "./WiseOperationsLog";
+import { Log } from "../lib/Log";
+import { Redis } from "../lib/redis/Redis";
+import { RedisImpl } from "../lib/redis/RedisImpl";
 import { PublisherQueue } from "../publisher/queue/PublisherQueue";
 import { PublisherQueueImpl } from "../publisher/queue/PublisherQueueImpl";
 import { RedisDualQueueImpl } from "../publisher/queue/RedisDualQueueImpl";
-import { Redis } from "../lib/redis/Redis";
-import { RedisImpl } from "../lib/redis/RedisImpl";
+
+import { ApiHelper } from "./ApiHelper";
+import { DaemonLog } from "./DaemonLog";
+import { DaemonManager } from "./DaemonManager";
 import { Watchdogs } from "./Watchdogs";
+import { WiseOperationsLog } from "./WiseOperationsLog";
 
 /******************
  ** INTIAL SETUP **
@@ -48,7 +48,7 @@ const publisherQueue: PublisherQueue = new PublisherQueueImpl(
     new RedisDualQueueImpl(redis, {
         processingQueueKey: common.redis.publishProcessingQueue,
         waitingQueueKey: common.redis.toPublishQueue,
-    })
+    }),
 );
 
 const daemonManager = new DaemonManager(ioredis, delegatorManager, apiHelper, daemonLog, publisherQueue, watchdogs);
@@ -76,7 +76,7 @@ process.on("SIGTERM", () => {
 
         daemonManager.run();
     } catch (error) {
-        Log.log().logError("daemon/index.ts in async call", error);
+        Log.log().error("daemon/index.ts in async call", error);
         process.exit(1);
     }
 })();
