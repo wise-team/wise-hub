@@ -1,16 +1,17 @@
-
 import * as steem from "steem";
 import * as _ from "lodash";
 import ow from "ow";
 
 export interface User {
     account: string;
-    profile: undefined | {
-        name: string;
-        account: steem.AccountInfo;
-        user_metadata: any;
-    };
-    scope: string [];
+    profile:
+        | undefined
+        | {
+              name: string;
+              account: steem.AccountInfo;
+              user_metadata: any;
+          };
+    scope: string[];
     settings?: UserSettings;
 }
 
@@ -22,19 +23,19 @@ export namespace User {
 
         if (user.profile) {
             ow(user.profile.name, ow.string.minLength(3).label(".profile.name"));
-            ow(user.profile.account, ow.object.label(".profile.account")
-                .hasKeys("witness_votes", "witnesses_voted_for", "voting_power", "reputation"));
+            ow(
+                user.profile.account,
+                ow.object
+                    .label(".profile.account")
+                    .hasKeys("witness_votes", "witnesses_voted_for", "voting_power", "reputation")
+            );
 
             // do not rely on this value, as it is
             /*ow(user.profile.scope, ow.array.label(".profile.scope").ofType(ow.string)
                 .is((scope: string []) => _.xor(scope, user.scope).length == 0 || `.profile.scope is not equal to .scope`));*/
-            ow(user.profile.user_metadata, ow.object.label(".profile.user_metadata"));
         }
-        
     }
 }
-
-
 
 export interface UserSettings {
     daemonEnabled: boolean;
@@ -54,5 +55,5 @@ export function isUserSettings(o: object): o is UserSettings {
 }
 
 export const defaultUserSettings = {
-    daemonEnabled: false
+    daemonEnabled: false,
 };

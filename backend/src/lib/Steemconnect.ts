@@ -30,10 +30,6 @@ export class Steemconnect {
         });
         Log.log().debug("steemconnect_me_response", { response: steemconnectResponse });
         ow(steemconnectResponse.account, ow.object.label("lib/Steemconnect.ts sc2.me().response.account"));
-        ow(
-            steemconnectResponse.user_metadata,
-            ow.any(ow.object.label("lib/Steemconnect.ts sc2.me().response.user_metadata"), ow.undefined),
-        );
         ow(steemconnectResponse.scope, ow.array.ofType(ow.string).label("lib/Steemconnect.ts sc2.me().response.scope"));
         ow(steemconnectResponse.name, ow.string.label("lib/Steemconnect.ts sc2.me().response.name"));
 
