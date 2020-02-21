@@ -48,7 +48,7 @@
     "@types/connect-redis": "0.0.7",
     "@types/dockerode": "^2.5.10",
     "@types/express": "^4.16.0",
-    "@types/express-flash": "0.0.0",
+    "@types/express-flash": "0.0.2",
     "@types/express-session": "^1.15.11",
     "@types/helmet": "0.0.42",
     "@types/ioredis": "^4.0.3",
