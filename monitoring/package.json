@@ -6,11 +6,15 @@
   "engines": {
     "node": ">=10.15"
   },
-  "scripts": {},
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
+  },
   "dependencies": {
     "axios": "^0.18.0",
     "lodash": "^4.17.11",
-    "ow": "^0.8.0"
+    "ow": "^0.8.0",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -42,5 +46,6 @@
   "bugs": {
     "url": "https://github.com/wise-team/wise-hub/issues"
   },
-  "homepage": "https://wise.vote/"
+  "homepage": "https://wise.vote/",
+  "snyk": true
 }
