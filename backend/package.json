@@ -27,7 +27,7 @@
     "helmet": "^3.14.0",
     "ioredis": "^4.2.0",
     "jwt-decode": "^2.2.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.20",
     "morgan": "^1.9.1",
     "node-docker-watchdog": "^1.2.3",
     "ow": "^0.8.0",
