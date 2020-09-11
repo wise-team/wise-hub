@@ -33,7 +33,7 @@
     "socket.io-client": "^2.1.1",
     "steem": "^0.7.2",
     "steem-wise-core": "^4.0.0",
-    "steemconnect": "^2.0.1",
+    "steemconnect": "^3.0.0",
     "universe-log": "^0.1.0",
     "uuid": "^3.3.2",
     "vue": "^2.5.17",
