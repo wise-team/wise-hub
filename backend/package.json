@@ -37,7 +37,7 @@
     "socket.io": "^2.1.1",
     "socket.io-redis": "^5.2.0",
     "steem-wise-core": "^4.0.0",
-    "steemconnect": "^2.0.1",
+    "steemconnect": "^3.0.0",
     "universe-log": "^1.4.2",
     "uuid": "^3.3.2"
   },
