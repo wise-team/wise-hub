@@ -17,7 +17,7 @@
     "@types/chai-as-promised": "^7.1.0",
     "@types/lodash": "^4.14.117",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^10.11.0",
+    "@types/node": "10.17.47",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "mocha": "^5.2.0",
