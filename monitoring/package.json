@@ -8,7 +8,7 @@
   },
   "scripts": {},
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "lodash": "^4.17.11",
     "ow": "^0.8.0"
   },
