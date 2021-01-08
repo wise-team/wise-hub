@@ -30,7 +30,7 @@
     "lodash": "^4.17.11",
     "normalizr": "^3.3.0",
     "ow": "^0.8.0",
-    "socket.io-client": "^2.1.1",
+    "socket.io-client": "^3.0.0",
     "steem": "^0.7.2",
     "steem-wise-core": "^4.0.0",
     "steemconnect": "^2.0.1",
